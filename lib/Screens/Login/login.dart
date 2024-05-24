@@ -1,15 +1,33 @@
+import 'package:chat_app/CustomWidget/form/CustomTextInput.dart';
+import 'package:chat_app/Screens/Home/home.dart';
+import 'package:chat_app/Screens/Login/register.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> {
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
+
+  Map<String, String?> formData = {'username': null, 'password': null};
+
+  void usernameChange(String value) {
+    formData['username'] = value;
+  }
+
+  void passwordChange(String value) {
+    formData['password'] = value;
+  }
+
+  void submit() {
+    print(formData);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+  }
 
   @override
   void initState() {
@@ -28,37 +46,60 @@ class _LoginState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-            child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+        body: SafeArea(
+            child: Padding(
+      padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          TextField(
-            controller: _usernameController,
-            obscureText: true,
-            decoration:
-                InputDecoration(border: OutlineInputBorder(), labelText: '账号'),
+          CustomTextInput(
+            labelText: '用户名',
+            onChanged: usernameChange,
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
-          TextField(
-            controller: _passwordController,
-            obscureText: true,
-            decoration:
-                InputDecoration(border: OutlineInputBorder(), labelText: '密码'),
+          CustomTextInput(
+            labelText: '密码',
+            onChanged: passwordChange,
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
-          FloatingActionButton.extended(
-              onPressed: () {
-                print('login');
-                print("username: $_usernameController.text, password: $_passwordController.text");
-              },
-              label: const Text('登录'))
+          Row(
+            children: [
+              TextButton(
+                  onPressed: () {
+                    print('去注册');
+                    Navigator.push(context, PageRouteBuilder<void>(
+                        pageBuilder: (BuildContext context, _, __) {
+                      return RegisterPage();
+                    }));
+                  },
+                  child: Text(
+                    '没账号？去注册',
+                    style: TextStyle(
+                      color: Colors.blue[800],
+                    ),
+                  ))
+            ],
+          ),
+          LoginButton(
+            onPressed: submit,
+          )
         ],
       ),
     )));
+  }
+}
+
+class LoginButton extends StatelessWidget {
+  final void Function()? onPressed;
+
+  const LoginButton({super.key, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton.extended(
+        onPressed: onPressed, label: const Text('登录'));
   }
 }
