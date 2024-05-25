@@ -1,3 +1,4 @@
+import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/Screens/Home/home.dart';
 import 'package:chat_app/Screens/Login/login.dart';
@@ -13,7 +14,8 @@ class AuthenticationWrapper extends StatelessWidget {
     if (isLoggedIn) {
       return const HomePage();
     } else {
-      return const LoginPage();
+      // return const LoginPage();
+      return Chat();
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -28,15 +29,23 @@ class _ChatMessageState extends State<ChatMessage> {
           return GestureDetector(
             onTap: () {
               print('点击了');
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, _, __) {
+                    return Chat();
+                  },
+                ),
+              );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Container(
-                    width: 45,
-                    height: 45,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(6)),
                       image: DecorationImage(
@@ -56,6 +65,7 @@ class _ChatMessageState extends State<ChatMessage> {
                               child: Text(
                                 item['name'],
                                 style: const TextStyle(
+                                  fontSize: 18,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
