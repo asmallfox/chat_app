@@ -1,7 +1,21 @@
+import 'dart:convert';
+
 import 'package:chat_app/CustomWidget/form/CustomTextInput.dart';
-import 'package:chat_app/Screens/Home/home.dart';
+import 'package:chat_app/Helpers/request.dart';
 import 'package:chat_app/Screens/Login/register.dart';
 import 'package:flutter/material.dart';
+import 'package:chat_app/Helpers/local_storage.dart';
+
+Future<String> loginRequest() async {
+  final Map<String, String> data = {
+    'username': 'xxx001',
+    'password': '123456',
+  };
+  var response = await HttpRequest.post('/api/login', data);
+  print('Response status: ${response.statusCode}');
+  print(jsonDecode(utf8.decode(response.bodyBytes)) as Map);
+  return 'xxx';
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,9 +38,17 @@ class _LoginPageState extends State<LoginPage> {
     formData['password'] = value;
   }
 
-  void submit() {
+  Future<void> submit() async {
     print(formData);
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+    String token = LocalStorage.getString('token') ?? 'xxxxxxxx';
+    print(token);
+    await loginRequest();
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => const HomePage(),
+    //   ),
+    // );
   }
 
   @override

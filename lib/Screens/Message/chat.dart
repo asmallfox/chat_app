@@ -10,89 +10,89 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  List<Map<String, dynamic>> messagaList = [
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好',
-      'type': 1
-    },
-    {
-      'name': '张三',
-      'userId': 1,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好',
-      'type': 1
-    },
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好',
-      'type': 1
-    },
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好',
-      'type': 1
-    },
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好',
-      'type': 1
-    },
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好',
-      'type': 1
-    },
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好',
-      'type': 1
-    },
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content': '你好啊，我是李四！',
-      'type': 1
-    },
-    {
-      'name': '李四',
-      'userId': 2,
-      'avatar':
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'time': '2020-01-01 12:00:00',
-      'content':
-          '你好https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpghttps://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-      'type': 1
-    }
+  List<Map<String, dynamic>> messageList = [
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '张三',
+    //   'userId': 1,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content': '你好啊，我是李四！',
+    //   'type': 1
+    // },
+    // {
+    //   'name': '李四',
+    //   'userId': 2,
+    //   'avatar':
+    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'time': '2020-01-01 12:00:00',
+    //   'content':
+    //       '你好https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpghttps://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //   'type': 1
+    // }
   ];
 
   late TextEditingController _messageInputController;
@@ -102,7 +102,7 @@ class _ChatState extends State<Chat> {
 
   void sendMessage(String message) {
     setState(() {
-      messagaList.add({
+      messageList.add({
         'name': '李四',
         'userId': currentUserId,
         'avatar':
@@ -112,10 +112,18 @@ class _ChatState extends State<Chat> {
         'type': 1
       });
     });
+    jumpTo();
+  }
+
+  void jumpTo() {
     Future.delayed(
       const Duration(milliseconds: 80),
       () {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 80),
+          curve: Curves.linear,
+        );
       },
     );
   }
@@ -125,12 +133,7 @@ class _ChatState extends State<Chat> {
     super.initState();
     _messageInputController = TextEditingController();
     _scrollController = ScrollController();
-    // Future.delayed(
-    //   const Duration(milliseconds: 80),
-    //   () {
-    //     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    //   },
-    // );
+    jumpTo();
   }
 
   @override
@@ -153,138 +156,87 @@ class _ChatState extends State<Chat> {
           Expanded(
             child: Container(
               color: Colors.grey[100],
-              child: ListView.builder(
+              child: ListView.separated(
                 padding: const EdgeInsets.all(20),
                 physics: const BouncingScrollPhysics(),
                 controller: _scrollController,
-                itemCount: messagaList.length,
+                itemCount: messageList.length,
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 15);
+                },
                 itemBuilder: (context, index) {
-                  var item = messagaList[index];
+                  var item = messageList[index];
+                  bool isCurrentUser = item['userId'] == currentUserId;
                   return Row(
                     key: ValueKey(index),
-                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
-                    verticalDirection: VerticalDirection.down,
+                    textDirection:
+                        isCurrentUser ? TextDirection.rtl : TextDirection.ltr,
                     children: [
                       Container(
                         width: 45,
                         height: 45,
                         decoration: BoxDecoration(
-                          color: Colors.pink,
                           image: DecorationImage(
                             image: NetworkImage(
                               item['avatar'],
                             ),
                           ),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      Container(
-                        width: 100,
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        decoration: BoxDecoration(
-                          color: item['userId'] == currentUserId
-                              ? Colors.green[400]
-                              : Colors.white,
-                        ),
-                        child: Text(
-                          item['content'],
-                          style: const TextStyle(fontSize: 18),
+                      Expanded(
+                        child: Align(
+                          alignment: isCurrentUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Stack(
+                            children: [
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                padding: const EdgeInsets.all(10),
+                                constraints:
+                                    const BoxConstraints(minHeight: 45),
+                                decoration: BoxDecoration(
+                                  color: isCurrentUser
+                                      ? Colors.green[400]
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  item['content'],
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ),
+                              Positioned(
+                                top: 15,
+                                left: isCurrentUser ? null : 0,
+                                right: isCurrentUser ? 0 : null,
+                                child: MessageTriangle(
+                                  isStart: isCurrentUser,
+                                  color: isCurrentUser
+                                      ? Colors.green
+                                      : Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      // const SizedBox(
-                      //   width: 60,
-                      // )
+                      const SizedBox(width: 40)
                     ],
                   );
                 },
               ),
             ),
           ),
-          // Expanded(
-          //   child: Container(
-          //     padding: const EdgeInsets.symmetric(horizontal: 15),
-          //     color: Colors.grey[200],
-          //     child: ListView.builder(
-          //       physics: const BouncingScrollPhysics(),
-          //       controller: _scrollController,
-          //       itemCount: messagaList.length,
-          //       itemBuilder: (context, index) {
-          //         var item = messagaList[index];
-          //         return GestureDetector(
-          //           key: ValueKey(index),
-          //           child: Padding(
-          //             padding: const EdgeInsets.only(bottom: 15, top: 15),
-          //             child: Row(
-          //               crossAxisAlignment: CrossAxisAlignment.start,
-          //               mainAxisAlignment: item['userId'] == currentUserId
-          //                   ? MainAxisAlignment.end
-          //                   : MainAxisAlignment.start,
-          //               children: [
-          //                 Container(
-          //                   width: 44,
-          //                   height: 44,
-          //                   margin: const EdgeInsets.only(right: 12),
-          //                   decoration: item['userId'] != currentUserId
-          //                       ? BoxDecoration(
-          //                           image: DecorationImage(
-          //                             image: NetworkImage(item['avatar']),
-          //                             fit: BoxFit.cover,
-          //                           ),
-          //                           borderRadius: const BorderRadius.all(
-          //                             Radius.circular(6),
-          //                           ),
-          //                         )
-          //                       : null,
-          //                 ),
-          //                 Expanded(
-          //                   child: Align(
-          //                     alignment: item['userId'] == currentUserId
-          //                         ? Alignment.centerRight
-          //                         : Alignment.centerLeft,
-          //                     child: Container(
-          //                       padding: const EdgeInsets.all(10),
-          //                       decoration: BoxDecoration(
-          //                         color: item['userId'] == currentUserId
-          //                             ? Colors.green[400]
-          //                             : Colors.white,
-          //                         borderRadius: BorderRadius.circular(4),
-          //                       ),
-          //                       child: Text(
-          //                         item['content'],
-          //                         style: const TextStyle(
-          //                           color: Colors.black,
-          //                           fontSize: 18,
-          //                         ),
-          //                       ),
-          //                     ),
-          //                   ),
-          //                 ),
-          //                 Container(
-          //                   width: 44,
-          //                   height: 44,
-          //                   margin: const EdgeInsets.only(left: 12),
-          //                   decoration: item['userId'] == currentUserId
-          //                       ? BoxDecoration(
-          //                           image: DecorationImage(
-          //                             image: NetworkImage(item['avatar']),
-          //                             fit: BoxFit.cover,
-          //                           ),
-          //                           borderRadius: const BorderRadius.all(
-          //                             Radius.circular(6),
-          //                           ),
-          //                         )
-          //                       : null,
-          //                 ),
-          //               ],
-          //             ),
-          //           ),
-          //         );
-          //       },
-          //     ),
-          //   ),
-          // ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            constraints: const BoxConstraints(
+              minHeight: 50
+            ),
             decoration: BoxDecoration(
               color: Colors.grey[100],
               border: const Border(
@@ -295,27 +247,29 @@ class _ChatState extends State<Chat> {
               ),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.max,
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _messageInputController,
-                    minLines: 1,
-                    maxLines: 8,
-                    decoration: const InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: InputBorder.none,
+                  child: Container(
+                    color: Colors.pink[100],
+                    child: TextField(
+                      controller: _messageInputController,
+                      minLines: 1,
+                      maxLines: 8,
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: InputBorder.none,
+                        // contentPadding: EdgeInsets.symmetric(horizontal: 0)
+                      ),
+                      onChanged: (value) {
+                        print(value);
+                      },
                     ),
-                    onChanged: (value) {
-                      print(value);
-                    },
                   ),
                 ),
-                const SizedBox(
-                  width: 12,
-                ),
+                const SizedBox(width: 12),
                 FilledButton(
                   onPressed: () {
                     sendMessage(_messageInputController.text);
@@ -339,6 +293,41 @@ class _ChatState extends State<Chat> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MessageTriangle extends StatelessWidget {
+  final bool isStart;
+  final Color color;
+  const MessageTriangle({
+    super.key,
+    this.isStart = true,
+    this.color = Colors.white,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: BorderDirectional(
+          top: const BorderSide(
+            color: Colors.transparent,
+            width: 6,
+          ),
+          bottom: const BorderSide(
+            color: Colors.transparent,
+            width: 6,
+          ),
+          start: BorderSide(
+            color: isStart ? color : Colors.transparent,
+            width: 8,
+          ),
+          end: BorderSide(
+            color: isStart ? Colors.transparent : color,
+            width: 8,
+          ),
+        ),
       ),
     );
   }
