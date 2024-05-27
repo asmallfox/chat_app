@@ -2,7 +2,6 @@ import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/route_handler.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:get_it/get_it.dart';
 // GetIt getIt = GetIt.instance();
