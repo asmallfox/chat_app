@@ -26,17 +26,18 @@ class _SearchUserPageState extends State<SearchUserPage> {
 
   Future<void> onSearchUser() async {
     try {
+      print('obje111111111111ct');
       final params = {'username': _keywordController.text};
       final res = await findUserRequest(params);
+      print('======, $res');
       final user = res['data'];
-      print(user);
       Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => UserDetailPage(user: user),
         ),
       );
     } catch (err) {
-      print(err);
+      print('[错误了] $err');
     }
   }
 

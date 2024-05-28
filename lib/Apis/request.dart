@@ -1,6 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+typedef DynamicMap = Map<String, dynamic>;
+
+class Result {
+  final Uri uri;
+  final DynamicMap data;
+
+  Result({required this.uri, required this.data});
+}
+
 class HttpRequest {
   static const String baseUrl = '10.0.2.2:3000'; // localhost
 
@@ -11,13 +20,19 @@ class HttpRequest {
     Encoding? encoding,
   ]) async {
     try {
+      final options = handleRequestParams(path: path, params: data);
+      print('请求地址：${options['uri']}');
       final response = await http.post(
-        getUrl(path, data),
-        body: data,
-        headers: headers,
+        options['uri'],
+        headers: headers ??
+            <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+        body: jsonEncode(options['data']),
         encoding: encoding ?? Encoding.getByName('utf8'),
       );
-      response.body;
+      print(response.body);
+
       final result = getJsonData(response.body);
       if (response.statusCode == 200) {
         return result;
@@ -25,6 +40,7 @@ class HttpRequest {
         throw _handlerErrorResponse(response);
       }
     } catch (err) {
+      print('[post 错误] $err');
       rethrow;
     }
   }
@@ -35,45 +51,18 @@ class HttpRequest {
     Map<String, String>? headers,
   ]) async {
     try {
-      if (data != null) {}
+      final options = handleRequestParams(path: path, queryParams: data);
+
       final response = await http.get(
-        getUrl(path, data),
+        options['uri'],
         headers: headers,
       );
-      response.body;
       final result = getJsonData(response.body);
       if (response.statusCode == 200) {
         return result;
       } else {
         throw _handlerErrorResponse(response);
       }
-    } catch (err) {
-      print(err);
-      rethrow;
-    }
-  }
-
-  static Uri getUrl(String path, [Map<String, dynamic>? query]) {
-    try {
-      Uri uri = Uri.http(baseUrl, path);
-      if (query != null) {
-        String url = path;
-        RegExp reg = RegExp(r'{(.*?)}');
-        Map<String, dynamic> deepQuery = Map.from(query);
-        for (final match in reg.allMatches(path)) {
-          String content = match.group(0).toString();
-          String key = content.substring(1, content.length - 1);
-          url = url.replaceAll(content, deepQuery[key]?.toString() ?? '');
-          deepQuery.remove(key);
-        }
-        print('==================');
-        print(url);
-        print(deepQuery.runtimeType.toString());
-        
-        uri = Uri.http(baseUrl, url, deepQuery);
-      }
-      print('当前请求地址：${uri.toString()}');
-      return uri;
     } catch (err) {
       print(err);
       rethrow;
@@ -91,5 +80,45 @@ class HttpRequest {
       'data': errorData,
       'message': errorData['message'],
     };
+  }
+
+  static Map<String, dynamic> handleRequestParams({
+    required String path,
+    DynamicMap? params,
+    DynamicMap? queryParams,
+  }) {
+    Map<String, dynamic> result = {};
+    String url = path;
+    RegExp reg = RegExp(r'{(.*?)}'); // 匹配 {xxx}
+
+    final matchResult = reg.allMatches(url);
+
+    DynamicMap? paramsFrom = Map.from(params ?? {});
+
+    try {
+      if (matchResult.isNotEmpty) {
+        for (final match in matchResult) {
+          String context = match.group(0) ?? '';
+          String key = context.replaceAll(RegExp(r'[{}]'), '');
+          url = url.replaceAll(context, paramsFrom[key].toString());
+          paramsFrom.remove(key.toString());
+        }
+        Uri uri = Uri.http(baseUrl, url);
+        result.putIfAbsent('uri', () => uri);
+      }
+    } catch (error) {
+      print('[handleRequestParams 错误了] $error');
+    }
+
+    if (queryParams != null) {
+      Uri uri = Uri.http(baseUrl, url, queryParams);
+      result.putIfAbsent('uri', () => uri);
+    }
+
+    if (paramsFrom.isNotEmpty) {
+      result.putIfAbsent('data', () => paramsFrom);
+    }
+
+    return result;
   }
 }

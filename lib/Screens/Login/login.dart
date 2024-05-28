@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } catch (err) {
-      print('[error]: ${err.toString()}');
+      print('[请求出错了]: ${err.toString()}');
     } finally {
       print('请求完成');
       setState(() {
