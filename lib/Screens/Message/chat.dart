@@ -234,9 +234,7 @@ class _ChatState extends State<Chat> {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            constraints: const BoxConstraints(
-              minHeight: 50
-            ),
+            constraints: const BoxConstraints(minHeight: 50),
             decoration: BoxDecoration(
               color: Colors.grey[100],
               border: const Border(
@@ -275,18 +273,18 @@ class _ChatState extends State<Chat> {
                     sendMessage(_messageInputController.text);
                     _messageInputController.text = '';
                   },
-                  child: Text(
-                    '发送',
-                    style: const TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF34A047),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),
                     ),
                     padding: const EdgeInsets.all(0),
+                  ),
+                  child: const Text(
+                    '发送',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ],

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorage {
@@ -53,11 +55,20 @@ class LocalStorage {
       case 'List<String>':
         await _preferences!.setStringList(key, value);
         break;
+      case '_Map<String, dynamic>':
+      case '_Map<String, String>':
+        await _preferences!.setString(key, jsonEncode(value));
+        break;
     }
   }
 
   static dynamic getItem(String key) {
     dynamic value = _preferences!.get(key);
     return value;
+  }
+
+  static dynamic getMapItem(String key) {
+    String value = _preferences!.getString(key) ?? '{}';
+    return jsonDecode(value);
   }
 }

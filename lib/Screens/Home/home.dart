@@ -1,3 +1,4 @@
+import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Screens/AddressBook/addressBook.dart';
 import 'package:chat_app/Screens/Message/message.dart';
 import 'package:chat_app/Screens/Mine/mine.dart';
@@ -39,8 +40,17 @@ class _MyHomePageState extends State<HomePage> {
         title: Text(widget.title),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: Icon(Icons.add))
+          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => const SearchUserPage(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add),
+          )
         ],
       ),
       body: PageView.builder(
