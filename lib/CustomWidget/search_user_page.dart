@@ -26,7 +26,6 @@ class _SearchUserPageState extends State<SearchUserPage> {
 
   Future<void> onSearchUser() async {
     try {
-      print('obje111111111111ct');
       final params = {'username': _keywordController.text};
       final res = await findUserRequest(params);
       print('======, $res');
@@ -76,7 +75,9 @@ class _SearchUserPageState extends State<SearchUserPage> {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
             child: const Text('取消'),
           )
         ],

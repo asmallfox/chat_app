@@ -35,16 +35,16 @@ class _LoginPageState extends State<LoginPage> {
       String token = user['token'];
       LocalStorage.setItem('token', token);
       LocalStorage.setItem('user', user);
-      Navigator.pushReplacement(
-        context,
+      if (!mounted) return;
+      print('登录成功');
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomePage(),
+          builder: (_) => const HomePage(),
         ),
       );
     } catch (err) {
       print('[请求出错了]: ${err.toString()}');
     } finally {
-      print('请求完成');
       setState(() {
         _loginBtnLoading = false;
         _loginBtnDisabled = false;

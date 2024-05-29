@@ -1,30 +1,13 @@
 import 'dart:convert';
 
-import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:http/http.dart' as http;
 
 typedef DynamicMap<T> = Map<String, T>;
 
-class HttpBaseClient extends http.BaseClient {
-  final http.Client _inner = http.Client();
-
-  String? token = LocalStorage.getString('token');
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) {
-    if (token != null) {
-      print('[Token] $token');
-      request.headers['Authorization'] = 'Bearer $token';
-    } else {}
-
-    print('[请求头] ${request.headers}');
-    return _inner.send(request);
-  }
-}
-
 class HttpRequest {
   final String baseUrl;
-  final HttpBaseClient _http = HttpBaseClient();
+
+  final client = http.Client();
 
   HttpRequest({
     this.baseUrl = '10.0.2.2:3000', // localhost
@@ -46,7 +29,7 @@ class HttpRequest {
 
     if (headers != null) headersConfig.addAll(headers);
 
-    final response = await _http.get(
+    final response = await http.get(
       options['uri'],
       headers: headers,
     );
@@ -66,11 +49,12 @@ class HttpRequest {
     );
 
     DynamicMap<String> headersConfig = {
+      // 'Content-Type': 'application/json; charset=UTF-8',
     };
 
     if (headers != null) headersConfig.addAll(headers);
 
-    final response = await _http.post(
+    final response = await http.post(
       options['uri'],
       body: data,
       headers: headersConfig,
@@ -84,7 +68,6 @@ class HttpRequest {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      print('[请求错误：${response.statusCode}] ${response.body}');
       return throw Exception(response);
     }
   }
@@ -117,7 +100,7 @@ class HttpRequest {
     Uri uri = Uri.http(baseUrl, url, queryParams);
     result.putIfAbsent('uri', () => uri);
 
-    print('[请求数据处理结果] $result');
+    print('[_handleRequestOptions] $result');
     return result;
   }
 }
