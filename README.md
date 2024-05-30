@@ -1,16 +1,19 @@
 # chat_app
 
-A new Flutter project.
+# 颜色
+  - 主色调 #7A83FD
 
-## Getting Started
+  - 文字
+    - 黑色 #222222
+    - 副标题 #777777
+  
+  - 边框
+    - 灰色 #F2F2F2
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+  - 底部tabar
+    - 选择颜色 #7A83FD  
+    - 未选中颜色 #1C1C1C
+#
+  - 登录功能
+    - 登录 login
+    - 注册 register

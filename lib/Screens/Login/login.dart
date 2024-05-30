@@ -86,55 +86,58 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              CustomTextInput(
-                labelText: '用户名',
-                controller: _usernameController,
-                onChanged: _updateButtonState,
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              CustomTextInput(
-                labelText: '密码',
-                controller: _passwordController,
-                onChanged: _updateButtonState,
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      print('去注册');
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder<void>(
-                          pageBuilder: (BuildContext context, _, __) {
-                            return RegisterPage();
-                          },
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CustomTextInput(
+                  labelText: '用户名',
+                  controller: _usernameController,
+                  onChanged: _updateButtonState,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                CustomTextInput(
+                  labelText: '密码',
+                  controller: _passwordController,
+                  onChanged: _updateButtonState,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        print('去注册');
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder<void>(
+                            pageBuilder: (BuildContext context, _, __) {
+                              return RegisterPage();
+                            },
+                          ),
+                        );
+                      },
+                      child: Text(
+                        '没账号？去注册',
+                        style: TextStyle(
+                          color: Colors.blue[800],
                         ),
-                      );
-                    },
-                    child: Text(
-                      '没账号？去注册',
-                      style: TextStyle(
-                        color: Colors.blue[800],
                       ),
                     ),
-                  ),
-                ],
-              ),
-              LoadingFilledButton(
-                loading: _loginBtnLoading,
-                onPressed: _loginBtnDisabled ? null : submit,
-                child: const Text('登录'),
-              ),
-            ],
+                  ],
+                ),
+                LoadingFilledButton(
+                  loading: _loginBtnLoading,
+                  onPressed: _loginBtnDisabled ? null : submit,
+                  child: const Text('登录'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
