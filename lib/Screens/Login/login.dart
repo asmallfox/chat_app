@@ -1,5 +1,6 @@
 import 'package:chat_app/Apis/modules/user.dart';
-import 'package:chat_app/CustomWidget/custom_text_input.dart';
+import 'package:chat_app/CustomWidget/avatar.dart';
+import 'package:chat_app/CustomWidget/custom_text_form_field.dart';
 import 'package:chat_app/CustomWidget/loading_filled_button.dart';
 import 'package:chat_app/Screens/Home/home.dart';
 import 'package:chat_app/Screens/Login/register.dart';
@@ -19,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _loginBtnDisabled = true;
   bool _loginBtnLoading = false;
 
-  Future<void> submit() async {
+  Future<void> submit(BuildContext context) async {
     setState(() {
       _loginBtnLoading = true;
       _loginBtnDisabled = true;
@@ -30,13 +31,12 @@ class _LoginPageState extends State<LoginPage> {
         'password': _passwordController.text
       };
 
-      Map<String, dynamic> res = await loginRequest(formData);
-      Map<String, dynamic> user = res['data'];
+      var res = await loginRequest(formData);
+      Map<String, dynamic> user = res.data;
       String token = user['token'];
       LocalStorage.setItem('token', token);
       LocalStorage.setItem('user', user);
-      if (!mounted) return;
-      print('登录成功');
+      if (!context.mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => const HomePage(),
@@ -85,45 +85,66 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: SingleChildScrollView(
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 120),
+            color: Colors.white,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                CustomTextInput(
-                  labelText: '用户名',
+                const Avatar(
+                  size: 100,
+                  image: AssetImage('assets/images/default_avatar.png'),
+                ),
+                const SizedBox(height: 60),
+                CustomTextFormField(
+                  hintText: "账号",
                   controller: _usernameController,
                   onChanged: _updateButtonState,
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 30,
                 ),
-                CustomTextInput(
-                  labelText: '密码',
+                CustomTextFormField(
+                  hintText: "密码",
+                  obscureText: true,
                   controller: _passwordController,
                   onChanged: _updateButtonState,
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 30,
                 ),
                 Row(
                   children: [
                     TextButton(
                       onPressed: () {
-                        print('去注册');
                         Navigator.push(
                           context,
                           PageRouteBuilder<void>(
-                            pageBuilder: (BuildContext context, _, __) {
-                              return RegisterPage();
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) {
+                              return const RegisterPage();
+                            },
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              return SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(1.0, 0.0),
+                                  end: Offset.zero,
+                                ).animate(animation),
+                                child: child,
+                              );
                             },
                           ),
                         );
                       },
                       child: Text(
-                        '没账号？去注册',
+                        '没有账号？去注册',
                         style: TextStyle(
                           color: Colors.blue[800],
                         ),
@@ -131,10 +152,20 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                LoadingFilledButton(
-                  loading: _loginBtnLoading,
-                  onPressed: _loginBtnDisabled ? null : submit,
-                  child: const Text('登录'),
+                const SizedBox(height: 30),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    LoadingFilledButton(
+                      height: 50,
+                      loading: _loginBtnLoading,
+                      onPressed: () => submit(context),
+                      child: const Text(
+                        "登录",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

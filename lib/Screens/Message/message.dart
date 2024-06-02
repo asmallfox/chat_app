@@ -1,6 +1,5 @@
 import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ChatMessage extends StatefulWidget {
   const ChatMessage({super.key});

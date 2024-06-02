@@ -3,7 +3,6 @@ import 'package:chat_app/Screens/AddressBook/addressBook.dart';
 import 'package:chat_app/Screens/Message/message.dart';
 import 'package:chat_app/Screens/Mine/mine.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.title = 'homePage'});
@@ -19,7 +18,11 @@ class _MyHomePageState extends State<HomePage> {
 
   late PageController _pageViewController;
 
-  final widgetList = <Widget>[ChatMessage(), AddressBook(), Mine()];
+  final widgetList = <Map<String, dynamic>>[
+    {"title": "消息", "child": const ChatMessage()},
+    {"title": "消息", "child": const AddressBook()},
+    {"title": "消息", "child": const Mine()}
+  ];
 
   @override
   void initState() {
@@ -37,10 +40,9 @@ class _MyHomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widgetList[currentPageIndex]["title"]),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -49,7 +51,7 @@ class _MyHomePageState extends State<HomePage> {
                 ),
               );
             },
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_circle_outline),
           )
         ],
       ),
@@ -62,7 +64,7 @@ class _MyHomePageState extends State<HomePage> {
             });
           },
           itemBuilder: (context, index) {
-            return widgetList[index];
+            return (widgetList[index]["child"]);
           }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentPageIndex,

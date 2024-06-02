@@ -5,6 +5,26 @@ import 'package:http/http.dart' as http;
 
 typedef DynamicMap<T> = Map<String, T>;
 
+class ResponseResult {
+  final int status;
+  final String message;
+  final Map<String, dynamic> data;
+
+  const ResponseResult({
+    required this.status,
+    required this.message,
+    this.data = const {},
+  });
+
+  factory ResponseResult.fromJson(Map<String, dynamic> json) {
+    return ResponseResult(
+      status: json["status"],
+      message: json["message"],
+      data: json["data"] ?? {},
+    );
+  }
+}
+
 class HttpBaseClient extends http.BaseClient {
   final http.Client _inner = http.Client();
 
@@ -13,11 +33,9 @@ class HttpBaseClient extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
     if (token != null) {
-      print('[Token] $token');
       request.headers['Authorization'] = 'Bearer $token';
     } else {}
 
-    print('[请求头] ${request.headers}');
     return _inner.send(request);
   }
 }
@@ -30,7 +48,7 @@ class HttpRequest {
     this.baseUrl = '10.0.2.2:3000', // localhost
   });
 
-  Future<DynamicMap> get(
+  Future<ResponseResult> get(
     String path, [
     DynamicMap? data,
     DynamicMap<String>? headers,
@@ -54,7 +72,7 @@ class HttpRequest {
     return _handleResponse(response);
   }
 
-  Future<DynamicMap> post(
+  Future<ResponseResult> post(
     String path, [
     DynamicMap? data,
     DynamicMap<String>? headers,
@@ -65,8 +83,7 @@ class HttpRequest {
       params: data,
     );
 
-    DynamicMap<String> headersConfig = {
-    };
+    DynamicMap<String> headersConfig = {};
 
     if (headers != null) headersConfig.addAll(headers);
 
@@ -80,12 +97,13 @@ class HttpRequest {
     return _handleResponse(response);
   }
 
-  DynamicMap _handleResponse(http.Response response) {
+  ResponseResult _handleResponse(http.Response response) {
+    var json = jsonDecode(response.body);
+    var res = ResponseResult.fromJson(json);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return res;
     } else {
-      print('[请求错误：${response.statusCode}] ${response.body}');
-      return throw Exception(response);
+      throw res.message;
     }
   }
 
@@ -117,7 +135,6 @@ class HttpRequest {
     Uri uri = Uri.http(baseUrl, url, queryParams);
     result.putIfAbsent('uri', () => uri);
 
-    print('[请求数据处理结果] $result');
     return result;
   }
 }
