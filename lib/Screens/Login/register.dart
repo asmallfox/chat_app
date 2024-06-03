@@ -1,4 +1,5 @@
 import 'package:chat_app/Apis/modules/user.dart';
+import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/CustomWidget/loading_filled_button.dart';
 import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:flutter/material.dart';
@@ -36,13 +37,6 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _updateButtonState() {
-    setState(() {
-      _loginBtnDisabled = _usernameController.text.isEmpty ||
-          _passwordController.text.isEmpty ||
-          _confirmPasswordController.text.isEmpty;
-    });
-  }
 
   Future<void> _onRegister(BuildContext context) async {
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -64,11 +58,12 @@ class _RegisterPageState extends State<RegisterPage> {
       await registerRequest(formData);
       if (!context.mounted) return;
       showTipMessage(context, '注册成功~');
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pop();
-      });
+      Future.delayed(
+        const Duration(seconds: 1),
+        () => Navigator.of(context).pop(),
+      );
     } catch (error) {
-      print("[注册失败], $error");
+      print("注册错误： $error");
       _errorText = error as String;
     } finally {
       setState(() {
@@ -88,12 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
+          leading: const BackIconButton(),
           title: const Text("注册"),
           centerTitle: true,
           backgroundColor: Colors.white,

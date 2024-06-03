@@ -4,6 +4,7 @@ class CustomTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final Function(String)? onChanged;
   final String? hintText;
+  final String? labelText;
   final FormFieldValidator? validator;
   final bool obscureText;
   final String? errorText;
@@ -15,6 +16,7 @@ class CustomTextFormField extends StatefulWidget {
     this.hintText,
     this.validator,
     this.errorText,
+    this.labelText,
     this.obscureText = false,
   });
 
@@ -42,6 +44,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         errorStyle: const TextStyle(fontSize: 18),
         border: const OutlineInputBorder(),
         errorText: widget.errorText,
+        labelText: widget.labelText,
         suffixIcon: widget.obscureText
             ? IconButton(
                 onPressed: () {

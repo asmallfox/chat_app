@@ -12,6 +12,6 @@ Future<ResponseResult> findUserRequest(DynamicMap data) async {
   return httpRequest.get('/api/find-users', data);
 }
 
-Future<ResponseResult> addFriendRequest(DynamicMap data) async {
-  return httpRequest.post('/api/add-user/{id}', data);
-}
+// Future<ResponseResult> addFriendRequest(DynamicMap data) async {
+//   return httpRequest.post('/api/add-user/{id}', data);
+// }

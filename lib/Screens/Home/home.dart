@@ -1,5 +1,5 @@
 import 'package:chat_app/CustomWidget/search_user_page.dart';
-import 'package:chat_app/Screens/AddressBook/addressBook.dart';
+import 'package:chat_app/Screens/AddressBook/address_book.dart';
 import 'package:chat_app/Screens/Message/message.dart';
 import 'package:chat_app/Screens/Mine/mine.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +20,8 @@ class _MyHomePageState extends State<HomePage> {
 
   final widgetList = <Map<String, dynamic>>[
     {"title": "消息", "child": const ChatMessage()},
-    {"title": "消息", "child": const AddressBook()},
-    {"title": "消息", "child": const Mine()}
+    {"title": "通讯录", "child": const AddressBook()},
+    {"title": "我的", "child": const Mine()}
   ];
 
   @override

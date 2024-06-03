@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:chat_app/Helpers/local_storage.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 typedef DynamicMap<T> = Map<String, T>;
@@ -28,10 +28,10 @@ class ResponseResult {
 class HttpBaseClient extends http.BaseClient {
   final http.Client _inner = http.Client();
 
-  String? token = LocalStorage.getString('token');
-
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) {
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    String? token = await Hive.box('settings').get('token');
+
     if (token != null) {
       request.headers['Authorization'] = 'Bearer $token';
     } else {}

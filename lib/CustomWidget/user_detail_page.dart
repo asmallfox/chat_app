@@ -1,7 +1,9 @@
-import 'package:chat_app/Apis/modules/user.dart';
-import 'package:chat_app/Helpers/local_storage.dart';
+import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/Helpers/show_tip_message.dart';
+import 'package:chat_app/Helpers/socket_io.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:chat_app/Helpers/socket_io.dart';
 
 class UserDetailPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -15,17 +17,19 @@ class UserDetailPage extends StatefulWidget {
 }
 
 class _UserDetailPageState extends State<UserDetailPage> {
-  final Map<String, dynamic> currentUser = LocalStorage.getMapItem('user');
+  final Map<String, dynamic> currentUser = Hive.box('settings').get('user', defaultValue: {});
 
-  Future<void> handleAddFriend(BuildContext context) async {
+  Future<void> _handleAddFriend(BuildContext context) async {
     try {
       final params = {
         'id': currentUser['id'],
         'userId': widget.user['id']
       };
-      print(widget.user['id'].runtimeType.toString());
-      await addFriendRequest(params);
+      print('$params');
+      // await addFriendRequest(params);
+      await SocketIO.socket.emit()
     } catch (err) {
+      if (!context.mounted) return;
       showTipMessage(context, '添加失败');
     }
   }
@@ -35,9 +39,11 @@ class _UserDetailPageState extends State<UserDetailPage> {
     String avatar = widget.user['avatar'] ?? '';
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: const BackIconButton(),
+      ),
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
         child: Column(
           children: [
             Row(
@@ -86,15 +92,16 @@ class _UserDetailPageState extends State<UserDetailPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 30,),
             FilledButton(
               onPressed: () {
-                handleAddFriend(context);
+                _handleAddFriend(context);
               },
               style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  backgroundColor: Colors.grey.shade400),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
               child: const Text('添加好友'),
             )
           ],

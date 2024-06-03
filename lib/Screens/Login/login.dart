@@ -2,10 +2,11 @@ import 'package:chat_app/Apis/modules/user.dart';
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/custom_text_form_field.dart';
 import 'package:chat_app/CustomWidget/loading_filled_button.dart';
+import 'package:chat_app/Helpers/animation_slide_route.dart';
 import 'package:chat_app/Screens/Home/home.dart';
 import 'package:chat_app/Screens/Login/register.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app/Helpers/local_storage.dart';
+import 'package:hive/hive.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,13 +18,11 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
-  bool _loginBtnDisabled = true;
   bool _loginBtnLoading = false;
 
-  Future<void> submit(BuildContext context) async {
+  Future<void> _submit(BuildContext context) async {
     setState(() {
       _loginBtnLoading = true;
-      _loginBtnDisabled = true;
     });
     try {
       Map<String, String> formData = {
@@ -33,34 +32,22 @@ class _LoginPageState extends State<LoginPage> {
 
       var res = await loginRequest(formData);
       Map<String, dynamic> user = res.data;
-      String token = user['token'];
-      LocalStorage.setItem('token', token);
-      LocalStorage.setItem('user', user);
+
+      await Hive.box('settings').put('token', user['token']);
+      await Hive.box('settings').put('user', user);
+
       if (!context.mounted) return;
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => const HomePage(),
         ),
       );
     } catch (err) {
-      print('[请求出错了]: ${err.toString()}');
+      print('登录失败: ${err.toString()}');
     } finally {
       setState(() {
         _loginBtnLoading = false;
-        _loginBtnDisabled = false;
-      });
-    }
-  }
-
-  void _updateButtonState(_) {
-    if (_usernameController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      setState(() {
-        _loginBtnDisabled = false; // 按钮启用
-      });
-    } else {
-      setState(() {
-        _loginBtnDisabled = true; // 按钮禁用
       });
     }
   }
@@ -70,15 +57,12 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _usernameController = TextEditingController(text: 'xxx001');
     _passwordController = TextEditingController(text: '123456');
-    _updateButtonState(null);
   }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
-    // _usernameController.addListener(_updateButtonState);
-    // _passwordController.addListener(_updateButtonState);
     super.dispose();
   }
 
@@ -103,18 +87,16 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 60),
                 CustomTextFormField(
-                  hintText: "账号",
+                  labelText: "账号",
                   controller: _usernameController,
-                  onChanged: _updateButtonState,
                 ),
                 const SizedBox(
                   height: 30,
                 ),
                 CustomTextFormField(
-                  hintText: "密码",
+                  labelText: "密码",
                   obscureText: true,
                   controller: _passwordController,
-                  onChanged: _updateButtonState,
                 ),
                 const SizedBox(
                   height: 30,
@@ -125,22 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          PageRouteBuilder<void>(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) {
-                              return const RegisterPage();
-                            },
-                            transitionsBuilder: (context, animation,
-                                secondaryAnimation, child) {
-                              return SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(1.0, 0.0),
-                                  end: Offset.zero,
-                                ).animate(animation),
-                                child: child,
-                              );
-                            },
-                          ),
+                          animationSlideRoute(const RegisterPage()),
                         );
                       },
                       child: Text(
@@ -159,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                     LoadingFilledButton(
                       height: 50,
                       loading: _loginBtnLoading,
-                      onPressed: () => submit(context),
+                      onPressed: () => _submit(context),
                       child: const Text(
                         "登录",
                         style: TextStyle(fontSize: 18),

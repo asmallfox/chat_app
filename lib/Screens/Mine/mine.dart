@@ -1,6 +1,6 @@
-import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Screens/Login/login.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class Mine extends StatefulWidget {
   const Mine({super.key});
@@ -10,7 +10,7 @@ class Mine extends StatefulWidget {
 }
 
 class _MineState extends State<Mine> {
-  final Map<String, dynamic> user = LocalStorage.getMapItem('user');
+  final Map<String, dynamic> user = Hive.box('settings').get('user', defaultValue: {});
   @override
   Widget build(BuildContext context) {
     String avatar = user['avatar'] ?? '';
@@ -73,16 +73,13 @@ class _MineState extends State<Mine> {
         ElevatedButton(
           child: const Text('登录'),
           onPressed: () async {
-            LocalStorage.setItem('token', 'token');
             print('登录');
           },
         ),
         ElevatedButton(
           child: const Text('退出'),
-          onPressed: () {
-            LocalStorage.remove('token');
-            print('退出');
-            // Navigator.of(context).pop();
+          onPressed: () async {
+            await Hive.box('settings').delete('token');
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
