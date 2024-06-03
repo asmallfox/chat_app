@@ -27,7 +27,6 @@ class _UserDetailPageState extends State<UserDetailPage> {
       };
       print('$params');
       // await addFriendRequest(params);
-      await SocketIO.socket.emit()
     } catch (err) {
       if (!context.mounted) return;
       showTipMessage(context, '添加失败');
