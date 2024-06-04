@@ -1,3 +1,5 @@
+import 'package:chat_app/Helpers/animation_slide_route.dart';
+import 'package:chat_app/Screens/AddressBook/friend_verification.dart';
 import 'package:flutter/material.dart';
 
 class AddressBook extends StatefulWidget {
@@ -22,8 +24,27 @@ class _AddressBookState extends State<AddressBook> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // child: ListView.builder(
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          ListTile(
+            title: const Text("通知"),
+            trailing: const Icon(Icons.arrow_forward_ios_outlined),
+            onTap: () {
+              Navigator.push(
+                context,
+                animationSlideRoute(
+                  const FriendVerification(),
+                ),
+              );
+            },
+          )
+        ],
+      ),
+    );
+  }
+}
+    // child: ListView.builder(
       //   itemCount: userList.length,
       //   itemBuilder: (context, index) {
       //     return ListTile(
@@ -31,6 +52,3 @@ class _AddressBookState extends State<AddressBook> {
       //     );
       //   },
       // ),
-    );
-  }
-}

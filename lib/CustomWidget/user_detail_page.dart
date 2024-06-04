@@ -1,9 +1,9 @@
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Helpers/socket_io.dart';
+import 'package:chat_app/constants/status.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:chat_app/Helpers/socket_io.dart';
 
 class UserDetailPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -17,17 +17,16 @@ class UserDetailPage extends StatefulWidget {
 }
 
 class _UserDetailPageState extends State<UserDetailPage> {
-  final Map<String, dynamic> currentUser = Hive.box('settings').get('user', defaultValue: {});
-
   Future<void> _handleAddFriend(BuildContext context) async {
+    var currentUser = await Hive.box('settings').get('user', defaultValue: {});
     try {
       final params = {
-        'id': currentUser['id'],
-        'userId': widget.user['id']
+        'userId': currentUser['id'],
+        'friendId': widget.user['id']
       };
-      print('$params');
-      // await addFriendRequest(params);
+      SocketIO.emit('add_friend', [params]);
     } catch (err) {
+      print('error: $err');
       if (!context.mounted) return;
       showTipMessage(context, '添加失败');
     }
@@ -91,7 +90,9 @@ class _UserDetailPageState extends State<UserDetailPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 30,),
+            const SizedBox(
+              height: 30,
+            ),
             FilledButton(
               onPressed: () {
                 _handleAddFriend(context);
@@ -101,7 +102,11 @@ class _UserDetailPageState extends State<UserDetailPage> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: const Text('添加好友'),
+              child: Text(
+                widget.user['status'] == verifyStatus['agreed']?['value']
+                    ? '发送消息'
+                    : '添加好友',
+              ),
             )
           ],
         ),

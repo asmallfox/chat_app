@@ -1,6 +1,7 @@
 import 'package:chat_app/Apis/modules/user.dart';
 import 'package:chat_app/CustomWidget/user_detail_page.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 class SearchUserPage extends StatefulWidget {
   const SearchUserPage({super.key});
@@ -30,13 +31,15 @@ class _SearchUserPageState extends State<SearchUserPage> {
       final res = await findUserRequest(params);
       final user = res.data;
 
-      Navigator.of(context).push(
+      if (!context.mounted) return;
+      Navigator.push(
+        context,
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => UserDetailPage(user: user),
         ),
       );
     } catch (error) {
-      print('搜索用户错误： $error');
+      Logger.root.info('搜索用户失败: $error');
     }
   }
 

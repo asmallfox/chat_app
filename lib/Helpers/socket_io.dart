@@ -1,3 +1,4 @@
+import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketIO {
@@ -9,6 +10,7 @@ class SocketIO {
 
   static bool _isInitialized = false;
   static IO.Socket? _socket;
+  static const String baseUrl = 'http://10.0.2.2:3000';
 
   static Future<SocketIO> getInstance() async {
     if (!_isInitialized) {
@@ -20,15 +22,7 @@ class SocketIO {
   }
 
   static Future<void> _initialize() async {
-    const String baseUrl = 'http://10.0.2.2:3000';
-
-    _socket = IO.io(
-        baseUrl,
-        IO.OptionBuilder()
-            .setTransports(['websocket'])
-            .setPath("/socket.io")
-            .setExtraHeaders({})
-            .build());
+    await _connect(null);
 
     // 监听 'connect' 事件
     _socket!.onConnect((_) {
@@ -48,4 +42,41 @@ class SocketIO {
     });
   }
 
+  static void emit(String eventName, [data]) {
+    _socket!.emit(eventName, data);
+  }
+
+  static void on(String eventName, [data]) {
+    final dataList = data as List;
+    final ack = dataList.last as Function;
+    ack(null);
+  }
+
+  static Future<void> updateHeaders(Map<String, String> headers) async {
+    if (_socket != null) {
+      _connect(headers);
+    }
+  }
+
+  static Future<void> reConnect(Map<String, String>? headers) async {
+    if (_socket != null) {
+      _connect(headers);
+    }
+  }
+
+  static Future<void> _connect(Map<String, String>? headers) async {
+    String token = await Hive.box('settings').get('token');
+
+    Map<String, String> defaultHeaders = {"authorization": token};
+
+    defaultHeaders.addAll(headers ?? {});
+
+    _socket = IO.io(
+        baseUrl,
+        IO.OptionBuilder()
+            .setTransports(['websocket'])
+            .setPath("/socket.io")
+            .setExtraHeaders(headers ?? {})
+            .build());
+  }
 }
