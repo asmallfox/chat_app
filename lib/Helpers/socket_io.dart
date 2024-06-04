@@ -22,7 +22,7 @@ class SocketIO {
   }
 
   static Future<void> _initialize() async {
-    await _connect(null);
+    await _connect({});
 
     // 监听 'connect' 事件
     _socket!.onConnect((_) {
@@ -46,10 +46,15 @@ class SocketIO {
     _socket!.emit(eventName, data);
   }
 
-  static void on(String eventName, [data]) {
-    final dataList = data as List;
-    final ack = dataList.last as Function;
-    ack(null);
+  static void on(String eventName, callback) {
+    _socket!.on(eventName, ([data]) {
+      final dataList = data as List;
+      final ack = dataList.last as Function;
+      ack(null);
+      if (callback != null) {
+        callback(data);
+      }
+    });
   }
 
   static Future<void> updateHeaders(Map<String, String> headers) async {
@@ -65,7 +70,7 @@ class SocketIO {
   }
 
   static Future<void> _connect(Map<String, String>? headers) async {
-    String token = await Hive.box('settings').get('token');
+    String token = await Hive.box('settings').get('token', defaultValue: "");
 
     Map<String, String> defaultHeaders = {"authorization": token};
 
