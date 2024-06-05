@@ -97,10 +97,10 @@ Widget? getVerifyStatus(int status) {
       text = '等待验证';
       break;
     case 2:
+    case 4:
       text = '已通过';
       break;
     case 3:
-    case 4:
       text = '已拒绝';
       break;
   }

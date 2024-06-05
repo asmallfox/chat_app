@@ -28,6 +28,7 @@ class _SearchUserPageState extends State<SearchUserPage> {
   Future<void> onSearchUser() async {
     try {
       final params = {'username': _keywordController.text};
+      print('xxx $params');
       final res = await findUserRequest(params);
       final user = res.data;
 

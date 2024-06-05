@@ -1,3 +1,4 @@
+import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/Screens/Login/login.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -10,11 +11,22 @@ class Mine extends StatefulWidget {
 }
 
 class _MineState extends State<Mine> {
-  final Map<String, dynamic> user = Hive.box('settings').get('user', defaultValue: {});
+  Map user = {};
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
+  void getUserData() {
+    user = Hive.box('settings').get('user', defaultValue: {});
+    setState(() {}); // 通知 Flutter 重新构建UI以显示最新数据
+  }
+
   @override
   Widget build(BuildContext context) {
     String avatar = user['avatar'] ?? '';
-
     return Column(
       children: [
         Container(
@@ -23,31 +35,21 @@ class _MineState extends State<Mine> {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      image: DecorationImage(
-                        image: avatar.isEmpty
-                            ? const AssetImage(
-                                'assets/images/default_avatar.png')
-                            : NetworkImage(avatar),
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  Avatar(url: avatar, size: 60),
                   const SizedBox(width: 20),
                   Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start, // 增加这一行
+                        mainAxisSize: MainAxisSize.max,
                         children: [
                           Text(
                             user['nickname'] ?? '未命名',
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 20,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -61,7 +63,10 @@ class _MineState extends State<Mine> {
                       ),
                       Text(
                         '账号：${user['username']}',
-                        style: TextStyle(color: Colors.grey.shade500),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                        ),
                       )
                     ],
                   ),

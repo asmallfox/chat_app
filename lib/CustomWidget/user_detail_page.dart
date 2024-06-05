@@ -1,3 +1,4 @@
+import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Helpers/socket_io.dart';
@@ -35,7 +36,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
   @override
   Widget build(BuildContext context) {
     String avatar = widget.user['avatar'] ?? '';
-
+    print('============== ${widget.user}}');
     return Scaffold(
       appBar: AppBar(
         leading: const BackIconButton(),
@@ -46,20 +47,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
           children: [
             Row(
               children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      image: DecorationImage(
-                        image: avatar.isEmpty
-                            ? const AssetImage(
-                                'assets/images/default_avatar.png',
-                              )
-                            : NetworkImage(avatar),
-                      ),
-                      borderRadius: BorderRadius.circular(8)),
-                ),
+                Avatar(url: avatar, size: 50),
                 const SizedBox(width: 20),
                 Column(
                   children: [
@@ -68,7 +56,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          widget.user['nickname'],
+                          widget.user['nickname'] ?? '',
                           style: const TextStyle(
                             fontSize: 18,
                           ),

@@ -55,11 +55,11 @@ class HttpRequest {
   ]) async {
     var options = _handleRequestOptions(
       path: path,
-      params: data,
+      queryParams: data,
     );
 
     DynamicMap<String> headersConfig = {
-      'Content-Type': 'application/json; charset=utf-8',
+      // 'Content-Type': 'application/json; charset=utf-8',
     };
 
     if (headers != null) headersConfig.addAll(headers);
@@ -68,7 +68,7 @@ class HttpRequest {
       options['uri'],
       headers: headers,
     );
-
+    print('====, ${options['uri']}');
     return _handleResponse(response);
   }
 
