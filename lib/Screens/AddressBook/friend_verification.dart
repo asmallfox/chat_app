@@ -16,6 +16,7 @@ class FriendVerification extends StatefulWidget {
 
 class _FriendVerificationState extends State<FriendVerification> {
   final List verifyList = [];
+  late Map<String, dynamic> user;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _FriendVerificationState extends State<FriendVerification> {
 
   Future<void> getVerifyList() async {
     try {
-      final user = await Hive.box('settings').get('user');
+      user = await Hive.box('settings').get('user');
       SocketIO.emit('get_friend_verify', {'userId': user["id"]});
       SocketIO.on('get_friend_verify', (data) {
         setState(() {
@@ -79,7 +80,7 @@ class _FriendVerificationState extends State<FriendVerification> {
                   title: Text(item['nickname'] ?? '未知用户名'),
                   subtitle:
                       item['message'] == null ? null : Text(item['message']),
-                  trailing: getVerifyStatus(item['status']),
+                  trailing: getVerifyStatus(item['status'], user, item),
                 );
               },
             ),
@@ -90,20 +91,29 @@ class _FriendVerificationState extends State<FriendVerification> {
   }
 }
 
-Widget? getVerifyStatus(int status) {
+Widget? getVerifyStatus(
+    int status, Map<String, dynamic> user, Map<String, dynamic> item) {
   String text = '';
+  bool isPromoter = user['id'] == item['promoter'];
   switch (status) {
     case 1:
-      text = '等待验证';
+      text = isPromoter ? '等待验证' : '同意';
       break;
     case 2:
     case 4:
-      text = '已通过';
+      text = isPromoter ? '已通过' : '已同意';
       break;
     case 3:
-      text = '已拒绝';
+      text = isPromoter ? '已拒绝' : '对方拒绝';
       break;
   }
 
-  return text.isEmpty ? null : Text(text);
+  return text.isEmpty
+      ? null
+      : TextButton(
+          onPressed: () {
+            print('====== getVerifyStatus');
+          },
+          child: Text(text),
+        );
 }
