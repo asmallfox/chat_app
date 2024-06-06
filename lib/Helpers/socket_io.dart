@@ -57,6 +57,10 @@ class SocketIO {
     });
   }
 
+  static void off(String eventName) {
+    _socket!.off(eventName);
+  }
+
   static Future<void> updateHeaders(Map<String, String> headers) async {
     if (_socket != null) {
       _connect(headers);

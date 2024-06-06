@@ -16,11 +16,12 @@ class FriendVerification extends StatefulWidget {
 
 class _FriendVerificationState extends State<FriendVerification> {
   final List verifyList = [];
-  late Map<String, dynamic> user;
+  late Map user;
 
   @override
   void initState() {
     super.initState();
+    SocketIO.on('get_friend_verify', handleFriendVerify);
     getVerifyList();
   }
 
@@ -28,14 +29,21 @@ class _FriendVerificationState extends State<FriendVerification> {
     try {
       user = await Hive.box('settings').get('user');
       SocketIO.emit('get_friend_verify', {'userId': user["id"]});
-      SocketIO.on('get_friend_verify', (data) {
-        setState(() {
-          verifyList.addAll(data.first);
-        });
-      });
     } catch (error) {
       Logger.root.info('Failed to get verify list: $error');
     }
+  }
+
+  void handleFriendVerify(data) {
+    setState(() {
+      verifyList.addAll(data.first);
+    });
+  }
+
+  @override
+  void dispose() {
+    SocketIO.off('get_friend_verify');
+    super.dispose();
   }
 
   @override
@@ -92,7 +100,7 @@ class _FriendVerificationState extends State<FriendVerification> {
 }
 
 Widget? getVerifyStatus(
-    int status, Map<String, dynamic> user, Map<String, dynamic> item) {
+    int status, Map<dynamic, dynamic> user, Map<String, dynamic> item) {
   String text = '';
   bool isPromoter = user['id'] == item['promoter'];
   switch (status) {
