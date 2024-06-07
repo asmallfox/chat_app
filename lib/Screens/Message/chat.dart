@@ -1,9 +1,17 @@
+import 'package:chat_app/CustomWidget/back_icon_button.dart';
+import 'package:chat_app/theme/app_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
 
 class Chat extends StatefulWidget {
-  const Chat({super.key});
+  final Map item;
+  Chat({
+    super.key,
+    required this.item,
+  });
 
   @override
   State<Chat> createState() => _ChatState();
@@ -146,16 +154,24 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Chat'),
+        leading: const BackIconButton(),
+        title: Text(widget.item['nickname'] ?? 'unknown'),
         centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Container(
-              color: Colors.grey[100],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Color(0xFFd3dae4), Colors.white],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.all(20),
                 physics: const BouncingScrollPhysics(),
@@ -231,66 +247,64 @@ class _ChatState extends State<Chat> {
                 },
               ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            constraints: const BoxConstraints(minHeight: 50),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              border: const Border(
-                top: BorderSide(
-                  width: 0.5,
-                  color: Color(0xFFBDBDBD),
-                ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              constraints: const BoxConstraints(minHeight: 50),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CustomIconButton(
+                    icon: Icons.add,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  CustomIconButton(
+                    icon: Icons.keyboard_voice_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: Colors.pink[100],
+                      child: TextField(
+                        controller: _messageInputController,
+                        minLines: 1,
+                        maxLines: 8,
+                        decoration: const InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          print(value);
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  FilledButton(
+                    onPressed: () {
+                      sendMessage(_messageInputController.text);
+                      _messageInputController.text = '';
+                    },
+                    style: FilledButton.styleFrom(
+                      // backgroundColor: const Color(0xFF34A047),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.all(0),
+                    ),
+                    child: const Text(
+                      '发送',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Container(
-                    color: Colors.pink[100],
-                    child: TextField(
-                      controller: _messageInputController,
-                      minLines: 1,
-                      maxLines: 8,
-                      decoration: const InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: InputBorder.none,
-                        // contentPadding: EdgeInsets.symmetric(horizontal: 0)
-                      ),
-                      onChanged: (value) {
-                        print(value);
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                FilledButton(
-                  onPressed: () {
-                    sendMessage(_messageInputController.text);
-                    _messageInputController.text = '';
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF34A047),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    padding: const EdgeInsets.all(0),
-                  ),
-                  child: const Text(
-                    '发送',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -329,4 +343,31 @@ class MessageTriangle extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget CustomIconButton({
+  required IconData icon,
+  Color? color,
+  Color? backgroundColor,
+  Function()? onPressed,
+}) {
+  return IconButton(
+    icon: Icon(
+      icon,
+      color: color,
+    ),
+    onPressed: () {
+      if (onPressed != null) {
+        onPressed();
+      }
+    },
+    style: ButtonStyle(
+      backgroundColor: WidgetStateProperty.all(backgroundColor ?? Colors.white),
+      shape: WidgetStateProperty.all<OutlinedBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6.0),
+        ),
+      ),
+    ),
+  );
 }

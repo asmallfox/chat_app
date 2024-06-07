@@ -16,7 +16,7 @@ class _SearchUserPageState extends State<SearchUserPage> {
   @override
   void initState() {
     super.initState();
-    _keywordController = TextEditingController(text: 'xxx001');
+    _keywordController = TextEditingController();
   }
 
   @override

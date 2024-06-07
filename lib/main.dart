@@ -80,9 +80,20 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       routes: namesRoutes,
       onGenerateRoute: (RouteSettings settings) {
-        print('路由守卫：${settings}');
         return HandleRoute.handleRoute(settings.name);
       },
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF231C9D),
+        ),
+        textTheme: const TextTheme(
+          displayLarge: const TextStyle(
+            fontSize: 72,
+            fontWeight: FontWeight.bold,
+          )
+        ),
+      ),
     );
   }
 }

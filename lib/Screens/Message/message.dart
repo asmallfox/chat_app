@@ -1,3 +1,6 @@
+import 'package:chat_app/CustomWidget/avatar.dart';
+import 'package:chat_app/CustomWidget/search_user_page.dart';
+import 'package:chat_app/Helpers/animation_slide_route.dart';
 import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +14,8 @@ class ChatMessage extends StatefulWidget {
 class _ChatMessageState extends State<ChatMessage> {
   final List<Map<String, dynamic>> userList = [
     {
-      'name': '张三',
+      'username': 1,
+      'nickname': '张三',
       'avatar':
           'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
       'time': '2020-01-01 12:00:00',
@@ -21,37 +25,39 @@ class _ChatMessageState extends State<ChatMessage> {
   ];
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('消息'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => const SearchUserPage(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add_circle_outline),
+          )
+        ],
+      ),
+      body: ListView.builder(
         itemCount: userList.length,
         itemBuilder: (context, index) {
           var item = userList[index];
           return GestureDetector(
             onTap: () {
-              print('点击了');
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, _, __) {
-                    return Chat();
-                  },
-                ),
-              );
+              Navigator.push(context, animationSlideRoute(Chat(item: item)));
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                      image: DecorationImage(
-                        image: NetworkImage(item['avatar']),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  Avatar(
+                    imageUrl: item['avatar'],
+                    size: 50,
                   ),
                   const SizedBox(width: 15),
                   Expanded(
@@ -62,7 +68,7 @@ class _ChatMessageState extends State<ChatMessage> {
                           children: [
                             Expanded(
                               child: Text(
-                                item['name'],
+                                item['nickname'],
                                 style: const TextStyle(
                                   fontSize: 18,
                                   overflow: TextOverflow.ellipsis,
@@ -106,6 +112,8 @@ class _ChatMessageState extends State<ChatMessage> {
               ),
             ),
           );
-        });
+        },
+      ),
+    );
   }
 }

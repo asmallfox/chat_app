@@ -36,7 +36,6 @@ class _UserDetailPageState extends State<UserDetailPage> {
   @override
   Widget build(BuildContext context) {
     String avatar = widget.user['avatar'] ?? '';
-    print('============== ${widget.user}}');
     return Scaffold(
       appBar: AppBar(
         leading: const BackIconButton(),
@@ -47,7 +46,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
           children: [
             Row(
               children: [
-                Avatar(url: avatar, size: 50),
+                Avatar(imageUrl: avatar, size: 50),
                 const SizedBox(width: 20),
                 Column(
                   children: [

@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: 'xxx001');
+    _usernameController = TextEditingController(text: 'zs');
     _passwordController = TextEditingController(text: '123456');
   }
 
@@ -81,10 +81,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const Avatar(
-                  size: 100,
-                  image: AssetImage('assets/images/default_avatar.png'),
-                ),
+                const Avatar(imageUrl: null, size: 100),
                 const SizedBox(height: 60),
                 CustomTextFormField(
                   labelText: "账号",

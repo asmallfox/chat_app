@@ -1,3 +1,4 @@
+import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
@@ -80,11 +81,7 @@ class _FriendVerificationState extends State<FriendVerification> {
                 var item = verifyList[index];
                 String avatar = item['avatar'] ?? "";
                 return ListTile(
-                  leading: Image(
-                    image: avatar.isEmpty
-                        ? const AssetImage('assets/images/default_avatar.png')
-                        : NetworkImage(avatar),
-                  ),
+                  leading: Avatar(imageUrl: avatar),
                   title: Text(item['nickname'] ?? '未知用户名'),
                   subtitle:
                       item['message'] == null ? null : Text(item['message']),

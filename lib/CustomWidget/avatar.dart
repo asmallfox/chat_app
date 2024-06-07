@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class Avatar extends StatelessWidget {
   final double size;
-  final ImageProvider<Object>? image;
-  final String? url;
+  final String? imageUrl;
   final bool circular;
   final bool rounded;
 
-  const Avatar(
-      {super.key,
-      this.size = 40,
-      this.image,
-      this.url,
-      this.circular = true,
-      this.rounded = false});
+  const Avatar({
+    super.key,
+    this.size = 40,
+    this.imageUrl,
+    this.circular = true,
+    this.rounded = false,
+  });
 
   String getLocalUrl(String url) {
-    return url.replaceAll(RegExp(r'http://localhost'), 'http://10.0.2.2');
+    if (url.startsWith(RegExp(r'https'))) {
+      return url;
+    }
+
+    if (url.startsWith(RegExp(r'http://localhost'))) {
+      return url.replaceAll(RegExp(r'http://localhost'), 'http://10.0.2.2');
+    } else {
+      return 'http://10.0.2.2:3000/$url';
+    }
   }
 
   @override
@@ -26,15 +32,7 @@ class Avatar extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: image ??
-              NetworkImage(
-                getLocalUrl(url as String),
-              ),
-        ),
         color: Colors.white,
-        // border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(
           rounded
               ? 50
@@ -44,13 +42,25 @@ class Avatar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withOpacity(0.3),
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, 0), // changes the position of the shadow
           ),
         ],
       ),
+      child: Image(
+        image: _getImageProvider(),
+        fit: BoxFit.cover,
+      ),
     );
+  }
+
+  ImageProvider _getImageProvider() {
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      return const AssetImage('assets/images/default_avatar.png');
+    } else {
+      return NetworkImage(getLocalUrl(imageUrl as String));
+    }
   }
 }
