@@ -85,7 +85,15 @@ class _FriendVerificationState extends State<FriendVerification> {
                   title: Text(item['nickname'] ?? '未知用户名'),
                   subtitle:
                       item['message'] == null ? null : Text(item['message']),
-                  trailing: getVerifyStatus(item['status'], user, item),
+                  trailing: getVerifyStatus(
+                    context,
+                    item['status'],
+                    user,
+                    item,
+                  ),
+                  onTap: () {
+                    print('信息');
+                  },
                 );
               },
             ),
@@ -97,7 +105,11 @@ class _FriendVerificationState extends State<FriendVerification> {
 }
 
 Widget? getVerifyStatus(
-    int status, Map<dynamic, dynamic> user, Map<String, dynamic> item) {
+  BuildContext context,
+  int status,
+  Map<dynamic, dynamic> user,
+  Map<String, dynamic> item,
+) {
   String text = '';
   bool isPromoter = user['id'] == item['promoter'];
   switch (status) {
@@ -117,8 +129,37 @@ Widget? getVerifyStatus(
       ? null
       : TextButton(
           onPressed: () {
-            print('====== getVerifyStatus');
+            _dialogBuilder(context);
           },
           child: Text(text),
         );
+}
+
+Future<void> _dialogBuilder(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        // title: const Text('好友验证'),
+        content: const Text('好友验证'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('拒绝'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('同意'),
+            onPressed: () {
+              // SocketIO.emit('add_friend_verify', {
+                
+              // });
+              // Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

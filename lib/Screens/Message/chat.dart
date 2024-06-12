@@ -1,4 +1,5 @@
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
+import 'package:chat_app/Helpers/socket_io.dart';
 import 'package:chat_app/theme/app_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -107,20 +108,38 @@ class _ChatState extends State<Chat> {
   late ScrollController _scrollController;
 
   final currentUserId = 1;
+  bool showSendButton = false;
 
-  void sendMessage(String message) {
-    setState(() {
-      messageList.add({
-        'name': '李四',
-        'userId': currentUserId,
-        'avatar':
-            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-        'time': '2020-01-01 12:00:00',
-        'content': message,
-        'type': 1
-      });
-    });
+  void sendMessage(String message) async {
+    var user = await Hive.box('settings').get('user');
+    print('================= ${user['id']}');
+    Map<String, dynamic> message = {
+      'userId': user['id'],
+      'friendId': 2,
+      'message': 'Hello',
+      'type': 1,
+      'avatar':
+          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+      'name': '李四',
+      'time': '2020-01-01 12:00:00',
+      'content': 'Hello'
+    };
+    //   messageList.add({
+    //     'name': '李四',
+    //     'userId': currentUserId,
+    //     'avatar':
+    //         'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+    //     'time': '2020-01-01 12:00:00',
+    //     'content': message,
+    //     'type': 1
+    //   });
+    SocketIO.emit('chat_message', message);
+    // SocketIO.on('chat_message', (data) {
+    //   print('接收数据： $data');
+    // });
+    messageList.add(message);
     jumpTo();
+    setState(() {});
   }
 
   void jumpTo() {
@@ -165,7 +184,7 @@ class _ChatState extends State<Chat> {
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [Color(0xFFd3dae4), Colors.white],
+            colors: [Color(0xFFD3DAE4), Color(0xFFDCE2EA), Color(0xFFF5F6FA)],
           ),
         ),
         child: Column(
@@ -217,13 +236,18 @@ class _ChatState extends State<Chat> {
                                     const BoxConstraints(minHeight: 45),
                                 decoration: BoxDecoration(
                                   color: isCurrentUser
-                                      ? Colors.green[400]
+                                      ? Theme.of(context).colorScheme.primary
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   item['content'],
-                                  style: const TextStyle(fontSize: 18),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: isCurrentUser
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
                                 ),
                               ),
                               Positioned(
@@ -233,7 +257,7 @@ class _ChatState extends State<Chat> {
                                 child: MessageTriangle(
                                   isStart: isCurrentUser,
                                   color: isCurrentUser
-                                      ? Colors.green
+                                      ? Theme.of(context).colorScheme.primary
                                       : Colors.white,
                                 ),
                               ),
@@ -249,54 +273,65 @@ class _ChatState extends State<Chat> {
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              constraints: const BoxConstraints(minHeight: 50),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   CustomIconButton(
-                    icon: Icons.add,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  CustomIconButton(
                     icon: Icons.keyboard_voice_rounded,
                     color: Theme.of(context).colorScheme.primary,
                   ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Container(
-                      color: Colors.pink[100],
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      margin: const EdgeInsets.only(bottom: 4.0),
+                      constraints: const BoxConstraints(
+                        minHeight: 42,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
                       child: TextField(
                         controller: _messageInputController,
                         minLines: 1,
                         maxLines: 8,
-                        decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: InputBorder.none,
-                        ),
+                        decoration: null,
                         onChanged: (value) {
-                          print(value);
+                          setState(() {
+                            showSendButton = value.isNotEmpty;
+                          });
                         },
                       ),
                     ),
                   ),
-                  const SizedBox(width: 15),
-                  FilledButton(
-                    onPressed: () {
-                      sendMessage(_messageInputController.text);
-                      _messageInputController.text = '';
-                    },
-                    style: FilledButton.styleFrom(
-                      // backgroundColor: const Color(0xFF34A047),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+                  const SizedBox(width: 8),
+                  CustomIconButton(
+                    icon: Icons.add,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Visibility(
+                    visible: showSendButton,
+                    child: FilledButton(
+                      onPressed: () {
+                        sendMessage(_messageInputController.text);
+                        _messageInputController.text = '';
+                      },
+                      style: FilledButton.styleFrom(
+                        // backgroundColor: const Color(0xFF34A047),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        padding: const EdgeInsets.all(0),
                       ),
-                      padding: const EdgeInsets.all(0),
-                    ),
-                    child: const Text(
-                      '发送',
-                      style: TextStyle(
-                        fontSize: 16,
+                      child: const Text(
+                        '发送',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -345,29 +380,43 @@ class MessageTriangle extends StatelessWidget {
   }
 }
 
-Widget CustomIconButton({
-  required IconData icon,
-  Color? color,
-  Color? backgroundColor,
-  Function()? onPressed,
-}) {
-  return IconButton(
-    icon: Icon(
-      icon,
-      color: color,
-    ),
-    onPressed: () {
-      if (onPressed != null) {
-        onPressed();
-      }
-    },
-    style: ButtonStyle(
-      backgroundColor: WidgetStateProperty.all(backgroundColor ?? Colors.white),
-      shape: WidgetStateProperty.all<OutlinedBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6.0),
+class CustomIconButton extends StatelessWidget {
+  final IconData icon;
+  final Color? color;
+  final Color? backgroundColor;
+  final double? size;
+  final Function()? onPressed;
+  const CustomIconButton({
+    super.key,
+    required this.icon,
+    this.color,
+    this.backgroundColor,
+    this.size = 24.0,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: color,
+        size: size,
+      ),
+      onPressed: () {
+        if (onPressed != null) {
+          onPressed!();
+        }
+      },
+      style: ButtonStyle(
+        backgroundColor:
+            WidgetStateProperty.all(backgroundColor ?? Colors.white),
+        shape: WidgetStateProperty.all<OutlinedBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.0),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

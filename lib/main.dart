@@ -5,6 +5,7 @@ import 'package:chat_app/Helpers/route_handler.dart';
 import 'package:chat_app/Helpers/socket_io.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
 import 'package:chat_app/constants/constants.dart';
+import 'package:chat_app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -82,18 +83,9 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (RouteSettings settings) {
         return HandleRoute.handleRoute(settings.name);
       },
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF231C9D),
-        ),
-        textTheme: const TextTheme(
-          displayLarge: const TextStyle(
-            fontSize: 72,
-            fontWeight: FontWeight.bold,
-          )
-        ),
-      ),
+      themeMode: ThemeMode.light,
+      theme: AppTheme.lightTheme(context: context),
+      darkTheme: AppTheme.darkTheme(context: context),
     );
   }
 }
