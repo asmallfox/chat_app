@@ -40,9 +40,13 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       controller: widget.controller,
       obscureText: _obscureText,
       decoration: InputDecoration(
+        fillColor: const Color(0xFFf5f6fa),
+        // fillColor: Colors.pink,
+        filled: true,
         hintText: widget.hintText,
+        hintStyle: TextStyle(color: Colors.grey[400]),
         errorStyle: const TextStyle(fontSize: 18),
-        border: const OutlineInputBorder(),
+        border: InputBorder.none,
         errorText: widget.errorText,
         labelText: widget.labelText,
         suffixIcon: widget.obscureText
