@@ -1,20 +1,18 @@
-import 'dart:math';
-import 'dart:ui' as ui;
-
 import 'package:chat_app/Apis/modules/user.dart';
-import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/custom_text_form_field.dart';
 import 'package:chat_app/CustomWidget/keyboard_container.dart';
 import 'package:chat_app/CustomWidget/linear_gradient_button.dart';
-import 'package:chat_app/CustomWidget/loading_filled_button.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
 import 'package:chat_app/Screens/Home/home.dart';
 import 'package:chat_app/Screens/Login/register.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
+import 'package:logging/logging.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -38,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
         'password': _passwordController.text
       };
 
-      var res = await loginRequest(formData);
+      final res = await loginRequest(formData);
       Map<String, dynamic> user = res.data;
 
       await Hive.box('settings').put('token', user['token']);
@@ -47,12 +45,10 @@ class _LoginPageState extends State<LoginPage> {
       if (!context.mounted) return;
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const HomePage(),
-        ),
+        MaterialPageRoute(builder: (_) => const HomePage()),
       );
     } catch (err) {
-      print('登录失败: ${err.toString()}');
+      Logger.root.info(err);
     } finally {
       setState(() {
         _loading = false;
@@ -65,8 +61,6 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
-    // _usernameController = TextEditingController(text: 'zs');
-    // _passwordController = TextEditingController(text: '123456');
   }
 
   @override
@@ -80,8 +74,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     final double screenHeight = MediaQuery.of(context).size.height;
-
     final paddingTop = statusBarHeight + 30.0;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: KeyboardContainer(
@@ -174,46 +168,54 @@ class _LoginPageState extends State<LoginPage> {
                         fontSize: 18,
                       ),
                     ),
+                    const SizedBox(
+                      height: 4,
+                    ),
                     TextButton(
-                      onPressed: () {},
-                      child: Stack(
-                        alignment: Alignment.center,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          animationSlideRoute(const RegisterPage()),
+                        );
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            "注册",
-                            style: TextStyle(
-                              fontSize: 22.0,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 4.0,
-                              foreground: Paint()
-                                ..shader = ui.Gradient.linear(
-                                  const Offset(0, 0),
-                                  const Offset(400, 22),
-                                  const <Color>[
-                                    Color(0xFF6562e3),
-                                    Color(0xff46a2f5),
-                                  ],
-                                ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 30),
-                              child: Container(
-                                height: 2,
-                                width: 20,
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color(0xFF6562e3),
-                                      Color(0xff46a2f5),
-                                    ],
-                                  ),
-                                ),
+                          ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return const LinearGradient(
+                                colors: <Color>[
+                                  Color(0xFF6562e3),
+                                  Color(0xff46a2f5),
+                                ],
+                              ).createShader(bounds);
+                            },
+                            child: const Text(
+                              "注册",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 6,
                               ),
                             ),
-                          )
+                          ),
+                          Container(
+                            width: 20,
+                            height: 3,
+                            margin: const EdgeInsets.only(top: 6.0),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFF6562e3),
+                                  Color(0xff46a2f5),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10.0),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
