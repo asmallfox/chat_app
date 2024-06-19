@@ -28,7 +28,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   late bool _obscureText;
   FocusNode _focusNode = FocusNode();
 
-  late AnimationController _controller;
+  final _animation = Tween(begin: 0,end: 1).animate(controller);
   late Animation<double> _opacityAnimation;
 
   List<Color> _bgColors = const [Color(0xFFF5F6FA), Color(0xFFF5F6FA)];
@@ -63,7 +63,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: animation,
+      animation: _controller,
       builder: (context, child) {
         return Container(
           padding: const EdgeInsets.all(2.0),
