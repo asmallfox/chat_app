@@ -24,44 +24,58 @@ class CustomTextFormField extends StatefulWidget {
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
 }
 
-class _CustomTextFormFieldState extends State<CustomTextFormField> {
+class _CustomTextFormFieldState extends State<CustomTextFormField>
+    with SingleTickerProviderStateMixin {
   late bool _obscureText;
   FocusNode _focusNode = FocusNode();
 
-  final _animation = Tween(begin: 0,end: 1).animate(controller);
+  late AnimationController _controller;
   late Animation<double> _opacityAnimation;
 
   List<Color> _bgColors = const [Color(0xFFF5F6FA), Color(0xFFF5F6FA)];
 
+  Color colorBegin = const Color(0xFFF5F6FA); // Initial color
+  Color colorEnd = const Color(0xFFF5F6FA); // Ending color
+
   @override
   void initState() {
     super.initState();
-    _obscureText =
-        widget.obscureText; // 使用 widget.obscureText 的值初始化 _obscureText
-    _focusNode.addListener(_onFocusChange);
+    _obscureText = widget.obscureText;
+
+    _controller = AnimationController(
+      duration: const Duration(microseconds: 300),
+      vsync: this,
+    );
+    _opacityAnimation = Tween<double>(
+      begin: 1,
+      end: 1.0,
+    ).animate(_controller);
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _controller.forward();
+        colorBegin = const Color(0xFF6562e3);
+        colorEnd = const Color(0xff46a2f5);
+      } else {
+        _controller.reverse();
+        colorBegin = const Color(0xFFF5F6FA);
+        colorEnd = const Color(0xFFF5F6FA);
+      }
+    });
   }
 
   @override
   void dispose() {
     // 记得在销毁时移除监听器
-    _focusNode.removeListener(_onFocusChange);
     _focusNode.dispose();
-    super.dispose();
-  }
+    _controller.dispose();
 
-  void _onFocusChange() {
-    setState(() {
-      _bgColors = _focusNode.hasFocus
-          ? const [
-              Color(0xFF6562e3),
-              Color(0xff46a2f5),
-            ]
-          : const [Color(0xFFF5F6FA), Color(0xFFF5F6FA)];
-    });
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Color animatedColor = Color.lerp(colorBegin, colorEnd, _controller.value)!;
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -69,7 +83,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           padding: const EdgeInsets.all(2.0),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: _bgColors,
+              colors: [colorBegin, colorEnd],
+              // colors: [colorBegin, animatedColor],
             ),
             borderRadius: const BorderRadius.all(Radius.circular(8.0)),
           ),
