@@ -1,18 +1,19 @@
+import 'package:chat_app/socket/address_book_socket.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class SocketIO {
-  static final SocketIO _instance = SocketIO.internal();
+class SocketIOClient {
+  static final SocketIOClient _instance = SocketIOClient.internal();
 
-  factory SocketIO() => _instance;
+  factory SocketIOClient() => _instance;
 
-  SocketIO.internal();
+  SocketIOClient.internal();
 
   static bool _isInitialized = false;
   static IO.Socket? _socket;
   static const String baseUrl = 'http://10.0.2.2:3000';
 
-  static Future<SocketIO> getInstance() async {
+  static Future<SocketIOClient> getInstance() async {
     if (!_isInitialized) {
       await _initialize();
       _isInitialized = true;
@@ -27,6 +28,8 @@ class SocketIO {
     // 监听 'connect' 事件
     _socket!.onConnect((_) {
       print("已连接 socket");
+
+      addressBookSocket(_socket!);
     });
 
     _socket!.on("conn success", (data) {
@@ -74,18 +77,24 @@ class SocketIO {
   }
 
   static Future<void> _connect(Map<String, String>? headers) async {
+
+
     String token = await Hive.box('settings').get('token', defaultValue: "");
 
     Map<String, String> defaultHeaders = {"authorization": token};
-
+  
     defaultHeaders.addAll(headers ?? {});
 
     _socket = IO.io(
-        baseUrl,
-        IO.OptionBuilder()
-            .setTransports(['websocket'])
-            .setPath("/socket.io")
-            .setExtraHeaders(headers ?? {})
-            .build());
+      'http://192.168.31.22:3000',
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .setPath("/socket.io")
+          .disableAutoConnect()
+          .setExtraHeaders(defaultHeaders)
+          .build(),
+    );
+    
+    _socket!.connect();
   }
 }

@@ -6,5 +6,9 @@ const hiveBoxes = [
   {
     'name': 'cache',
     'limit': false,
+  },
+  {
+    'name': 'chat',
+    'limit': false,
   }
 ];

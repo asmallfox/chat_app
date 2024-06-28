@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:chat_app/Helpers/logging.dart';
 import 'package:chat_app/Helpers/route_handler.dart';
-import 'package:chat_app/Helpers/socket_io.dart';
+import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
 import 'package:chat_app/constants/constants.dart';
 import 'package:chat_app/theme/app_theme.dart';
@@ -37,13 +37,9 @@ void main() async {
 }
 
 Future<void> startService() async {
-  await initializeLogging();
+  // await initializeLogging();
 
-  await SocketIO.getInstance();
-
-  // GetIt getIt = GetIt.instance;
-  // getIt.registerSingleton<AppModel>(AppModel());
-  // GetIt.I.registerSingleton<AppModel>(AppModel());
+  await SocketIOClient.getInstance();
 }
 
 Future<void> openHive(String boxName, {bool limit = false}) async {

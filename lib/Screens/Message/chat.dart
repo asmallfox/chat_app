@@ -1,5 +1,5 @@
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
-import 'package:chat_app/Helpers/socket_io.dart';
+import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/theme/app_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -133,8 +133,8 @@ class _ChatState extends State<Chat> {
     //     'content': message,
     //     'type': 1
     //   });
-    SocketIO.emit('chat_message', message);
-    // SocketIO.on('chat_message', (data) {
+    SocketIOClient.emit('chat_message', message);
+    // SocketIOClient.on('chat_message', (data) {
     //   print('接收数据： $data');
     // });
     messageList.add(message);

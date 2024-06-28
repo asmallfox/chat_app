@@ -2,7 +2,7 @@ import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
-import 'package:chat_app/Helpers/socket_io.dart';
+import 'package:chat_app/socket/socket_io.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
@@ -22,14 +22,14 @@ class _FriendVerificationState extends State<FriendVerification> {
   @override
   void initState() {
     super.initState();
-    SocketIO.on('get_friend_verify', handleFriendVerify);
+    SocketIOClient.on('get_friend_verify', handleFriendVerify);
     getVerifyList();
   }
 
   Future<void> getVerifyList() async {
     try {
       user = await Hive.box('settings').get('user');
-      SocketIO.emit('get_friend_verify', {'userId': user["id"]});
+      SocketIOClient.emit('get_friend_verify', {'userId': user["id"]});
     } catch (error) {
       Logger.root.info('Failed to get verify list: $error');
     }
@@ -43,7 +43,7 @@ class _FriendVerificationState extends State<FriendVerification> {
 
   @override
   void dispose() {
-    SocketIO.off('get_friend_verify');
+    SocketIOClient.off('get_friend_verify');
     super.dispose();
   }
 
@@ -152,7 +152,7 @@ Future<void> _dialogBuilder(BuildContext context) {
           TextButton(
             child: const Text('同意'),
             onPressed: () {
-              // SocketIO.emit('add_friend_verify', {
+              // SocketIOClient.emit('add_friend_verify', {
                 
               // });
               // Navigator.of(context).pop();

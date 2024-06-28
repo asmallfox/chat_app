@@ -5,7 +5,9 @@ import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
 import 'package:chat_app/Screens/AddressBook/friend_verification.dart';
 import 'package:chat_app/Screens/Message/chat.dart';
+import 'package:chat_app/private/address_book.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class AddressBook extends StatefulWidget {
   const AddressBook({super.key});
@@ -15,24 +17,16 @@ class AddressBook extends StatefulWidget {
 }
 
 class _AddressBookState extends State<AddressBook> {
-  final List<Map<String, dynamic>> userList = List.generate(30, (index) {
-    return {
-      "id": index,
-      "username": 'username${index + 1}',
-      "nickname": '好友${index + 1}',
-      "avatar": null,
-    };
-  });
-  //
-  // @override
-  // Future<void> initState() async {}
-  //
-  // Future<void> getUserList() async {
-  //   try {
-  //     const res = await
-  //     userList = [];
-  //   } catch (error) {}
-  // }
+  // final List<Map<String, dynamic>> userList = List.generate(30, (index) {
+  //   return {
+  //     "id": index,
+  //     "username": 'username${index + 1}',
+  //     "nickname": '好友${index + 1}',
+  //     "avatar": null,
+  //   };
+  // });
+  final List<dynamic> userList =
+      Hive.box('chat').get('friendList', defaultValue: []);
 
   @override
   Widget build(BuildContext context) {
@@ -75,28 +69,27 @@ class _AddressBookState extends State<AddressBook> {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 15),
               itemBuilder: (context, index) {
-                var item = userList[index];
+                final item = userList[index];
+                final avatarUrl = item['avatar']?.toString() ?? '';
                 return ListTile(
                   leading: Container(
                     width: 46,
                     height: 46,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(
-                        Random().nextInt(256),
-                        Random().nextInt(256),
-                        Random().nextInt(256),
-                        1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    child: Text(
-                      (index + 1).toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    // decoration: BoxDecoration(
+                    //   color: Color.fromRGBO(
+                    //     Random().nextInt(256),
+                    //     Random().nextInt(256),
+                    //     Random().nextInt(256),
+                    //     1.0,
+                    //   ),
+                    //   borderRadius: BorderRadius.circular(6.0),
+                    // ),
+                    child: Avatar(
+                      imageUrl: avatarUrl,
+                      size: 46,
+                      circular: true,
+                      // rounded: true
                     ),
                   ),
                   title: Text(item['nickname']),

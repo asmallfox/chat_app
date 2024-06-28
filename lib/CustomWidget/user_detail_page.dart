@@ -1,7 +1,7 @@
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/Helpers/show_tip_message.dart';
-import 'package:chat_app/Helpers/socket_io.dart';
+import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -25,7 +25,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
         'userId': currentUser['id'],
         'friendId': widget.user['id']
       };
-      SocketIO.emit('add_friend', [params]);
+      SocketIOClient.emit('add_friend', [params]);
     } catch (err) {
       print('error: $err');
       if (!context.mounted) return;

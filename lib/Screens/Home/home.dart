@@ -40,7 +40,7 @@ class _MyHomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _pageViewController = PageController(initialPage: 0);
+    _pageViewController = PageController(initialPage: 1);
   }
 
   @override
