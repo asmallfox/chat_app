@@ -1,3 +1,4 @@
+import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/theme/app_theme.dart';
@@ -8,10 +9,10 @@ import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 
 class Chat extends StatefulWidget {
-  final Map item;
-  Chat({
+  final Map user;
+  const Chat({
     super.key,
-    required this.item,
+    required this.user,
   });
 
   @override
@@ -19,100 +20,16 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  List<Map<String, dynamic>> messageList = [
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '张三',
-    //   'userId': 1,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content': '你好啊，我是李四！',
-    //   'type': 1
-    // },
-    // {
-    //   'name': '李四',
-    //   'userId': 2,
-    //   'avatar':
-    //       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'time': '2020-01-01 12:00:00',
-    //   'content':
-    //       '你好https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpghttps://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //   'type': 1
-    // }
-  ];
+  late List messageList;
 
   late TextEditingController _messageInputController;
   late ScrollController _scrollController;
 
-  final currentUserId = 1;
+  final currentUserId = Hive.box('settings').get('user', defaultValue: {});
   bool showSendButton = false;
 
   void sendMessage(String message) async {
     var user = await Hive.box('settings').get('user');
-    print('================= ${user['id']}');
     Map<String, dynamic> message = {
       'userId': user['id'],
       'friendId': 2,
@@ -124,19 +41,9 @@ class _ChatState extends State<Chat> {
       'time': '2020-01-01 12:00:00',
       'content': 'Hello'
     };
-    //   messageList.add({
-    //     'name': '李四',
-    //     'userId': currentUserId,
-    //     'avatar':
-    //         'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-    //     'time': '2020-01-01 12:00:00',
-    //     'content': message,
-    //     'type': 1
-    //   });
+
     SocketIOClient.emit('chat_message', message);
-    // SocketIOClient.on('chat_message', (data) {
-    //   print('接收数据： $data');
-    // });
+
     messageList.add(message);
     jumpTo();
     setState(() {});
@@ -158,6 +65,7 @@ class _ChatState extends State<Chat> {
   @override
   void initState() {
     super.initState();
+    messageList = widget.user['message'];
     _messageInputController = TextEditingController();
     _scrollController = ScrollController();
     jumpTo();
@@ -172,11 +80,13 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    print(messageList);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         leading: const BackIconButton(),
-        title: Text(widget.item['nickname'] ?? 'unknown'),
+        title: Text(widget.user['nickname'] ?? 'unknown'),
         centerTitle: true,
       ),
       body: Container(
@@ -201,7 +111,7 @@ class _ChatState extends State<Chat> {
                 },
                 itemBuilder: (context, index) {
                   var item = messageList[index];
-                  bool isCurrentUser = item['userId'] == currentUserId;
+                  bool isCurrentUser = item['from'] == currentUserId;
                   return Row(
                     key: ValueKey(index),
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,18 +119,7 @@ class _ChatState extends State<Chat> {
                     textDirection:
                         isCurrentUser ? TextDirection.rtl : TextDirection.ltr,
                     children: [
-                      Container(
-                        width: 45,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(
-                              item['avatar'],
-                            ),
-                          ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
+                      Avatar(imageUrl: widget.user['avatar']),
                       Expanded(
                         child: Align(
                           alignment: isCurrentUser
@@ -241,7 +140,7 @@ class _ChatState extends State<Chat> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  item['content'],
+                                  item['message'],
                                   style: TextStyle(
                                     fontSize: 18,
                                     color: isCurrentUser

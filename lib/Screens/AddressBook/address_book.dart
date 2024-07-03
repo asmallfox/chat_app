@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:chat_app/CustomWidget/avatar.dart';
@@ -17,16 +18,28 @@ class AddressBook extends StatefulWidget {
 }
 
 class _AddressBookState extends State<AddressBook> {
-  // final List<Map<String, dynamic>> userList = List.generate(30, (index) {
-  //   return {
-  //     "id": index,
-  //     "username": 'username${index + 1}',
-  //     "nickname": '好友${index + 1}',
-  //     "avatar": null,
-  //   };
-  // });
-  final List<dynamic> userList =
-      Hive.box('chat').get('friendList', defaultValue: []);
+  List<dynamic> userList = Hive.box('chat').get('friendList', defaultValue: []);
+  StreamSubscription? _subscription;
+  @override
+  void initState() {
+    super.initState();
+    _subscription = Hive.box('chat').watch(key: 'friendList').listen(
+      (BoxEvent event) async {
+        final box = await Hive.box('chat');
+        if (event.key != null) {
+          setState(() {
+            userList = box.get('friendList', defaultValue: []);
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,32 +84,18 @@ class _AddressBookState extends State<AddressBook> {
               itemBuilder: (context, index) {
                 final item = userList[index];
                 final avatarUrl = item['avatar']?.toString() ?? '';
+                final newMessageCount = item['newMessageCount'] ?? 0;
                 return ListTile(
-                  leading: Container(
-                    width: 46,
-                    height: 46,
-                    alignment: Alignment.center,
-                    // decoration: BoxDecoration(
-                    //   color: Color.fromRGBO(
-                    //     Random().nextInt(256),
-                    //     Random().nextInt(256),
-                    //     Random().nextInt(256),
-                    //     1.0,
-                    //   ),
-                    //   borderRadius: BorderRadius.circular(6.0),
-                    // ),
-                    child: Avatar(
-                      imageUrl: avatarUrl,
-                      size: 46,
-                      circular: true,
-                      // rounded: true
-                    ),
+                  leading: Avatar(
+                    imageUrl: avatarUrl,
+                    size: 46,
+                    circular: true,
                   ),
-                  title: Text(item['nickname']),
+                  title: Text("${item['nickname']} $newMessageCount"),
                   onTap: () {
                     Navigator.push(
                       context,
-                      animationSlideRoute(Chat(item: item)),
+                      animationSlideRoute(Chat(user: item)),
                     );
                   },
                 );
@@ -108,3 +107,15 @@ class _AddressBookState extends State<AddressBook> {
     );
   }
 }
+
+// alignment: Alignment.center,
+//   // decoration: BoxDecoration(
+//   //   color: Color.fromRGBO(
+//   //     Random().nextInt(256),
+//   //     Random().nextInt(256),
+//   //     Random().nextInt(256),
+//   //     1.0,
+//   //   ),
+//   //   borderRadius: BorderRadius.circular(6.0),
+//   // ),
+//   child: 

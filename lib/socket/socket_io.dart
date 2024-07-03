@@ -1,4 +1,5 @@
 import 'package:chat_app/socket/address_book_socket.dart';
+import 'package:chat_app/socket/chat_message_socket.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -29,6 +30,7 @@ class SocketIOClient {
     _socket!.onConnect((_) {
       print("已连接 socket");
 
+      chatMessageSocket(_socket!);
       addressBookSocket(_socket!);
     });
 
