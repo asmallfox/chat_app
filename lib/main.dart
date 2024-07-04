@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:chat_app/Helpers/logging.dart';
 import 'package:chat_app/Helpers/route_handler.dart';
+import 'package:chat_app/provider/model/chat_model.dart';
+import 'package:chat_app/provider/provider.dart';
 import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
 import 'package:chat_app/constants/constants.dart';
@@ -11,6 +13,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   // 返回实现 WidgetsBinding 的绑定的实例。
@@ -33,7 +36,17 @@ void main() async {
 
   await startService();
 
-  runApp(const MyApp());
+  // runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => ChatModel(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 Future<void> startService() async {

@@ -2,9 +2,12 @@ import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
 import 'package:chat_app/Screens/Message/chat.dart';
+import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class ChatMessage extends StatefulWidget {
   const ChatMessage({super.key});
@@ -14,8 +17,7 @@ class ChatMessage extends StatefulWidget {
 }
 
 class _ChatMessageState extends State<ChatMessage> {
-  final List<Map<String, dynamic>> userList = [];
-  final List chatList = Hive.box('chat').get('chatList', defaultValue: []);
+  var chatListValueListenable = Hive.box('chat').listenable(keys: ['chatList']);
 
   @override
   Widget build(BuildContext context) {
@@ -36,70 +38,125 @@ class _ChatMessageState extends State<ChatMessage> {
           )
         ],
       ),
-      body: ListView.builder(
-        itemCount: chatList.length,
-        itemBuilder: (context, index) {
-          var item = chatList[index];
-          var newMessage = item['message'][item['message'].length - 1];
-          int newMessageCount =
-              item['newMessageCount'] > 99 ? 99 : item['newMessageCount'];
-
-          return GestureDetector(
-            key: ValueKey(item['friendId']),
-            onTap: () {
-              Navigator.push(context, animationSlideRoute(Chat(user: item)));
+      body: ValueListenableBuilder(
+        valueListenable: chatListValueListenable,
+        builder: (context, box, _) {
+          List chatList = box.get('chatList', defaultValue: []);
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 15.0),
+            itemCount: chatList.length,
+            separatorBuilder: (context, index) {
+              return const SizedBox(
+                height: 10,
+              );
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Avatar(
-                    imageUrl: item['avatar'],
-                    size: 50,
+            itemBuilder: (context, index) {
+              var item = chatList[index];
+              var newMessage = item['messages'][item['messages'].length - 1];
+              int newMessageCount =
+                  item['newMessageCount'] > 99 ? 99 : item['newMessageCount'];
+
+              return GestureDetector(
+                key: ValueKey(item['friendId']),
+                onTap: () async {
+                  item['newMessageCount'] = 0;
+                  Provider.of<ChatModel>(context, listen: false).setChat(item);
+                  Navigator.push(
+                      context, animationSlideRoute(Chat(user: item)));
+                  await Hive.box('chat').put('chatList', chatList);
+                },
+                child: Dismissible(
+                  key: ValueKey(item['friendId']),
+                  background: Container(
+                    width: 70,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
                   ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                item['nickname'],
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
+                  confirmDismiss: (direction) async {
+                    return showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('确定删除吗？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('取消'),
                             ),
-                            Text(
-                              getDateTime(newMessage['created_at']),
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                              ),
-                            )
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('确定'),
+                            ),
                           ],
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Avatar(
+                          imageUrl: item['avatar'],
+                          size: 50,
+                          badgeCount: newMessageCount,
                         ),
-                        Row(
-                          children: [
-                            newMessage['type'] == 1
-                                ? Text(
-                                    "${newMessageCount > 0 ? '[$newMessageCount条] ' : ''}${newMessage['message']}",
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      item['nickname'],
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    newMessage == null
+                                        ? ''
+                                        : getDateTime(newMessage['created_at']),
                                     style: TextStyle(
                                       color: Colors.grey[500],
                                     ),
-                                  )
-                                : const SizedBox(),
-                          ],
-                        )
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  newMessage?['type'] == 1
+                                      ? Text(
+                                          "${newMessageCount > 0 ? '[$newMessageCount条] ' : ''}${newMessage['message']}",
+                                          style: TextStyle(
+                                            color: Colors.grey[500],
+                                          ),
+                                        )
+                                      : const SizedBox(),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),

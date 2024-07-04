@@ -19,13 +19,17 @@ const verifyStatus = {
 };
 
 const messageStatus = {
-  'has_been_sent': {
-    'label': '已发送',
+  'sending': {
+    'label': '正在发送',
     'value': 1,
   },
-  'not_sent': {
-    'label': '未发送',
+  'success': {
+    'label': '发送成功',
     'value': 2,
+  },
+  'fail': {
+    'label': '发送失败',
+    'value': 3,
   }
 };
 

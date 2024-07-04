@@ -1,4 +1,7 @@
+import 'package:chat_app/Helpers/util.dart';
+import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatMessage {
@@ -44,18 +47,24 @@ class ChatMessage {
 
 void chatMessageSocket(IO.Socket socket) {
   socket.on('chat_message', (data) async {
+    final dataList = data as List;
+    final messages = dataList.first is List ? dataList.first : [dataList.first];
+    final ack = dataList.last as Function;
+
+    Map? currentChat = ChatModel.staticCurrentChat;
+
+    print('[chat_message] $messages');
+
     Box chatBox = Hive.box('chat');
 
     List friendList = await chatBox.get('friendList', defaultValue: []);
     List chatList = await chatBox.get('chatList', defaultValue: []);
     List chatMessageList = await chatBox.get('chatMessage', defaultValue: []);
 
-    List dataList = data is List ? data : [data];
-
     Map<String, List<Map<String, dynamic>>> messageGroup = {};
 
-    for (int i = 0; i < dataList.length; i++) {
-      final item = dataList[i];
+    for (int i = 0; i < messages.length; i++) {
+      final item = messages[i];
 
       String fromId = item['from'].toString();
 
@@ -67,38 +76,48 @@ void chatMessageSocket(IO.Socket socket) {
     }
 
     messageGroup.forEach((key, value) {
-      final currentUser = friendList
-          .firstWhere((element) => element['friendId'].toString() == key);
+      Map? currentFriend =
+          listFind(friendList, (item) => item['friendId'].toString() == key);
 
-      if (currentUser != null) {
-        if (currentUser.containsKey('message')) {
-          currentUser['message'].addAll(value);
-
+      if (currentFriend != null) {
+        if (currentFriend.containsKey('messages')) {
+          currentFriend['messages'].addAll(value);
         } else {
-          currentUser['message'] = value;
+          currentFriend['messages'] = value;
         }
-        currentUser['newMessageCount'] += value.length;
 
-        final currentChat = chatList.firstWhere(
-          (element) => element['friendId'].toString() == key,
-          orElse: () => null,
-        );
-        if (currentChat == null) {
-          chatList.insert(0, currentUser);
+        Map? chatItem =
+            listFind(chatList, (item) => item['friendId'].toString() == key);
+
+        if (chatItem == null) {
+          chatList.insert(0, {
+            ...currentFriend,
+            'newMessageCount':
+                currentChat?['friendId'] == currentFriend['friendId']
+                    ? 0
+                    : value.length,
+          });
         } else {
-          currentChat['message'] = currentUser['message'];
-          currentChat['newMessageCount'] = currentUser['newMessageCount'];
+          chatItem.addAll({
+            ...currentFriend,
+            'newMessageCount':
+                currentChat?['friendId'] == currentFriend['friendId']
+                    ? 0
+                    : chatItem['newMessageCount'] + value.length,
+          });
         }
+        print(currentChat);
+        print(currentChat?['friendId'] == currentFriend['friendId']);
+        print('${currentChat?['friendId']}, ${currentFriend['friendId']}');
       }
     });
 
-    chatMessageList.addAll(dataList);
+    ack(null);
 
-    print(chatMessageList.length);
-    print(chatList[0]['message'][0]);
+    chatMessageList.addAll(messages);
 
-    // await Hive.box('chat').put('friendList', friendList);
-    // await Hive.box('chat').put('chatList', chatList);
-    // await Hive.box('chat').put('chatMessage', chatMessageList);
+    await Hive.box('chat').put('friendList', friendList);
+    await Hive.box('chat').put('chatList', chatList);
+    await Hive.box('chat').put('chatMessage', chatMessageList);
   });
 }

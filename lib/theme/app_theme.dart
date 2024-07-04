@@ -5,7 +5,7 @@ class AppTheme {
   static ThemeData lightTheme({required BuildContext context}) {
     return ThemeData(
       colorScheme: Theme.of(context).colorScheme.copyWith(
-            primary: Color.fromARGB(255, 73, 63, 248),
+            primary: const Color.fromARGB(255, 73, 63, 248),
             // primary: const Color(0xFF231C9D),
             brightness: Brightness.light,
             secondary: const Color(0xFF231C9D),

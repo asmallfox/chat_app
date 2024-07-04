@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
 import 'package:chat_app/Screens/AddressBook/friend_verification.dart';
 import 'package:chat_app/Screens/Message/chat.dart';
-import 'package:chat_app/private/address_book.dart';
+import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 
 class AddressBook extends StatefulWidget {
   const AddressBook({super.key});
@@ -25,7 +25,7 @@ class _AddressBookState extends State<AddressBook> {
     super.initState();
     _subscription = Hive.box('chat').watch(key: 'friendList').listen(
       (BoxEvent event) async {
-        final box = await Hive.box('chat');
+        final box = Hive.box('chat');
         if (event.key != null) {
           setState(() {
             userList = box.get('friendList', defaultValue: []);
@@ -84,15 +84,15 @@ class _AddressBookState extends State<AddressBook> {
               itemBuilder: (context, index) {
                 final item = userList[index];
                 final avatarUrl = item['avatar']?.toString() ?? '';
-                final newMessageCount = item['newMessageCount'] ?? 0;
                 return ListTile(
                   leading: Avatar(
                     imageUrl: avatarUrl,
                     size: 46,
                     circular: true,
                   ),
-                  title: Text("${item['nickname']} $newMessageCount"),
+                  title: Text(item['nickname']),
                   onTap: () {
+                    Provider.of<ChatModel>(context, listen: false).setChat(item);
                     Navigator.push(
                       context,
                       animationSlideRoute(Chat(user: item)),

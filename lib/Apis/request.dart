@@ -45,7 +45,8 @@ class HttpRequest {
   final HttpBaseClient _http = HttpBaseClient();
 
   HttpRequest({
-    this.baseUrl = '10.0.2.2:3000', // localhost
+    // this.baseUrl = '10.0.2.2:3000', // localhost
+    this.baseUrl = 'http://192.168.31.22:3000', // localhost
   });
 
   Future<ResponseResult> get(
@@ -68,7 +69,6 @@ class HttpRequest {
       options['uri'],
       headers: headers,
     );
-    print('====, ${options['uri']}');
     return _handleResponse(response);
   }
 

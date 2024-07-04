@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class Avatar extends StatelessWidget {
   final double size;
   final String? imageUrl;
   final bool circular;
   final bool rounded;
+  final int badgeCount;
 
   const Avatar({
     super.key,
@@ -12,6 +14,7 @@ class Avatar extends StatelessWidget {
     this.imageUrl,
     this.circular = true,
     this.rounded = false,
+    this.badgeCount = 0,
   });
 
   String getLocalUrl(String url) {
@@ -28,31 +31,60 @@ class Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(
-          rounded
-              ? 50
-              : circular
-                  ? 6.0
-                  : 0.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, 0), // changes the position of the shadow
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(
+              rounded
+                  ? 50
+                  : circular
+                      ? 6.0
+                      : 0.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset:
+                    const Offset(0, 0), // changes the position of the shadow
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Image(
-        image: _getImageProvider(),
-        fit: BoxFit.cover,
-      ),
+          child: Image(
+            image: _getImageProvider(),
+            fit: BoxFit.cover,
+          ),
+        ),
+        Visibility(
+          visible: badgeCount > 0,
+          child: Positioned(
+            right: -5,
+            top: -5,
+            child: Container(
+              width: 16,
+              height: 16,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.all(Radius.circular(50)),
+              ),
+              child: Text(
+                badgeCount.toString(),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
