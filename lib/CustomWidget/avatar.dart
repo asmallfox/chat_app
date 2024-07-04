@@ -55,11 +55,15 @@ class Avatar extends StatelessWidget {
                     const Offset(0, 0), // changes the position of the shadow
               ),
             ],
+            image: DecorationImage(
+              image: _getImageProvider(),
+              fit: BoxFit.cover,
+            ),
           ),
-          child: Image(
-            image: _getImageProvider(),
-            fit: BoxFit.cover,
-          ),
+          // child: Image(
+          //   image: _getImageProvider(),
+          //   fit: BoxFit.cover,
+          // ),
         ),
         Visibility(
           visible: badgeCount > 0,

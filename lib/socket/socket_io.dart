@@ -5,7 +5,8 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketIOClient {
   static final SocketIOClient _instance = SocketIOClient._internal();
-  static const String baseUrl = 'http://192.168.31.22:3000';
+  static const String baseUrl = 'http://192.168.1.7:3000';
+  // static const String baseUrl = 'http://192.168.31.22:3000';
   // static const String baseUrl = 'http://10.0.2.2:3000';
 
   factory SocketIOClient() => _instance;

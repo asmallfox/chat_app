@@ -144,6 +144,7 @@ class _ChatState extends State<Chat> {
         builder: (context, box, _) {
           return Container(
             decoration: const BoxDecoration(
+              // color: Color(0xFFf4f5f9)
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
@@ -183,6 +184,7 @@ class _ChatState extends State<Chat> {
                             imageUrl: isCurrentUser
                                 ? currentUser['avatar']
                                 : widget.user['avatar'],
+                            size: 42,
                           ),
                           Expanded(
                             child: Align(
@@ -193,10 +195,15 @@ class _ChatState extends State<Chat> {
                                 children: [
                                   Container(
                                     margin: const EdgeInsets.symmetric(
-                                        horizontal: 15),
-                                    padding: const EdgeInsets.all(10),
-                                    constraints:
-                                        const BoxConstraints(minHeight: 45),
+                                      horizontal: 15,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                      horizontal: 10,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minHeight: 40,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: isCurrentUser
                                           ? Theme.of(context)
@@ -232,15 +239,17 @@ class _ChatState extends State<Chat> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 40)
+                          const SizedBox(width: 42)
                         ],
                       );
                     },
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,

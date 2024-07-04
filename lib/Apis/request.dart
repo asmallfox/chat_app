@@ -46,7 +46,8 @@ class HttpRequest {
 
   HttpRequest({
     // this.baseUrl = '10.0.2.2:3000', // localhost
-    this.baseUrl = 'http://192.168.31.22:3000', // localhost
+    // this.baseUrl = 'http://192.168.31.22:3000', // localhost
+    this.baseUrl = '192.168.1.7:3000', // localhost
   });
 
   Future<ResponseResult> get(
