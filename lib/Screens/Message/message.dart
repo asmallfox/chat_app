@@ -1,6 +1,7 @@
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
+import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,9 @@ class ChatMessage extends StatefulWidget {
 }
 
 class _ChatMessageState extends State<ChatMessage> {
-  var chatListValueListenable = Hive.box('chat').listenable(keys: ['chatList']);
+  Box userBox = LocalStorage.getUserBox();
+
+  late List chatList = userBox.get('chatList', defaultValue: []);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +42,7 @@ class _ChatMessageState extends State<ChatMessage> {
         ],
       ),
       body: ValueListenableBuilder(
-        valueListenable: chatListValueListenable,
+        valueListenable: userBox.listenable(keys: ['chatList']),
         builder: (context, box, _) {
           List chatList = box.get('chatList', defaultValue: []);
           return ListView.separated(
@@ -62,8 +65,10 @@ class _ChatMessageState extends State<ChatMessage> {
                   item['newMessageCount'] = 0;
                   Provider.of<ChatModel>(context, listen: false).setChat(item);
                   Navigator.push(
-                      context, animationSlideRoute(Chat(user: item)));
-                  await Hive.box('chat').put('chatList', chatList);
+                    context,
+                    animationSlideRoute(Chat(chatItem: item)),
+                  );
+                  await userBox.put('chatList', chatList);
                 },
                 child: Dismissible(
                   key: ValueKey(item['friendId']),

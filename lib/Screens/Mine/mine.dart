@@ -1,5 +1,6 @@
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/Screens/Login/login.dart';
+import 'package:chat_app/socket/socket_io.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -86,6 +87,8 @@ class _MineState extends State<Mine> {
             child: const Text('退出'),
             onPressed: () async {
               await Hive.box('settings').delete('token');
+              SocketIOClient.disconnect();
+              if (!context.mounted) return;
               Navigator.pushReplacement(
                 context,
                 PageRouteBuilder(

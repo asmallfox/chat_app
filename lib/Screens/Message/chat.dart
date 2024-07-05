@@ -1,5 +1,6 @@
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
+import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/util.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
@@ -13,10 +14,10 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
 class Chat extends StatefulWidget {
-  final Map user;
+  final Map chatItem;
   const Chat({
     super.key,
-    required this.user,
+    required this.chatItem,
   });
 
   @override
@@ -27,21 +28,27 @@ class _ChatState extends State<Chat> {
   late List messageList;
   late TextEditingController _messageInputController;
   late ScrollController _scrollController;
+
+  final Map userInfo = LocalStorage.getUserInfo();
+  Box userBox = LocalStorage.getUserBox();
+
   final currentUser = Hive.box('settings').get('user', defaultValue: {});
+
   var chatMessageValueListenable =
       Hive.box('chat').listenable(keys: ['chatMessage']);
 
   bool showSendButton = false;
 
-  void sendMessage() async {
-    Box chatBox = Hive.box('chat');
-    List chatList = await chatBox.get('chatList', defaultValue: []);
-    List friendList = await chatBox.get('friendList', defaultValue: []);
-    List chatMessage = await chatBox.get('chatMessage', defaultValue: []);
+  Future<void> sendMessage() async {
+    Box userBox = LocalStorage.getUserBox();
 
-    var data = {
-      'to': widget.user['friendId'],
-      'from': currentUser['id'],
+    List friends = await userBox.get('friends', defaultValue: []);
+    List chatList = await userBox.get('chatList', defaultValue: []);
+    List chatMessage = await userBox.get('chatMessage', defaultValue: []);
+
+    Map data = {
+      'to': widget.chatItem['friendId'],
+      'from': userInfo['id'],
       'message': _messageInputController.text,
       'type': messageType['text']?['value']
     };
@@ -58,13 +65,13 @@ class _ChatState extends State<Chat> {
     _messageInputController.text = '';
 
     Map currentFriend = listFind(
-      friendList,
-      (item) => item['friendId'] == widget.user['friendId'],
+      friends,
+      (item) => item['friendId'] == widget.chatItem['friendId'],
     );
 
     Map? currentChat = listFind(
       chatList,
-      (item) => item['friendId'] == widget.user['friendId'],
+      (item) => item['friendId'] == widget.chatItem['friendId'],
     );
 
     currentFriend['messages'] = messageList;
@@ -75,48 +82,34 @@ class _ChatState extends State<Chat> {
       currentChat['messages'] = messageList;
     }
 
-    jumpTo();
+    jumpTo(_scrollController);
+
+    Future<void> saveData() async {
+      await userBox.put('chatList', chatList);
+      await userBox.put('friends', friends);
+      await userBox.put('chatMessage', chatMessage);
+    }
 
     SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
       messageList.remove(msg);
       messageList.add(row);
-      currentFriend['messages'] = messageList;
-
       chatMessage.remove(msg);
       chatMessage.add(row);
 
-      jumpTo();
+      currentFriend['messages'] = messageList;
 
-      await chatBox.put('chatList', chatList);
-      await chatBox.put('friendList', friendList);
-      await chatBox.put('chatMessage', chatMessage);
+      await saveData();
     });
-
-    await chatBox.put('chatList', chatList);
-    await chatBox.put('friendList', friendList);
-    await chatBox.put('chatMessage', chatMessage);
-  }
-
-  void jumpTo() {
-    Future.delayed(
-      const Duration(milliseconds: 80),
-      () {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 80),
-          curve: Curves.linear,
-        );
-      },
-    );
+    await saveData();
   }
 
   @override
   void initState() {
     super.initState();
-    messageList = widget.user['messages'] ?? [];
+    messageList = widget.chatItem['messages'] ?? [];
     _messageInputController = TextEditingController();
     _scrollController = ScrollController();
-    jumpTo();
+    jumpTo(_scrollController);
   }
 
   @override
@@ -136,11 +129,11 @@ class _ChatState extends State<Chat> {
             Provider.of<ChatModel>(context, listen: false).removeChat();
           },
         ),
-        title: Text(widget.user['nickname'] ?? 'unknown'),
+        title: Text(widget.chatItem['nickname'] ?? 'unknown'),
         centerTitle: true,
       ),
       body: ValueListenableBuilder(
-        valueListenable: chatMessageValueListenable,
+        valueListenable: userBox.listenable(keys: ['chatList']),
         builder: (context, box, _) {
           return Container(
             decoration: const BoxDecoration(
@@ -169,9 +162,11 @@ class _ChatState extends State<Chat> {
                     },
                     itemBuilder: (context, index) {
                       var item = messageList[index];
-                      bool isCurrentUser = item == null
-                          ? false
-                          : item['from'] == currentUser['id'];
+                      bool isCurrentUser = item['from'] == userInfo['id'];
+                      String avatar = isCurrentUser
+                          ? userInfo['avatar']
+                          : widget.chatItem['avatar'];
+
                       return Row(
                         key: ValueKey(index),
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,9 +176,7 @@ class _ChatState extends State<Chat> {
                             : TextDirection.ltr,
                         children: [
                           Avatar(
-                            imageUrl: isCurrentUser
-                                ? currentUser['avatar']
-                                : widget.user['avatar'],
+                            imageUrl: avatar,
                             size: 42,
                           ),
                           Expanded(
@@ -293,8 +286,8 @@ class _ChatState extends State<Chat> {
                       Visibility(
                         visible: showSendButton,
                         child: FilledButton(
-                          onPressed: () {
-                            sendMessage();
+                          onPressed: () async {
+                            await sendMessage();
                           },
                           style: FilledButton.styleFrom(
                             // backgroundColor: const Color(0xFF34A047),
@@ -398,3 +391,81 @@ class CustomIconButton extends StatelessWidget {
     );
   }
 }
+
+void jumpTo(ScrollController controller) {
+  Future.delayed(
+    const Duration(milliseconds: 80),
+    () {
+      controller.animateTo(
+        controller.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 80),
+        curve: Curves.linear,
+      );
+    },
+  );
+}
+
+
+// void sendMessage() async {
+//   Box chatBox = Hive.box('chat');
+//   List chatList = await chatBox.get('chatList', defaultValue: []);
+//   List friendList = await chatBox.get('friendList', defaultValue: []);
+//   List chatMessage = await chatBox.get('chatMessage', defaultValue: []);
+
+//   var data = {
+//     'to': widget.chatItem['friendId'],
+//     'from': currentUser['id'],
+//     'message': _messageInputController.text,
+//     'type': messageType['text']?['value']
+//   };
+
+//   Map msg = {
+//     ...data,
+//     'status': messageStatus['sending'],
+//     'created_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
+//   };
+
+//   messageList.add(msg);
+//   chatMessage.add(msg);
+
+//   _messageInputController.text = '';
+
+//   Map currentFriend = listFind(
+//     friendList,
+//     (item) => item['friendId'] == widget.chatItem['friendId'],
+//   );
+
+//   Map? currentChat = listFind(
+//     chatList,
+//     (item) => item['friendId'] == widget.chatItem['friendId'],
+//   );
+
+//   currentFriend['messages'] = messageList;
+
+//   if (currentChat == null) {
+//     chatList.add(currentFriend);
+//   } else {
+//     currentChat['messages'] = messageList;
+//   }
+
+//   jumpTo();
+
+//   SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
+//     messageList.remove(msg);
+//     messageList.add(row);
+//     currentFriend['messages'] = messageList;
+
+//     chatMessage.remove(msg);
+//     chatMessage.add(row);
+
+//     jumpTo();
+
+//     await chatBox.put('chatList', chatList);
+//     await chatBox.put('friendList', friendList);
+//     await chatBox.put('chatMessage', chatMessage);
+//   });
+
+//   await chatBox.put('chatList', chatList);
+//   await chatBox.put('friendList', friendList);
+//   await chatBox.put('chatMessage', chatMessage);
+// }

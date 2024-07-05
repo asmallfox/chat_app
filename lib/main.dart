@@ -34,6 +34,17 @@ void main() async {
     );
   }
 
+  final userBox = Hive.box('settings').get('users', defaultValue: []);
+  print(userBox);
+  if (userBox.length > 0) {
+    for (final id in userBox) {
+      await openHive(
+        'user_$id',
+        limit: false,
+      );
+    }
+  }
+
   await startService();
 
   // runApp(const MyApp());

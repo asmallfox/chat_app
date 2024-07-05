@@ -3,8 +3,10 @@ import 'package:chat_app/CustomWidget/custom_text_form_field.dart';
 import 'package:chat_app/CustomWidget/keyboard_container.dart';
 import 'package:chat_app/CustomWidget/linear_gradient_button.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
+import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Screens/Home/home.dart';
 import 'package:chat_app/Screens/Login/register.dart';
+import 'package:chat_app/socket/socket_io.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -31,7 +33,9 @@ class _LoginPageState extends State<LoginPage> {
       _loading = true;
     });
     try {
-      print('xxxxxxxxxxxxxxxxxx');
+      if (_usernameController.text.isEmpty) throw '请输入账号！';
+      if (_passwordController.text.isEmpty) throw '请输入密码！';
+
       Map<String, String> formData = {
         'username': _usernameController.text,
         'password': _passwordController.text
@@ -40,15 +44,36 @@ class _LoginPageState extends State<LoginPage> {
       final res = await loginRequest(formData);
       Map<String, dynamic> user = res.data;
 
-      await Hive.box('settings').put('token', user['token']);
-      await Hive.box('settings').put('user', user);
+      // await Hive.box('settings').put('token', user['token']);
+      // await Hive.box('settings').put('user', user);
+
+      Box settingsBox = Hive.box('settings');
+
+      int userId = user['id'];
+
+      await settingsBox.put('token', user['token']);
+      await settingsBox.put('username', user['username']);
+      await settingsBox.put('user', user);
+
+      List users = await settingsBox.get('users', defaultValue: []);
+
+      if (!users.contains(userId)) {
+        users.add(userId);
+      }
+
+      await settingsBox.put('users', users);
+
+      String userBoxName = 'user_$userId';
+      await Hive.openBox(userBoxName);
+      await Hive.box(userBoxName).put('id', userId);
 
       if (!context.mounted) return;
-
+      SocketIOClient.reConnect({});
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
     } catch (err) {
+      showTipMessage(context, err as String);
       Logger.root.info(err);
     } finally {
       setState(() {

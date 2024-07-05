@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chat_app/constants/app_settings.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
@@ -41,13 +42,16 @@ class HttpBaseClient extends http.BaseClient {
 }
 
 class HttpRequest {
-  final String baseUrl;
+  // const String baseUrl = baseUrl;
   final HttpBaseClient _http = HttpBaseClient();
+
+  final String baseUrl;
 
   HttpRequest({
     // this.baseUrl = '10.0.2.2:3000', // localhost
     // this.baseUrl = 'http://192.168.31.22:3000', // localhost
-    this.baseUrl = '192.168.1.7:3000', // localhost
+    // this.baseUrl = baseUrl, // localhost
+    this.baseUrl = serverBaseUrl,
   });
 
   Future<ResponseResult> get(
@@ -60,9 +64,7 @@ class HttpRequest {
       queryParams: data,
     );
 
-    DynamicMap<String> headersConfig = {
-      // 'Content-Type': 'application/json; charset=utf-8',
-    };
+    DynamicMap<String> headersConfig = {};
 
     if (headers != null) headersConfig.addAll(headers);
 
@@ -133,7 +135,10 @@ class HttpRequest {
       result.putIfAbsent('data', () => paramsFrom);
     }
 
-    Uri uri = Uri.http(baseUrl, url, queryParams);
+    Uri baseUri = Uri.parse(baseUrl + url);
+
+    Uri uri = baseUri.replace(queryParameters: queryParams);
+
     result.putIfAbsent('uri', () => uri);
 
     return result;

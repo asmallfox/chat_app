@@ -1,3 +1,4 @@
+import 'package:chat_app/constants/app_settings.dart';
 import 'package:chat_app/socket/address_book_socket.dart';
 import 'package:chat_app/socket/chat_message_socket.dart';
 import 'package:hive/hive.dart';
@@ -5,7 +6,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketIOClient {
   static final SocketIOClient _instance = SocketIOClient._internal();
-  static const String baseUrl = 'http://192.168.1.7:3000';
+  // static const String baseUrl = 'http://192.168.1.7:3000';
   // static const String baseUrl = 'http://192.168.31.22:3000';
   // static const String baseUrl = 'http://10.0.2.2:3000';
 
@@ -43,6 +44,9 @@ class SocketIOClient {
 
     _socket!.on('timeout', (data) {
       print("[socket 连接超时] $data");
+    });
+    _socket!.onDisconnect((_) {
+      print("[socket 已断开]");
     });
   }
 
@@ -91,13 +95,17 @@ class SocketIOClient {
     }
   }
 
+  static void disconnect() {
+    _socket!.disconnect();
+  }
+
   static Future<void> _connect([Map<String, String>? headers]) async {
     String token = await Hive.box('settings').get('token', defaultValue: "");
     Map<String, String> defaultHeaders = {"authorization": token};
     defaultHeaders.addAll(headers ?? {});
 
     _socket = IO.io(
-      baseUrl,
+      serverBaseUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .setPath("/socket.io")

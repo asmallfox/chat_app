@@ -1,3 +1,4 @@
+import 'package:chat_app/Helpers/util.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -6,28 +7,45 @@ void addressBookSocket(IO.Socket socket) {
     // Hive.box('chat').delete('friendList');
     // Hive.box('chat').delete('chatList');
 
-    final friendList =
-        await Hive.box('chat').get('friendList', defaultValue: []);
+    Map? user = await Hive.box('settings').get('user');
+
+    if (user == null) return;
 
     final dataList = data is List ? data : [data];
+    Box userBox = Hive.box('user_${user['id']}');
+    List friends = await userBox.get('friends', defaultValue: []);
 
     for (int i = 0; i < dataList.length; i++) {
-      var item = dataList[i];
-      final currentUser = friendList.firstWhere(
+      Map item = dataList[i];
+      Map? friend = listFind(
+        friends,
         (element) => element['friendId'] == item['friendId'],
-        orElse: () => null,
       );
 
-      if (currentUser != null) {
-        dataList[i] = {...(currentUser as Map), ...(item as Map)};
-      } else {
+      item['isDelete'] = false;
+
+      if (friend == null) {
         item['messages'] = [];
         item['newMessageCount'] = 0;
+        friends.add(item);
+      } else {
+        friend.addAll(item);
       }
     }
 
-    Hive.box('chat').put('friendList', dataList);
-  });
+    // 处理被非好友关系的好友（已删除）
+    for (int i = 0; i < friends.length; i++) {
+      Map item = friends[i];
+      Map? friend = listFind(
+        dataList,
+        (element) => element['friendId'] == item['friendId'],
+      );
 
-  // socket.emit('get_friend_list');
+      if (friend == null) {
+        item['isDelete'] = true;
+      }
+    }
+
+    await userBox.put('friends', friends);
+  });
 }
