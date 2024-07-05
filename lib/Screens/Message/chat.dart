@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
@@ -38,6 +40,7 @@ class _ChatState extends State<Chat> {
       Hive.box('chat').listenable(keys: ['chatMessage']);
 
   bool showSendButton = false;
+  late StreamSubscription _chatListWatch;
 
   Future<void> sendMessage() async {
     Box userBox = LocalStorage.getUserBox();
@@ -97,8 +100,8 @@ class _ChatState extends State<Chat> {
       chatMessage.add(row);
 
       currentFriend['messages'] = messageList;
-
       await saveData();
+      setState(() {});
     });
     await saveData();
   }
@@ -109,6 +112,11 @@ class _ChatState extends State<Chat> {
     messageList = widget.chatItem['messages'] ?? [];
     _messageInputController = TextEditingController();
     _scrollController = ScrollController();
+    _chatListWatch = userBox.watch(key: 'chatList').listen((event) {
+      setState(() {
+        jumpTo(_scrollController);
+      });
+    });
     jumpTo(_scrollController);
   }
 
@@ -116,6 +124,7 @@ class _ChatState extends State<Chat> {
   void dispose() {
     _messageInputController.dispose();
     _scrollController.dispose();
+    _chatListWatch.cancel();
     super.dispose();
   }
 
@@ -394,7 +403,7 @@ class CustomIconButton extends StatelessWidget {
 
 void jumpTo(ScrollController controller) {
   Future.delayed(
-    const Duration(milliseconds: 80),
+    const Duration(milliseconds: 0),
     () {
       controller.animateTo(
         controller.position.maxScrollExtent,
