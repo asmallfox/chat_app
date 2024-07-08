@@ -68,7 +68,8 @@ class _MyHomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentPageIndex,
-        selectedItemColor: Colors.green[800],
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        enableFeedback: false,
         onTap: (index) {
           setState(() {
             _pageViewController.jumpToPage(index);

@@ -139,24 +139,31 @@ class _ChatState extends State<Chat> {
           },
         ),
         title: Text(widget.chatItem['nickname'] ?? 'unknown'),
-        centerTitle: true,
+        // centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              // ...
+              print('语音');
+            },
+            icon: const Icon(Icons.phone),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          IconButton(
+            onPressed: () {
+              // ...
+              print('视频');
+            },
+            icon: const Icon(Icons.videocam_sharp),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ],
       ),
       body: ValueListenableBuilder(
         valueListenable: userBox.listenable(keys: ['chatList']),
         builder: (context, box, _) {
           return Container(
-            decoration: const BoxDecoration(
-              // color: Color(0xFFf4f5f9)
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFFD3DAE4),
-                  Color(0xFFDCE2EA),
-                  Color(0xFFF5F6FA)
-                ],
-              ),
-            ),
+            color: Colors.white,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -176,72 +183,88 @@ class _ChatState extends State<Chat> {
                           ? userInfo['avatar']
                           : widget.chatItem['avatar'];
 
-                      return Row(
+                      return Column(
                         key: ValueKey(index),
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        textDirection: isCurrentUser
-                            ? TextDirection.rtl
-                            : TextDirection.ltr,
                         children: [
-                          Avatar(
-                            imageUrl: avatar,
-                            size: 42,
-                          ),
-                          Expanded(
-                            child: Align(
-                              alignment: isCurrentUser
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 15,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 6,
-                                      horizontal: 10,
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minHeight: 40,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isCurrentUser
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      item['message'],
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        color: isCurrentUser
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 15,
-                                    left: isCurrentUser ? null : 0,
-                                    right: isCurrentUser ? 0 : null,
-                                    child: MessageTriangle(
-                                      isStart: isCurrentUser,
-                                      color: isCurrentUser
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                          : Colors.white,
-                                    ),
-                                  ),
-                                ],
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            textDirection: isCurrentUser
+                                ? TextDirection.rtl
+                                : TextDirection.ltr,
+                            children: [
+                              Avatar(
+                                imageUrl: avatar,
+                                size: 42,
                               ),
-                            ),
+                              Expanded(
+                                child: Align(
+                                  alignment: isCurrentUser
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 15,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 6,
+                                          horizontal: 10,
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minHeight: 40,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: isCurrentUser
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.1),
+                                              spreadRadius: 14,
+                                              blurRadius: 20,
+                                              offset: const Offset(6, 8),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          item['message'],
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: isCurrentUser
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 15,
+                                        left: isCurrentUser ? null : 0,
+                                        right: isCurrentUser ? 0 : null,
+                                        child: MessageTriangle(
+                                          isStart: isCurrentUser,
+                                          color: isCurrentUser
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 36)
+                            ],
                           ),
-                          const SizedBox(width: 42)
                         ],
                       );
                     },
@@ -478,3 +501,79 @@ void jumpTo(ScrollController controller) {
 //   await chatBox.put('friendList', friendList);
 //   await chatBox.put('chatMessage', chatMessage);
 // }
+
+
+// 消息
+// Column(
+//                         key: ValueKey(index),
+//                         children: [
+//                           Row(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             mainAxisAlignment: MainAxisAlignment.start,
+//                             textDirection: isCurrentUser
+//                                 ? TextDirection.rtl
+//                                 : TextDirection.ltr,
+//                             children: [
+//                               Avatar(
+//                                 imageUrl: avatar,
+//                                 size: 42,
+//                               ),
+//                               Expanded(
+//                                 child: Align(
+//                                   alignment: isCurrentUser
+//                                       ? Alignment.centerRight
+//                                       : Alignment.centerLeft,
+//                                   child: Stack(
+//                                     children: [
+//                                       Container(
+//                                         margin: const EdgeInsets.symmetric(
+//                                           horizontal: 15,
+//                                         ),
+//                                         padding: const EdgeInsets.symmetric(
+//                                           vertical: 6,
+//                                           horizontal: 10,
+//                                         ),
+//                                         constraints: const BoxConstraints(
+//                                           minHeight: 40,
+//                                         ),
+//                                         decoration: BoxDecoration(
+//                                           color: isCurrentUser
+//                                               ? Theme.of(context)
+//                                                   .colorScheme
+//                                                   .primary
+//                                               : Colors.white,
+//                                           borderRadius:
+//                                               BorderRadius.circular(4),
+//                                         ),
+//                                         child: Text(
+//                                           item['message'],
+//                                           style: TextStyle(
+//                                             fontSize: 18,
+//                                             color: isCurrentUser
+//                                                 ? Colors.white
+//                                                 : Colors.black,
+//                                           ),
+//                                         ),
+//                                       ),
+//                                       Positioned(
+//                                         top: 15,
+//                                         left: isCurrentUser ? null : 0,
+//                                         right: isCurrentUser ? 0 : null,
+//                                         child: MessageTriangle(
+//                                           isStart: isCurrentUser,
+//                                           color: isCurrentUser
+//                                               ? Theme.of(context)
+//                                                   .colorScheme
+//                                                   .primary
+//                                               : Colors.white,
+//                                         ),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 ),
+//                               ),
+//                               const SizedBox(width: 42)
+//                             ],
+//                           ),
+//                         ],
+//                       )

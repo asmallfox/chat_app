@@ -5,11 +5,15 @@ class AppTheme {
   static ThemeData lightTheme({required BuildContext context}) {
     return ThemeData(
       colorScheme: Theme.of(context).colorScheme.copyWith(
-            primary: const Color.fromARGB(255, 73, 63, 248),
-            // primary: const Color(0xFF231C9D),
             brightness: Brightness.light,
+            primary: const Color(0xFF231c9d),
+            // primary: const Color(0xFF493FF8),
             secondary: const Color(0xFF231C9D),
+            tertiary: const Color(0xFF6C79F8),
+            tertiaryContainer: const Color(0xFFeaebfd),
           ),
+      highlightColor: Colors.transparent, // 长按效果
+      splashColor: Colors.transparent, // 点击效果
     );
   }
 
@@ -20,6 +24,8 @@ class AppTheme {
             brightness: Brightness.dark,
             secondary: Colors.white,
           ),
+      highlightColor: Colors.transparent, // 长按效果
+      splashColor: Colors.transparent, // 点击效果
     );
   }
 }
