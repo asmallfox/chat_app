@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
@@ -31,7 +33,9 @@ class _ChatMessageState extends State<ChatMessage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('消息'),
         centerTitle: true,
         actions: [
@@ -59,11 +63,12 @@ class _ChatMessageState extends State<ChatMessage>
                   },
                   child: Container(
                     height: 50,
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    margin: const EdgeInsets.symmetric(horizontal: 20.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
                       color: const Color(0xFFf5f6fa),
-                      borderRadius: BorderRadius.circular(3.0),
+                      borderRadius: BorderRadius.circular(6.0),
                     ),
                     child: Row(
                       children: [
@@ -83,10 +88,13 @@ class _ChatMessageState extends State<ChatMessage>
                     ),
                   ),
                 ),
+                const SizedBox(
+                  height: 8,
+                ),
                 chatList.isEmpty
                     ? const ChatEmpty()
                     : SlidableAutoCloseBehavior(
-                        child: ListView.builder(
+                        child: ListView.separated(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           padding: const EdgeInsets.symmetric(
@@ -94,6 +102,11 @@ class _ChatMessageState extends State<ChatMessage>
                             horizontal: 20.0,
                           ),
                           itemCount: chatList.length,
+                          separatorBuilder: (_, __) {
+                            return const SizedBox(
+                              height: 15,
+                            );
+                          },
                           itemBuilder: (context, index) {
                             var item = chatList[index];
                             var newMessage =
@@ -145,13 +158,30 @@ class _ChatMessageState extends State<ChatMessage>
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
+                                        vertical: 10.0,
+                                        horizontal: 15.0,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Color.fromARGB(
+                                                31, 118, 117, 117),
+                                            spreadRadius: 0,
+                                            blurRadius: 20,
+                                            offset: Offset(0, 4),
+                                          )
+                                        ],
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
                                           Avatar(
                                             imageUrl: item['avatar'],
-                                            size: 50,
+                                            size: 42,
+                                            rounded: true,
                                           ),
                                           const SizedBox(width: 15),
                                           Expanded(

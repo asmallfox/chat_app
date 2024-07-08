@@ -1,3 +1,4 @@
+import 'package:chat_app/constants/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -25,7 +26,7 @@ class Avatar extends StatelessWidget {
     if (url.startsWith(RegExp(r'http://localhost'))) {
       return url.replaceAll(RegExp(r'http://localhost'), 'http://10.0.2.2');
     } else {
-      return 'http://10.0.2.2:3000/$url';
+      return '$serverBaseUrl/$url';
     }
   }
 
