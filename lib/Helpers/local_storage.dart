@@ -11,6 +11,20 @@ class LocalStorage {
     final user = getUserInfo();
     return Hive.box('user_${user['id']}');
   }
+
+  static Future<T?> getStorageData<T>(
+    String boxName,
+    String key, {
+    T? defaultValue,
+  }) async {
+    try {
+      final res = await Hive.box(boxName).get(key, defaultValue: defaultValue);
+      return res;
+    } catch (error) {
+      print('getHiveData错误：$error');
+      return defaultValue;
+    }
+  }
 }
 
 // settings

@@ -4,6 +4,7 @@ import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/util.dart';
+import 'package:chat_app/Screens/Message/chat_tab_panel.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
@@ -28,7 +29,6 @@ class Chat extends StatefulWidget {
 
 class _ChatState extends State<Chat> {
   late List messageList;
-  late TextEditingController _messageInputController;
   late ScrollController _scrollController;
 
   final Map userInfo = LocalStorage.getUserInfo();
@@ -42,7 +42,7 @@ class _ChatState extends State<Chat> {
   bool showSendButton = false;
   late StreamSubscription _chatListWatch;
 
-  Future<void> sendMessage() async {
+  Future<void> sendMessage(String text) async {
     Box userBox = LocalStorage.getUserBox();
 
     List friends = await userBox.get('friends', defaultValue: []);
@@ -52,7 +52,7 @@ class _ChatState extends State<Chat> {
     Map data = {
       'to': widget.chatItem['friendId'],
       'from': userInfo['id'],
-      'message': _messageInputController.text,
+      'message': text,
       'type': messageType['text']?['value']
     };
 
@@ -64,8 +64,6 @@ class _ChatState extends State<Chat> {
 
     messageList.add(msg);
     chatMessage.add(msg);
-
-    _messageInputController.text = '';
 
     Map currentFriend = listFind(
       friends,
@@ -110,7 +108,6 @@ class _ChatState extends State<Chat> {
   void initState() {
     super.initState();
     messageList = widget.chatItem['messages'] ?? [];
-    _messageInputController = TextEditingController();
     _scrollController = ScrollController();
     _chatListWatch = userBox.watch(key: 'chatList').listen((event) {
       setState(() {
@@ -122,7 +119,6 @@ class _ChatState extends State<Chat> {
 
   @override
   void dispose() {
-    _messageInputController.dispose();
     _scrollController.dispose();
     _chatListWatch.cancel();
     super.dispose();
@@ -164,6 +160,14 @@ class _ChatState extends State<Chat> {
         builder: (context, box, _) {
           return Container(
             color: Colors.white,
+            // decoration: BoxDecoration(
+            //   gradient: LinearGradient(
+            //     colors: [
+            //       Color(0xFFf5f6fb),
+            //       Colors.white,
+            //     ]
+            //   )
+            // ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -270,74 +274,10 @@ class _ChatState extends State<Chat> {
                     },
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      CustomIconButton(
-                        icon: Icons.keyboard_voice_rounded,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          margin: const EdgeInsets.only(bottom: 4.0),
-                          constraints: const BoxConstraints(
-                            minHeight: 42,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6.0),
-                          ),
-                          child: TextField(
-                            controller: _messageInputController,
-                            minLines: 1,
-                            maxLines: 8,
-                            decoration: null,
-                            onChanged: (value) {
-                              setState(() {
-                                showSendButton = value.isNotEmpty;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      CustomIconButton(
-                        icon: Icons.add,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Visibility(
-                        visible: showSendButton,
-                        child: FilledButton(
-                          onPressed: () async {
-                            await sendMessage();
-                          },
-                          style: FilledButton.styleFrom(
-                            // backgroundColor: const Color(0xFF34A047),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            padding: const EdgeInsets.all(0),
-                          ),
-                          child: const Text(
-                            '发送',
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                BottomTabPanel(
+                  onSend: (String text) {
+                    sendMessage(text);
+                  },
                 ),
               ],
             ),
@@ -383,47 +323,6 @@ class MessageTriangle extends StatelessWidget {
   }
 }
 
-class CustomIconButton extends StatelessWidget {
-  final IconData icon;
-  final Color? color;
-  final Color? backgroundColor;
-  final double? size;
-  final Function()? onPressed;
-  const CustomIconButton({
-    super.key,
-    required this.icon,
-    this.color,
-    this.backgroundColor,
-    this.size = 24.0,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        icon,
-        color: color,
-        size: size,
-      ),
-      onPressed: () {
-        if (onPressed != null) {
-          onPressed!();
-        }
-      },
-      style: ButtonStyle(
-        backgroundColor:
-            WidgetStateProperty.all(backgroundColor ?? Colors.white),
-        shape: WidgetStateProperty.all<OutlinedBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 void jumpTo(ScrollController controller) {
   Future.delayed(
     const Duration(milliseconds: 0),
@@ -436,144 +335,3 @@ void jumpTo(ScrollController controller) {
     },
   );
 }
-
-
-// void sendMessage() async {
-//   Box chatBox = Hive.box('chat');
-//   List chatList = await chatBox.get('chatList', defaultValue: []);
-//   List friendList = await chatBox.get('friendList', defaultValue: []);
-//   List chatMessage = await chatBox.get('chatMessage', defaultValue: []);
-
-//   var data = {
-//     'to': widget.chatItem['friendId'],
-//     'from': currentUser['id'],
-//     'message': _messageInputController.text,
-//     'type': messageType['text']?['value']
-//   };
-
-//   Map msg = {
-//     ...data,
-//     'status': messageStatus['sending'],
-//     'created_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-//   };
-
-//   messageList.add(msg);
-//   chatMessage.add(msg);
-
-//   _messageInputController.text = '';
-
-//   Map currentFriend = listFind(
-//     friendList,
-//     (item) => item['friendId'] == widget.chatItem['friendId'],
-//   );
-
-//   Map? currentChat = listFind(
-//     chatList,
-//     (item) => item['friendId'] == widget.chatItem['friendId'],
-//   );
-
-//   currentFriend['messages'] = messageList;
-
-//   if (currentChat == null) {
-//     chatList.add(currentFriend);
-//   } else {
-//     currentChat['messages'] = messageList;
-//   }
-
-//   jumpTo();
-
-//   SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
-//     messageList.remove(msg);
-//     messageList.add(row);
-//     currentFriend['messages'] = messageList;
-
-//     chatMessage.remove(msg);
-//     chatMessage.add(row);
-
-//     jumpTo();
-
-//     await chatBox.put('chatList', chatList);
-//     await chatBox.put('friendList', friendList);
-//     await chatBox.put('chatMessage', chatMessage);
-//   });
-
-//   await chatBox.put('chatList', chatList);
-//   await chatBox.put('friendList', friendList);
-//   await chatBox.put('chatMessage', chatMessage);
-// }
-
-
-// 消息
-// Column(
-//                         key: ValueKey(index),
-//                         children: [
-//                           Row(
-//                             crossAxisAlignment: CrossAxisAlignment.start,
-//                             mainAxisAlignment: MainAxisAlignment.start,
-//                             textDirection: isCurrentUser
-//                                 ? TextDirection.rtl
-//                                 : TextDirection.ltr,
-//                             children: [
-//                               Avatar(
-//                                 imageUrl: avatar,
-//                                 size: 42,
-//                               ),
-//                               Expanded(
-//                                 child: Align(
-//                                   alignment: isCurrentUser
-//                                       ? Alignment.centerRight
-//                                       : Alignment.centerLeft,
-//                                   child: Stack(
-//                                     children: [
-//                                       Container(
-//                                         margin: const EdgeInsets.symmetric(
-//                                           horizontal: 15,
-//                                         ),
-//                                         padding: const EdgeInsets.symmetric(
-//                                           vertical: 6,
-//                                           horizontal: 10,
-//                                         ),
-//                                         constraints: const BoxConstraints(
-//                                           minHeight: 40,
-//                                         ),
-//                                         decoration: BoxDecoration(
-//                                           color: isCurrentUser
-//                                               ? Theme.of(context)
-//                                                   .colorScheme
-//                                                   .primary
-//                                               : Colors.white,
-//                                           borderRadius:
-//                                               BorderRadius.circular(4),
-//                                         ),
-//                                         child: Text(
-//                                           item['message'],
-//                                           style: TextStyle(
-//                                             fontSize: 18,
-//                                             color: isCurrentUser
-//                                                 ? Colors.white
-//                                                 : Colors.black,
-//                                           ),
-//                                         ),
-//                                       ),
-//                                       Positioned(
-//                                         top: 15,
-//                                         left: isCurrentUser ? null : 0,
-//                                         right: isCurrentUser ? 0 : null,
-//                                         child: MessageTriangle(
-//                                           isStart: isCurrentUser,
-//                                           color: isCurrentUser
-//                                               ? Theme.of(context)
-//                                                   .colorScheme
-//                                                   .primary
-//                                               : Colors.white,
-//                                         ),
-//                                       ),
-//                                     ],
-//                                   ),
-//                                 ),
-//                               ),
-//                               const SizedBox(width: 42)
-//                             ],
-//                           ),
-//                         ],
-//                       )

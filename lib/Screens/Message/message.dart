@@ -166,7 +166,11 @@ class _ChatMessageState extends State<ChatMessage>
                                         boxShadow: const [
                                           BoxShadow(
                                             color: Color.fromARGB(
-                                                31, 118, 117, 117),
+                                              31,
+                                              118,
+                                              117,
+                                              117,
+                                            ),
                                             spreadRadius: 0,
                                             blurRadius: 20,
                                             offset: Offset(0, 4),
@@ -195,6 +199,9 @@ class _ChatMessageState extends State<ChatMessage>
                                                     Expanded(
                                                       child: Text(
                                                         item['nickname'],
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        maxLines: 1,
                                                         style: const TextStyle(
                                                           fontSize: 18,
                                                           overflow: TextOverflow
@@ -220,20 +227,29 @@ class _ChatMessageState extends State<ChatMessage>
                                                       MainAxisAlignment
                                                           .spaceBetween,
                                                   children: [
-                                                    newMessage?['type'] == 1
-                                                        ? Text(
-                                                            "${newMessageCount > 0 ? '[$newMessageCount条] ' : ''}${newMessage['message']}",
-                                                            style: TextStyle(
-                                                              color: Colors
-                                                                  .grey[500],
-                                                            ),
-                                                          )
-                                                        : const SizedBox(),
+                                                    Expanded(
+                                                      child: newMessage?[
+                                                                  'type'] ==
+                                                              1
+                                                          ? Text(
+                                                              "${newMessageCount > 0 ? '[$newMessageCount条] ' : ''}${newMessage['message']}",
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              maxLines: 1,
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .grey[500],
+                                                              ),
+                                                            )
+                                                          : const SizedBox(),
+                                                    ),
                                                     Badge.count(
                                                       count: newMessageCount,
                                                       backgroundColor:
                                                           const Color(
-                                                              0xFFf5a13c),
+                                                        0xFFf5a13c,
+                                                      ),
                                                       isLabelVisible:
                                                           newMessageCount > 0,
                                                     ),
