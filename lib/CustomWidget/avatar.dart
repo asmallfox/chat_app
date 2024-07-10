@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/constants/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -27,6 +28,7 @@ class Avatar extends StatelessWidget {
       return url.replaceAll(RegExp(r'http://localhost'), 'http://10.0.2.2');
     } else {
       return '$serverBaseUrl/$url';
+      // return 'http://192.168.31.22:3000/$url';
     }
   }
 
@@ -56,14 +58,19 @@ class Avatar extends StatelessWidget {
                     const Offset(0, 0), // changes the position of the shadow
               ),
             ],
+            // image: DecorationImage(
+            //   image: _getImageProvider(),
+            //   fit: BoxFit.cover,
+            // ),
             image: DecorationImage(
               image: _getImageProvider(),
               fit: BoxFit.cover,
             ),
           ),
-          // child: Image(
-          //   image: _getImageProvider(),
-          //   fit: BoxFit.cover,
+          // child: CachedNetworkImage(
+          //   imageUrl: getLocalUrl(imageUrl as String),
+          //   placeholder: (context, url) => CircularProgressIndicator(strokeWidth: 2),
+          //   errorWidget: (context, url, error) => Icon(Icons.error),
           // ),
         ),
         Visibility(
@@ -97,7 +104,9 @@ class Avatar extends StatelessWidget {
     if (imageUrl == null || imageUrl!.isEmpty) {
       return const AssetImage('assets/images/default_avatar.png');
     } else {
-      return NetworkImage(getLocalUrl(imageUrl as String));
+      // return NetworkImage(getLocalUrl(imageUrl as String));
+      return CachedNetworkImageProvider(getLocalUrl(imageUrl as String));
     }
+
   }
 }

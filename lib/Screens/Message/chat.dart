@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
+import 'package:chat_app/CustomWidget/keyboard_container.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
+import 'package:chat_app/Helpers/system_utils.dart';
 import 'package:chat_app/Helpers/util.dart';
 import 'package:chat_app/Screens/Message/chat_tab_panel.dart';
 import 'package:chat_app/constants/status.dart';
@@ -18,6 +21,7 @@ import 'package:provider/provider.dart';
 
 class Chat extends StatefulWidget {
   final Map chatItem;
+
   const Chat({
     super.key,
     required this.chatItem,
@@ -30,19 +34,15 @@ class Chat extends StatefulWidget {
 class _ChatState extends State<Chat> {
   late List messageList;
   late ScrollController _scrollController;
-
-  final Map userInfo = LocalStorage.getUserInfo();
-  Box userBox = LocalStorage.getUserBox();
-
-  final currentUser = Hive.box('settings').get('user', defaultValue: {});
-
-  var chatMessageValueListenable =
-      Hive.box('chat').listenable(keys: ['chatMessage']);
-
-  bool showSendButton = false;
   late StreamSubscription _chatListWatch;
 
-  Future<void> sendMessage(String text) async {
+  final Map userInfo = LocalStorage.getUserInfo();
+  final Box userBox = LocalStorage.getUserBox();
+  final currentUser = Hive.box('settings').get('user', defaultValue: {});
+
+  bool showSendButton = false;
+
+  Future<void> sendMessage(Map params) async {
     Box userBox = LocalStorage.getUserBox();
 
     List friends = await userBox.get('friends', defaultValue: []);
@@ -52,8 +52,9 @@ class _ChatState extends State<Chat> {
     Map data = {
       'to': widget.chatItem['friendId'],
       'from': userInfo['id'],
-      'message': text,
-      'type': messageType['text']?['value']
+      'message': params['content'],
+      'file': params['file'],
+      'type': params['type'],
     };
 
     Map msg = {
@@ -126,163 +127,238 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        leading: BackIconButton(
-          backFn: () {
-            Provider.of<ChatModel>(context, listen: false).removeChat();
-          },
+    return GestureDetector(
+      onTap: () {
+        SystemUtils.hideSoftKeyBoard(context);
+        chatTabPanelKey.currentState?.onHiddenPanel();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          leading: BackIconButton(
+            backFn: () {
+              Provider.of<ChatModel>(context, listen: false).removeChat();
+            },
+          ),
+          title: Text(widget.chatItem['nickname'] ?? 'unknown'),
+          // centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: () {
+                // ...
+                print('语音');
+              },
+              icon: const Icon(Icons.phone),
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            IconButton(
+              onPressed: () {
+                // ...
+                print('视频');
+              },
+              icon: const Icon(Icons.videocam_sharp),
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ],
         ),
-        title: Text(widget.chatItem['nickname'] ?? 'unknown'),
-        // centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              // ...
-              print('语音');
-            },
-            icon: const Icon(Icons.phone),
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          IconButton(
-            onPressed: () {
-              // ...
-              print('视频');
-            },
-            icon: const Icon(Icons.videocam_sharp),
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ],
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: userBox.listenable(keys: ['chatList']),
-        builder: (context, box, _) {
-          return Container(
-            color: Colors.white,
-            // decoration: BoxDecoration(
-            //   gradient: LinearGradient(
-            //     colors: [
-            //       Color(0xFFf5f6fb),
-            //       Colors.white,
-            //     ]
-            //   )
-            // ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(20),
-                    physics: const BouncingScrollPhysics(),
-                    controller: _scrollController,
-                    itemCount: messageList.length,
-                    separatorBuilder: (context, index) {
-                      return const SizedBox(height: 15);
-                    },
-                    itemBuilder: (context, index) {
-                      var item = messageList[index];
-                      bool isCurrentUser = item['from'] == userInfo['id'];
-                      String avatar = isCurrentUser
-                          ? userInfo['avatar']
-                          : widget.chatItem['avatar'];
+        body: ValueListenableBuilder(
+          valueListenable: userBox.listenable(keys: ['chatList']),
+          builder: (context, box, _) {
+            return Container(
+              color: Colors.white,
+              // decoration: BoxDecoration(
+              //   gradient: LinearGradient(
+              //     colors: [
+              //       Color(0xFFf5f6fb),
+              //       Colors.white,
+              //     ]
+              //   )
+              // ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(20),
+                      physics: const BouncingScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: messageList.length,
+                      separatorBuilder: (context, index) {
+                        return const SizedBox(height: 15);
+                      },
+                      itemBuilder: (context, index) {
+                        var item = messageList[index];
+                        bool isCurrentUser = item['from'] == userInfo['id'];
+                        String avatar = isCurrentUser
+                            ? userInfo['avatar']
+                            : widget.chatItem['avatar'];
 
-                      return Column(
-                        key: ValueKey(index),
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            textDirection: isCurrentUser
-                                ? TextDirection.rtl
-                                : TextDirection.ltr,
-                            children: [
-                              Avatar(
-                                imageUrl: avatar,
-                                size: 42,
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: isCurrentUser
-                                      ? Alignment.centerRight
-                                      : Alignment.centerLeft,
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 15,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 6,
-                                          horizontal: 10,
-                                        ),
-                                        constraints: const BoxConstraints(
-                                          minHeight: 40,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isCurrentUser
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                              : Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withOpacity(0.1),
-                                              spreadRadius: 14,
-                                              blurRadius: 20,
-                                              offset: const Offset(6, 8),
+                        int menuItemIndex = 1;
+
+                        return Column(
+                          key: ValueKey(index),
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              textDirection: isCurrentUser
+                                  ? TextDirection.rtl
+                                  : TextDirection.ltr,
+                              children: [
+                                Avatar(
+                                  imageUrl: avatar,
+                                  size: 42,
+                                  rounded: true,
+                                ),
+                                Expanded(
+                                  child: Align(
+                                    alignment: isCurrentUser
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    child: Stack(
+                                      children: [
+                                        PopupMenuButton(
+                                          initialValue: menuItemIndex,
+                                          onCanceled: () async {
+                                            messageList.removeAt(index);
+
+                                            Box userBox =
+                                                LocalStorage.getUserBox();
+
+                                            List friends = await userBox.get(
+                                                'friends',
+                                                defaultValue: []);
+                                            List chatList = await userBox.get(
+                                                'chatList',
+                                                defaultValue: []);
+                                            // List chatMessage = await userBox.get('chatMessage', defaultValue: []);
+
+                                            Map currentFriend = listFind(
+                                              friends,
+                                              (item) =>
+                                                  item['friendId'] ==
+                                                  widget.chatItem['friendId'],
+                                            );
+
+                                            Map? currentChat = listFind(
+                                              chatList,
+                                              (item) =>
+                                                  item['friendId'] ==
+                                                  widget.chatItem['friendId'],
+                                            );
+
+                                            currentFriend['messages'] =
+                                                messageList;
+
+                                            if (currentChat != null) {
+                                              currentChat['messages'] =
+                                                  messageList;
+                                            }
+                                            await Hive.box('chat')
+                                                .put('friends', friends);
+                                            await Hive.box('chat')
+                                                .put('chatList', chatList);
+
+                                            setState(() {});
+                                          },
+                                          itemBuilder: (context) {
+                                            return <PopupMenuEntry>[
+                                              const PopupMenuItem(
+                                                child: Text('删除'),
+                                              ),
+                                            ];
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.symmetric(
+                                              horizontal: 15,
                                             ),
-                                          ],
-                                        ),
-                                        child: Text(
-                                          item['message'],
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            color: isCurrentUser
-                                                ? Colors.white
-                                                : Colors.black,
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 6,
+                                              horizontal: 10,
+                                            ),
+                                            constraints: const BoxConstraints(
+                                              minHeight: 40,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isCurrentUser
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .primary
+                                                  : Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary
+                                                      .withOpacity(0.1),
+                                                  spreadRadius: 14,
+                                                  blurRadius: 20,
+                                                  offset: const Offset(6, 8),
+                                                ),
+                                              ],
+                                            ),
+                                            // child: Text(
+                                            //   item['message'],
+                                            //   style: TextStyle(
+                                            //     fontSize: 18,
+                                            //     color: isCurrentUser
+                                            //         ? Colors.white
+                                            //         : Colors.black,
+                                            //   ),
+                                            // ),
+                                            child: item['type'] == 1
+                                                ? Text(
+                                                    item['message'],
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      color: isCurrentUser
+                                                          ? Colors.white
+                                                          : Colors.black,
+                                                    ),
+                                                  )
+                                                : Avatar(
+                                                    imageUrl: item['message'],
+                                                  ),
                                           ),
                                         ),
-                                      ),
-                                      Positioned(
-                                        top: 15,
-                                        left: isCurrentUser ? null : 0,
-                                        right: isCurrentUser ? 0 : null,
-                                        child: MessageTriangle(
-                                          isStart: isCurrentUser,
-                                          color: isCurrentUser
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                              : Colors.white,
+                                        Positioned(
+                                          top: 15,
+                                          left: isCurrentUser ? null : 0,
+                                          right: isCurrentUser ? 0 : null,
+                                          child: MessageTriangle(
+                                            isStart: isCurrentUser,
+                                            color: isCurrentUser
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
+                                                : Colors.white,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 36)
-                            ],
-                          ),
-                        ],
-                      );
+                                const SizedBox(width: 36)
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  ChatTabPanel(
+                    key: chatTabPanelKey,
+                    onSend: (Map params) {
+                      sendMessage(params);
                     },
                   ),
-                ),
-                BottomTabPanel(
-                  onSend: (String text) {
-                    sendMessage(text);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -291,11 +367,13 @@ class _ChatState extends State<Chat> {
 class MessageTriangle extends StatelessWidget {
   final bool isStart;
   final Color color;
+
   const MessageTriangle({
     super.key,
     this.isStart = true,
     this.color = Colors.white,
   });
+
   @override
   Widget build(BuildContext context) {
     return Container(
