@@ -1,3 +1,4 @@
+import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/constants/app_settings.dart';
 import 'package:chat_app/socket/address_book_socket.dart';
 import 'package:chat_app/socket/chat_message_socket.dart';
@@ -6,9 +7,8 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketIOClient {
   static final SocketIOClient _instance = SocketIOClient._internal();
-  // static const String baseUrl = 'http://192.168.1.7:3000';
-  // static const String baseUrl = 'http://192.168.31.22:3000';
-  // static const String baseUrl = 'http://10.0.2.2:3000';
+
+  SocketIOClient._();
 
   factory SocketIOClient() => _instance;
 
@@ -20,37 +20,84 @@ class SocketIOClient {
   static Future<SocketIOClient> getInstance() async {
     if (!_isInitialized) {
       await _initialize();
-      _isInitialized = true;
     }
     return _instance;
   }
 
   static Future<void> _initialize() async {
-    await _connect();
+    try {
+      await connect();
+    } catch (error) {
+      print(error);
+      print('_initialize: socket初始化失败！');
+    }
+  }
 
-    _socket!.onConnect((_) {
-      print("已连接 socket");
-      // 在连接成功后处理业务逻辑
-      _setupSocketListeners();
+  static Future<void> reConnect() async {
+    if (_socket == null && !_isInitialized) {
+      print('reConnect: socket未初始化~');
+      return;
+    }
+    await connect();
+  }
+
+  static Future<void> removeSocket() async {
+    if (_socket == null && !_isInitialized) {
+      print('removeSocket: socket未初始化~');
+      return;
+    }
+    _socket?.disconnect();
+    _socket = null;
+    _isInitialized = false;
+  }
+
+  static Future<void> connect({Map<String, String>? headers}) async {
+    try {
+      String? token = await LocalStorage.getStorageData('settings', 'token');
+      if (token == null) {
+        throw Exception('用户未登录，发起socket连接请求错误~');
+      }
+
+      Map<String, String> defaultHeaders = {"authorization": token};
+      defaultHeaders.addAll(headers ?? {});
+
+      _socket = IO.io(
+        serverBaseUrl,
+        IO.OptionBuilder()
+            .setTransports(['websocket'])
+            .setPath("/socket.io")
+            .setExtraHeaders(defaultHeaders)
+            .build(),
+      );
+
+      _handleConnect(_socket!);
+    } catch (error) {
+      print('Error during socket connection: $error');
+      rethrow; // 重新抛出异常以便外部处理
+    }
+  }
+
+  static void _handleConnect(IO.Socket socket) {
+    print('_handleConnect');
+    socket.onConnect((data) {
+      print("[socket] 连接成功~");
+      _setupAppSocketEvent();
     });
 
-    _socket!.on("conn success", (data) {
-      print("[接收socket信息] $data");
+    socket.onDisconnect((_) {
+      print("[socket] 断开连接~");
     });
 
-    _socket!.on("connect_error", (data) {
-      print("socket连接失败 $data");
+    socket.onConnectTimeout((data) {
+      print("[socket] 连接超时~");
     });
 
-    _socket!.on('timeout', (data) {
-      print("[socket 连接超时] $data");
-    });
-    _socket!.onDisconnect((_) {
-      print("[socket 已断开]");
+    socket.onConnectError((data) {
+      print("[socket] 连接失败~");
     });
   }
 
-  static void _setupSocketListeners() {
+  static void _setupAppSocketEvent() {
     chatMessageSocket(_socket!);
     addressBookSocket(_socket!);
     // 添加其他需要监听的事件
@@ -81,39 +128,5 @@ class SocketIOClient {
 
   static void off(String eventName) {
     _socket!.off(eventName);
-  }
-
-  static Future<void> updateHeaders(Map<String, String> headers) async {
-    if (_socket != null) {
-      await _connect(headers);
-    }
-  }
-
-  static Future<void> reConnect(Map<String, String>? headers) async {
-    if (_socket != null) {
-      await _connect(headers);
-    }
-  }
-
-  static void disconnect() {
-    _socket!.disconnect();
-  }
-
-  static Future<void> _connect([Map<String, String>? headers]) async {
-    String token = await Hive.box('settings').get('token', defaultValue: "");
-    Map<String, String> defaultHeaders = {"authorization": token};
-    defaultHeaders.addAll(headers ?? {});
-
-    _socket = IO.io(
-      serverBaseUrl,
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .setPath("/socket.io")
-          .disableAutoConnect()
-          .setExtraHeaders(defaultHeaders)
-          .build(),
-    );
-
-    _socket!.connect();
   }
 }

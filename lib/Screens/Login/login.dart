@@ -68,7 +68,9 @@ class _LoginPageState extends State<LoginPage> {
       await Hive.box(userBoxName).put('id', userId);
 
       if (!context.mounted) return;
-      SocketIOClient.reConnect({});
+
+      await SocketIOClient.getInstance();
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomePage()),
       );

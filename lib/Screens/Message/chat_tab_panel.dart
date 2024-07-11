@@ -418,38 +418,6 @@ class _ChatTabPanelState extends State<ChatTabPanel>
                 ],
               ),
             ),
-            Visibility(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                    left: 0,
-                    top: 0,
-                    child: Container(
-                      // width: MediaQuery.of(context).size.width,
-                      // height: MediaQuery.of(context).size.height,
-                      color: const Color.fromRGBO(0, 0, 0, 0.5),
-                    ),
-                  ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 80),
-                    curve: Curves.easeInOut,
-                    height: showAudioPanel ? 100 : 0,
-                    child: Row(
-                      children: [
-                        Container(
-                          key: audioCloseKey,
-                          color: _isOverlyClose
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.tertiary,
-                          child: Text('xxxxxxxxxx'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

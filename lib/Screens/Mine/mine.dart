@@ -87,7 +87,7 @@ class _MineState extends State<Mine> {
             child: const Text('退出'),
             onPressed: () async {
               await Hive.box('settings').delete('token');
-              SocketIOClient.disconnect();
+              SocketIOClient.removeSocket();
               if (!context.mounted) return;
               Navigator.pushReplacement(
                 context,
