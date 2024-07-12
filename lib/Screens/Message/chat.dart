@@ -364,8 +364,31 @@ class _ChatState extends State<Chat> {
                       ),
                       ChatTabPanel(
                         key: chatTabPanelKey,
+                        audioCloseKey: audioCloseKey,
                         onSend: (Map params) {
                           sendMessage(params);
+                        },
+                        startAudio: () {
+                          setState(() {
+                            showAudioPanel = true;
+                          });
+                        },
+                        endAudio: () {
+                          print('xxxxxxxxxxxxxxxx $isOverlyClose');
+                          setState(() {
+                            showAudioPanel = false;
+                          });
+                          isOverlyClose = false;
+                        },
+                        closeBlur: () {
+                          setState(() {
+                            isOverlyClose = false;
+                          });
+                        },
+                        closeFocus: () {
+                          setState(() {
+                            isOverlyClose = true;
+                          });
                         },
                       ),
                     ],
@@ -375,64 +398,85 @@ class _ChatState extends State<Chat> {
             ),
           ),
         ),
-        Positioned.fill(
-          child: Container(
-            color: const Color.fromRGBO(0, 0, 0, 0.5),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 80),
-              curve: Curves.easeInOut,
-              height: showAudioPanel ? 200 : 0,
-              child: Text('xxx'),
-              // child: Align(
-              //   // alignment: Alignment.bottomLeft,
-              //   child: Container(
-              //     padding: const EdgeInsets.all(20.0),
-              //     // alignment: Alignment.topLeft,
-              //     color: Colors.white,
-              //     height: 200,
-              //     child: Row(
-              //       children: [
-              //         // Container(
-              //         //   key: audioCloseKey,
-              //         //   padding: const EdgeInsets.all(8.0),
-              //         //   decoration: BoxDecoration(
-              //         //     color: isOverlyClose
-              //         //         ? Theme.of(context).colorScheme.primary
-              //         //         : Theme.of(context).colorScheme.tertiary,
-              //         //     borderRadius: BorderRadius.circular(50),
-              //         //   ),
-              //         //   child: const Icon(
-              //         //     Icons.close_rounded,
-              //         //     color: Colors.white,
-              //         //   ),
-              //         // ),
-              //         // Column(
-              //         //   mainAxisSize: MainAxisSize.min,
-              //         //   children: [
-              //         //     Icon(
-              //         //       Icons.multitrack_audio,
-              //         //       color: Theme.of(context).colorScheme.primary,
-              //         //       size: 58,
-              //         //     ),
-              //         //     const Text('松开发送'),
-              //         //   ],
-              //         // ),
-              //         // TextButton(
-              //         //   onPressed: () {},
-              //         //   onHover: (hover) {
-              //         //     print('未实现');
-              //         //   },
-              //         //   child: const Icon(
-              //         //     Icons.question_mark_rounded,
-              //         //   ),
-              //         // ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
+        Visibility(
+          visible: showAudioPanel,
+          child: Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  showAudioPanel = !showAudioPanel;
+                });
+              },
+              child: Container(
+                color: const Color.fromRGBO(0, 0, 0, 0.5),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 100),
+                    curve: Curves.easeInOut,
+                    height: showAudioPanel ? 300 : 0,
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          key: audioCloseKey,
+                          padding: EdgeInsets.all(isOverlyClose ? 10 : 8.0),
+                          decoration: BoxDecoration(
+                            color: isOverlyClose
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.tertiary,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                        // Column(
+                        //   mainAxisSize: MainAxisSize.min,
+                        //   children: [
+                        //     Icon(
+                        //       Icons.multitrack_audio_rounded,
+                        //       size: 48,
+                        //       color: Theme.of(context).colorScheme.secondary,
+                        //     ),
+                        //     const SizedBox(
+                        //       height: 10,
+                        //     ),
+                        //     Text(
+                        //       '松开发送',
+                        //       style: TextStyle(
+                        //         color: Theme.of(context).colorScheme.secondary,
+                        //         fontSize: 14,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.tertiary,
+                            // color: isOverlyClose
+                            //     ? Theme.of(context).colorScheme.primary
+                            //     : Theme.of(context).colorScheme.tertiary,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: const Icon(
+                            Icons.question_mark_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+        )
       ],
     );
   }

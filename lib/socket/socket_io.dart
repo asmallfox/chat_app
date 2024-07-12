@@ -66,6 +66,7 @@ class SocketIOClient {
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .setPath("/socket.io")
+            .enableForceNew()
             .setExtraHeaders(defaultHeaders)
             .build(),
       );

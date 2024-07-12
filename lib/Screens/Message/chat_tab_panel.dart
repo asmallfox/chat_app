@@ -15,10 +15,20 @@ final GlobalKey<_ChatTabPanelState> chatTabPanelKey = GlobalKey();
 
 class ChatTabPanel extends StatefulWidget {
   final Function(Map)? onSend;
+  final Function? startAudio;
+  final Function? endAudio;
+  final Function? closeFocus;
+  final Function? closeBlur;
+  final GlobalKey audioCloseKey;
 
   const ChatTabPanel({
     super.key,
     this.onSend,
+    this.startAudio,
+    this.endAudio,
+    this.closeFocus,
+    this.closeBlur,
+    required this.audioCloseKey,
   });
 
   @override
@@ -39,11 +49,11 @@ class _ChatTabPanelState extends State<ChatTabPanel>
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  final GlobalKey audioCloseKey = GlobalKey();
+  // final GlobalKey audioCloseKey = GlobalKey();
 
   // final GlobalKey audioCloseKey = GlobalKey();
 
-  // RecordingManager _recordingManager = RecordingManager();
+  final RecordingManager _recordingManager = RecordingManager();
 
   void onHiddenPanel() {
     setState(() {
@@ -62,12 +72,6 @@ class _ChatTabPanelState extends State<ChatTabPanel>
         _imageFile = File(pickedFile.path);
       });
     }
-  }
-
-  Widget _imagePreview() {
-    return _imageFile == null
-        ? Text('No image selected.')
-        : Image.file(_imageFile!);
   }
 
   Future<void> _takePicture() async {
@@ -97,65 +101,23 @@ class _ChatTabPanelState extends State<ChatTabPanel>
   }
 
   void _showBottomSheet() {
-    // Scaffold.of(context).showBottomSheet((context) {
-    //   return SizedBox(
-    //     height: 200,
-    //     width: MediaQuery.of(context).size.width,
-    //     child: Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //       crossAxisAlignment: CrossAxisAlignment.center,
-    //       children: [
-    //         Container(
-    //           key: audioCloseKey,
-    //           padding: EdgeInsets.all(_isOverlyClose ? 10 : 8),
-    //           decoration: BoxDecoration(
-    //             color: _isOverlyClose ? Colors.red : Colors.pink,
-    //             // color: _isOverlyClose
-    //             //     ? Theme.of(context).colorScheme.primary
-    //             //     : Theme.of(context).colorScheme.tertiary,
-    //             borderRadius: BorderRadius.circular(50),
-    //           ),
-    //           child: const Icon(
-    //             Icons.close_rounded,
-    //             color: Colors.white,
-    //           ),
-    //         ),
-    //         Column(
-    //           mainAxisSize: MainAxisSize.min,
-    //           children: [
-    //             Icon(
-    //               Icons.multitrack_audio,
-    //               color: Theme.of(context).colorScheme.primary,
-    //               size: 58,
-    //             ),
-    //             const Text('松开发送'),
-    //           ],
-    //         ),
-    //         TextButton(
-    //           onPressed: () {},
-    //           onHover: (hover) {
-    //             print('未实现');
-    //           },
-    //           child: const Icon(
-    //             Icons.question_mark_rounded,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    // });
+    if (widget.startAudio != null) {
+      widget.startAudio!();
+    }
   }
 
   void _hideBottomSheet() {
-    Navigator.pop(context);
     _isOverlyClose = false;
+
+    widget.endAudio?.call();
+    _recordingManager.stopRecordingAndSend();
     print('录音完成');
   }
 
-  void _handleAudio() {
+  void _handleAudio() async {
     // 语音
     try {
-      // await _recordingManager.startRecording();
+      await _recordingManager.startRecording();
       print('开始录音');
       _showBottomSheet();
     } catch (error) {
@@ -165,23 +127,23 @@ class _ChatTabPanelState extends State<ChatTabPanel>
 
   void _handleOverlap(detail) {
     RenderBox renderBox =
-        audioCloseKey.currentContext?.findRenderObject() as RenderBox;
+        widget.audioCloseKey.currentContext?.findRenderObject() as RenderBox;
     Offset acOffset = renderBox.localToGlobal(Offset.zero);
     double acX = acOffset.dx;
-    double acY = acOffset.dy;
+    // double acY = acOffset.dy;
     double acW = renderBox.size.width;
-    double acH = renderBox.size.height;
+    // double acH = renderBox.size.height;
 
     double mouseX = detail.globalPosition.dx;
-    double mouseY = detail.globalPosition.dy;
+    // double mouseY = detail.globalPosition.dy;
 
-    // bool isOverlap = (mouseX >= acX && mouseX <= acX + acW) &&
-    //     (mouseY > acY && mouseY < acY + acH);
     bool isOverlap = mouseX >= acX && mouseX <= acX + acW;
 
-    setState(() {
-      _isOverlyClose = isOverlap;
-    });
+    if (isOverlap) {
+      widget.closeFocus?.call();
+    } else {
+      widget.closeBlur?.call();
+    }
   }
 
   @override
@@ -202,22 +164,8 @@ class _ChatTabPanelState extends State<ChatTabPanel>
     super.didChangeMetrics();
     // 如果MediaQuery.of(context).viewInsets.bottom获取键盘高度如果无论如何都是0，
     // 需设置父级Scaffold的resizeToAvoidBottomInset为false
-
     // final isKeyboardNowVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-    // setState(() {
-    //   isKeyboardVisible = isKeyboardNowVisible;
-    //   if (isKeyboardNowVisible) {
-    //     showPanel = false;
-    //   } else {
-    //   }
-    // });
 
-    // if (isKeyboardNowVisible) {
-    //   setState(() {
-    //     showPanel = false;
-    //   });
-    // }
-    // print(MediaQuery.of(context).size.height);
     if (showPanel) {
       if (_focusNode.hasFocus) {
         setState(() {
@@ -291,22 +239,11 @@ class _ChatTabPanelState extends State<ChatTabPanel>
                     ),
                     child: isAudio
                         ? GestureDetector(
-                            // onLongPressDown: (_) => _handleAudio(),
-                            // onTapUp: (_) => _hideBottomSheet(),
-                            // onHorizontalDragEnd: (_) => _hideBottomSheet(),
-                            // onLongPressUp: _hideBottomSheet,
-                            // onHorizontalDragUpdate: _handleOverlap,
-                            // onLongPressMoveUpdate: _handleOverlap,
-                            onLongPressDown: (_) {
-                              setState(() {
-                                showAudioPanel = true;
-                              });
-                            },
-                            onLongPressUp: () {
-                              setState(() {
-                                showAudioPanel = false;
-                              });
-                            },
+                            onLongPressDown: (_) => _handleAudio(),
+                            onTapUp: (_) => _hideBottomSheet(),
+                            onHorizontalDragEnd: (_) => _hideBottomSheet(),
+                            onLongPressUp: _hideBottomSheet,
+                            onHorizontalDragUpdate: _handleOverlap,
                             onLongPressMoveUpdate: _handleOverlap,
                             child: Container(
                               height: 42,
@@ -334,8 +271,6 @@ class _ChatTabPanelState extends State<ChatTabPanel>
                   icon: Icons.add,
                   color: Theme.of(context).colorScheme.primary,
                   onPressed: () {
-                    // 监听键盘状态
-                    // print(SystemChannels.textInput.invokeMethod('TextInput.hide'));
                     SystemUtils.hideSoftKeyBoard(context);
                     Future.delayed(const Duration(milliseconds: 100), () {
                       setState(() {
@@ -358,7 +293,6 @@ class _ChatTabPanelState extends State<ChatTabPanel>
                       }
                     },
                     style: FilledButton.styleFrom(
-                      // backgroundColor: const Color(0xFF34A047),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
