@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chat_app/Screens/Message/chat_message_item.dart';
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/CustomWidget/custom_model.dart';
-import 'package:chat_app/CustomWidget/keyboard_container.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/system_utils.dart';
 import 'package:chat_app/Helpers/util.dart';
@@ -12,6 +12,7 @@ import 'package:chat_app/Screens/Message/chat_tab_panel.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
+import 'package:chat_app/theme/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,9 +63,12 @@ class _ChatState extends State<Chat> {
       'type': params['type'],
     };
 
+    print('xxxxxxxxxxxxxxxx $data');
+
     Map msg = {
       ...data,
-      'status': messageStatus['sending'],
+      // 'status': MessageStatus['sending'],
+      'status': MessageStatus.sending,
       'created_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
     };
 
@@ -92,16 +96,40 @@ class _ChatState extends State<Chat> {
     jumpTo(_scrollController);
 
     Future<void> saveData() async {
-      await userBox.put('chatList', chatList);
-      await userBox.put('friends', friends);
-      await userBox.put('chatMessage', chatMessage);
+      // await userBox.put('chatList', chatList);
+      // await userBox.put('friends', friends);
+      // await userBox.put('chatMessage', chatMessage);
     }
 
-    SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
+    final timer = Timer(const Duration(seconds: 15), () async {
       messageList.remove(msg);
-      messageList.add(row);
       chatMessage.remove(msg);
-      chatMessage.add(row);
+
+      final data = {
+        ...msg,
+        'status': MessageStatus.fail,
+      };
+
+      messageList.add(data);
+      chatMessage.add(data);
+
+      currentFriend['messages'] = messageList;
+      await saveData();
+      setState(() {});
+    });
+
+    SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
+      timer.cancel();
+      messageList.remove(msg);
+      chatMessage.remove(msg);
+
+      final data = {
+        ...row,
+        'status': MessageStatus.success,
+      };
+
+      messageList.add(data);
+      chatMessage.add(data);
 
       currentFriend['messages'] = messageList;
       await saveData();
@@ -148,7 +176,6 @@ class _ChatState extends State<Chat> {
                 },
               ),
               title: Text(widget.chatItem['nickname'] ?? 'unknown'),
-              // centerTitle: true,
               actions: [
                 IconButton(
                   onPressed: () {
@@ -173,14 +200,6 @@ class _ChatState extends State<Chat> {
               builder: (context, box, _) {
                 return Container(
                   color: Colors.white,
-                  // decoration: BoxDecoration(
-                  //   gradient: LinearGradient(
-                  //     colors: [
-                  //       Color(0xFFf5f6fb),
-                  //       Colors.white,
-                  //     ]
-                  //   )
-                  // ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -222,8 +241,31 @@ class _ChatState extends State<Chat> {
                                         alignment: isCurrentUser
                                             ? Alignment.centerRight
                                             : Alignment.centerLeft,
-                                        child: Stack(
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
+                                            Visibility(
+                                              visible: item['status'] == null ||
+                                                  item['status'] !=
+                                                      MessageStatus.success,
+                                              child: item['status'] ==
+                                                      MessageStatus.sending
+                                                  ? const SizedBox(
+                                                      width: 20,
+                                                      height: 20,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        strokeWidth: 3,
+                                                      ),
+                                                    )
+                                                  : GestureDetector(
+                                                      child: const Icon(
+                                                        Icons.error_outline,
+                                                        color: AppColors
+                                                            .errorColor,
+                                                      ),
+                                                    ),
+                                            ),
                                             PopupMenuButton(
                                               initialValue: menuItemIndex,
                                               onCanceled: () async {
@@ -277,77 +319,8 @@ class _ChatState extends State<Chat> {
                                                   ),
                                                 ];
                                               },
-                                              child: Container(
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 15,
-                                                ),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  vertical: 6,
-                                                  horizontal: 10,
-                                                ),
-                                                constraints:
-                                                    const BoxConstraints(
-                                                  minHeight: 40,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: isCurrentUser
-                                                      ? Theme.of(context)
-                                                          .colorScheme
-                                                          .primary
-                                                      : Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(6),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .primary
-                                                          .withOpacity(0.1),
-                                                      spreadRadius: 14,
-                                                      blurRadius: 20,
-                                                      offset:
-                                                          const Offset(6, 8),
-                                                    ),
-                                                  ],
-                                                ),
-                                                // child: Text(
-                                                //   item['message'],
-                                                //   style: TextStyle(
-                                                //     fontSize: 18,
-                                                //     color: isCurrentUser
-                                                //         ? Colors.white
-                                                //         : Colors.black,
-                                                //   ),
-                                                // ),
-                                                child: item['type'] == 1
-                                                    ? Text(
-                                                        item['message'],
-                                                        style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: isCurrentUser
-                                                              ? Colors.white
-                                                              : Colors.black,
-                                                        ),
-                                                      )
-                                                    : Avatar(
-                                                        imageUrl:
-                                                            item['message'],
-                                                      ),
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 15,
-                                              left: isCurrentUser ? null : 0,
-                                              right: isCurrentUser ? 0 : null,
-                                              child: MessageTriangle(
-                                                isStart: isCurrentUser,
-                                                color: isCurrentUser
-                                                    ? Theme.of(context)
-                                                        .colorScheme
-                                                        .primary
-                                                    : Colors.white,
+                                              child: ChatMessageItem(
+                                                item: item,
                                               ),
                                             ),
                                           ],
@@ -373,12 +346,16 @@ class _ChatState extends State<Chat> {
                             showAudioPanel = true;
                           });
                         },
-                        endAudio: () {
-                          print('xxxxxxxxxxxxxxxx $isOverlyClose');
+                        endAudio: (String path) {
                           setState(() {
                             showAudioPanel = false;
                           });
                           isOverlyClose = false;
+                          sendMessage({
+                            'type': 3,
+                            'content': path,
+                            'file': File(path),
+                          });
                         },
                         closeBlur: () {
                           setState(() {
@@ -478,43 +455,6 @@ class _ChatState extends State<Chat> {
           ),
         )
       ],
-    );
-  }
-}
-
-class MessageTriangle extends StatelessWidget {
-  final bool isStart;
-  final Color color;
-
-  const MessageTriangle({
-    super.key,
-    this.isStart = true,
-    this.color = Colors.white,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: BorderDirectional(
-          top: const BorderSide(
-            color: Colors.transparent,
-            width: 6,
-          ),
-          bottom: const BorderSide(
-            color: Colors.transparent,
-            width: 6,
-          ),
-          start: BorderSide(
-            color: isStart ? color : Colors.transparent,
-            width: 8,
-          ),
-          end: BorderSide(
-            color: isStart ? Colors.transparent : color,
-            width: 8,
-          ),
-        ),
-      ),
     );
   }
 }

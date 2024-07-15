@@ -30,11 +30,13 @@ class RecordingManager {
     await _audioRecorder.startRecorder(toFile: 'temp_audio.aac');
   }
 
-  Future<void> stopRecordingAndSend() async {
+  Future<String?> stopRecording() async {
     String? filePath = await _audioRecorder.stopRecorder();
     // await _audioRecorder.closeRecorder();
-    if (filePath != null) {
-      print(filePath);
-    }
+    // if (filePath != null) {
+    //   print(filePath);
+    // }
+
+    return filePath;
   }
 }

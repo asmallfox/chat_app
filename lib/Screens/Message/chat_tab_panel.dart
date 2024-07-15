@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_app/CustomWidget/custom_icon_button.dart';
@@ -16,7 +15,7 @@ final GlobalKey<_ChatTabPanelState> chatTabPanelKey = GlobalKey();
 class ChatTabPanel extends StatefulWidget {
   final Function(Map)? onSend;
   final Function? startAudio;
-  final Function? endAudio;
+  final Function(String)? endAudio;
   final Function? closeFocus;
   final Function? closeBlur;
   final GlobalKey audioCloseKey;
@@ -41,27 +40,21 @@ class _ChatTabPanelState extends State<ChatTabPanel>
   bool showPanel = false;
   bool isKeyboardVisible = false;
   bool isAudio = false;
-  bool _isOverlyClose = false;
-  late OverlayEntry _overlayEntry;
 
   bool showAudioPanel = false;
 
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  // final GlobalKey audioCloseKey = GlobalKey();
-
-  // final GlobalKey audioCloseKey = GlobalKey();
-
   final RecordingManager _recordingManager = RecordingManager();
+
+  File? _imageFile;
 
   void onHiddenPanel() {
     setState(() {
       showPanel = false;
     });
   }
-
-  File? _imageFile;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -106,23 +99,25 @@ class _ChatTabPanelState extends State<ChatTabPanel>
     }
   }
 
-  void _hideBottomSheet() {
-    _isOverlyClose = false;
-
-    widget.endAudio?.call();
-    _recordingManager.stopRecordingAndSend();
-    print('录音完成');
-  }
-
   void _handleAudio() async {
-    // 语音
     try {
+      await requestPermissions();
       await _recordingManager.startRecording();
       print('开始录音');
       _showBottomSheet();
     } catch (error) {
       print('录音错误: $error');
     }
+  }
+
+  void _hideBottomSheet() async {
+    String? path = await _recordingManager.stopRecording();
+
+    if (path != null) {
+      widget.endAudio?.call(path);
+    }
+
+    print('录音完成');
   }
 
   void _handleOverlap(detail) {
@@ -146,11 +141,24 @@ class _ChatTabPanelState extends State<ChatTabPanel>
     }
   }
 
+  Future<void> requestPermissions() async {
+    PermissionStatus status = await Permission.microphone.status;
+    if (status.isGranted) {
+      print('已经授权录音权限');
+    } else {
+      // 如果未授权，请求录音权限
+      if (await Permission.microphone.request().isGranted) {
+        print('已经授权录音权限');
+      } else {
+        print('授权失败');
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _overlayEntry = OverlayEntry(builder: (context) => Container());
   }
 
   @override
@@ -195,17 +203,6 @@ class _ChatTabPanelState extends State<ChatTabPanel>
                       : Icons.keyboard_voice_rounded,
                   color: Theme.of(context).colorScheme.primary,
                   onPressed: () async {
-                    Future<void> requestPermissions() async {
-                      PermissionStatus status =
-                          await Permission.microphone.request();
-                      if (!status.isGranted) {
-                        if (context.mounted) {
-                          showTipMessage(context, '未授予麦克风权限');
-                        }
-                        throw Exception('未授予麦克风权限');
-                      }
-                    }
-
                     setState(() {
                       isAudio = !isAudio;
                     });

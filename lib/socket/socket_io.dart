@@ -68,6 +68,7 @@ class SocketIOClient {
             .setPath("/socket.io")
             .enableForceNew()
             .setExtraHeaders(defaultHeaders)
+            .setTimeout(15000)
             .build(),
       );
 
@@ -94,7 +95,7 @@ class SocketIOClient {
     });
 
     socket.onConnectError((data) {
-      print("[socket] 连接失败~");
+      print("[socket] 连接失败~ $data");
     });
   }
 
@@ -114,6 +115,7 @@ class SocketIOClient {
     Function? ack,
     bool binary = false,
   }) {
+    print('[emitWithAck]: ' + eventName);
     _socket!.emitWithAck(eventName, data, ack: ack, binary: binary);
   }
 

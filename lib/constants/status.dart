@@ -18,20 +18,26 @@ const verifyStatus = {
   },
 };
 
-const messageStatus = {
-  'sending': {
-    'label': '正在发送',
-    'value': 1,
-  },
-  'success': {
-    'label': '发送成功',
-    'value': 2,
-  },
-  'fail': {
-    'label': '发送失败',
-    'value': 3,
-  }
-};
+// const messageStatus = {
+//   'sending': {
+//     'label': '正在发送',
+//     'value': 1,
+//   },
+//   'success': {
+//     'label': '发送成功',
+//     'value': 2,
+//   },
+//   'fail': {
+//     'label': '发送失败',
+//     'value': 3,
+//   }
+// };
+
+class MessageStatus {
+  static int sending = 1;
+  static int success = 2;
+  static int fail = 3;
+}
 
 const messageType = {
   'text': {
