@@ -1,20 +1,22 @@
+import 'dart:async';
 import 'dart:math';
 
-import 'package:chat_app/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class AudioIconPaint extends CustomPainter {
-  final Color color;
+  final Color actionColor;
+  final int actionIndex;
 
   AudioIconPaint({
-    this.color = Colors.black,
+    this.actionColor = Colors.black,
+    this.actionIndex = 0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint arcPaint = Paint()
-      ..color = color
+      ..color = actionIndex > 0 ? actionColor : Colors.black
       ..style = PaintingStyle.fill;
 
     canvas.drawArc(
@@ -26,20 +28,25 @@ class AudioIconPaint extends CustomPainter {
     );
 
     Paint paint_1 = Paint()
-      ..color = color
+      ..color = actionIndex > 1 ? actionColor : Colors.black
       ..strokeWidth = 3.0
       ..style = PaintingStyle.stroke;
 
     Path path_1 = Path();
-    path_1.moveTo(5, 12); // 顶部点
+    path_1.moveTo(5, 12);
     path_1.quadraticBezierTo(
       13,
       20,
       5,
       28,
-    ); // 左下角点
+    );
 
     canvas.drawPath(path_1, paint_1);
+
+    Paint paint_2 = Paint()
+      ..color = actionIndex > 2 ? actionColor : Colors.black
+      ..strokeWidth = 3.0
+      ..style = PaintingStyle.stroke;
 
     Path path_2 = Path();
     path_2.moveTo(11, 8);
@@ -50,15 +57,25 @@ class AudioIconPaint extends CustomPainter {
       32,
     );
 
-    canvas.drawPath(path_2, paint_1);
+    canvas.drawPath(path_2, paint_2);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is AudioIconPaint) {
+      return oldDelegate.actionIndex != actionIndex;
+    }
+    return true;
+  }
 }
 
 class AudioIcon extends StatefulWidget {
-  const AudioIcon({super.key});
+  final bool isPlay;
+
+  const AudioIcon({
+    super.key,
+    this.isPlay = false,
+  });
 
   @override
   State<AudioIcon> createState() => _AudioIconState();
@@ -67,23 +84,25 @@ class AudioIcon extends StatefulWidget {
 class _AudioIconState extends State<AudioIcon>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late dynamic _colorAnimation;
 
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat();
-
-    _colorAnimation = ColorTween(
-      begin: Colors.black,
-      end: Colors.red,
-    ).animate(_controller);
-
-    _controller.forward(); // Start the animation
+      duration: const Duration(milliseconds: 1500),
+    );
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (widget.isPlay) {
+          startAnimation();
+        } else {
+          // Timer(const Duration(milliseconds: 80), () {
+          // });
+          _controller.value = 0;
+        }
+      }
+    });
   }
 
   @override
@@ -92,14 +111,35 @@ class _AudioIconState extends State<AudioIcon>
     super.dispose();
   }
 
+  void startAnimation() {
+    _controller.reset(); // 重置动画的状态
+    _controller.forward(); // 启动动画
+  }
+
   @override
   Widget build(BuildContext context) {
-    print('动画颜色： ${_colorAnimation.value}');
-    print('xxxxxx');
-    return CustomPaint(
-      size: const Size(40, 40),
-      painter: AudioIconPaint(
-        color: _colorAnimation.value,
+    return ValueListenableBuilder(
+      valueListenable: ValueNotifier(widget.isPlay),
+      builder: (content, value, child) {
+        if (value) {
+          startAnimation();
+        }
+        return child!;
+      },
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (BuildContext content, Widget? child) {
+          int index = (_controller.value * 10 / 3).floor();
+
+          return CustomPaint(
+            size: const Size(38, 38),
+            painter: AudioIconPaint(
+              // actionColor: Theme.of(context).colorScheme.primary,
+              actionColor: Colors.red,
+              actionIndex: index,
+            ),
+          );
+        },
       ),
     );
   }

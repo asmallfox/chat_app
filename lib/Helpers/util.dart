@@ -10,11 +10,10 @@ dynamic listFind(List list, bool Function(dynamic) fn) {
 }
 
 String getImageUrl(String url) {
+  print(url);
   if (url.startsWith(RegExp(r'https'))) {
     return url;
-  }
-
-  if (url.startsWith(RegExp(r'http://localhost'))) {
+  } else if (url.startsWith(RegExp(r'http://localhost'))) {
     return url.replaceAll(RegExp(r'http://localhost'), 'http://10.0.2.2');
   } else {
     return '$serverBaseUrl/$url';

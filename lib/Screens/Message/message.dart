@@ -267,7 +267,7 @@ class _ChatMessageState extends State<ChatMessage>
                             );
                           },
                         ),
-                      )
+                      ),
               ],
             );
           },

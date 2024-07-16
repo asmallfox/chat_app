@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chat_app/Helpers/audio_serice.dart';
 import 'package:chat_app/Helpers/logging.dart';
 import 'package:chat_app/Helpers/route_handler.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
@@ -64,6 +65,7 @@ Future<void> startService() async {
   // await initializeLogging();
 
   await SocketIOClient.getInstance();
+  await RecordingManager.getInstance();
 }
 
 Future<void> openHive(String boxName, {bool limit = false}) async {

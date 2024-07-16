@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/Helpers/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class CustomImage extends StatelessWidget {
   final double? width;
@@ -16,10 +19,20 @@ class CustomImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl: getImageUrl(imageUrl),
-      width: width,
-      height: height,
-    );
+    bool isLocalImage =
+        imageUrl.startsWith(r'/data/user/0/com.example.chat_app/app_flutter/');
+
+    return isLocalImage
+        ? Image.file(
+            File(imageUrl),
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+          )
+        : CachedNetworkImage(
+            imageUrl: getImageUrl(imageUrl),
+            width: width,
+            height: height,
+          );
   }
 }

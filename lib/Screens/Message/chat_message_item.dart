@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_app/CustomWidget/audio_icon.dart';
 import 'package:chat_app/CustomWidget/avatar.dart';
+import 'package:chat_app/CustomWidget/custom_image.dart';
+import 'package:chat_app/Helpers/audio_serice.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:flutter/material.dart';
@@ -23,22 +27,132 @@ class ChatMessageItem extends StatefulWidget {
 class _ChatMessageItemState extends State<ChatMessageItem> {
   final Map userInfo = LocalStorage.getUserInfo();
 
-  final FlutterSoundPlayer _audioPlayer = FlutterSoundPlayer();
+  // final AudioPlayer _audioPlayer = AudioPlayer();
+
+  String audioLength = '';
+
+  bool isPlayAudio = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      child: _getMessageWidget(context),
+    );
+  }
+
+  Future<void> _initializePlayer() async {
+    try {
+      AudioPlayer _audioPlayer = AudioPlayer();
+      await _audioPlayer.setSourceUrl(widget.item['message']);
+
+      final audioDuration = await _audioPlayer.getDuration();
+
+      if (audioDuration != null) {
+        setState(() {
+          audioLength = getAudioLength(audioDuration);
+        });
+      }
+    } catch (e) {
+      print('Failed to initialize player: $e');
+    }
+  }
 
   Widget _getMessageWidget(BuildContext context) {
     bool isCurrentUser = widget.item['from'] == userInfo['id'];
 
     switch (widget.item['type']) {
-      case 1:
+      case 2:
+        return Container(
+          color: Colors.pink,
+          width: 100,
+          child: CustomImage(
+            imageUrl: widget.item['message'],
+          ),
+        );
+      case 3:
+        return GestureDetector(
+          onTap: () {
+            print('播放语音');
+
+            if (RecordingManager.audioPlayer.isPlaying) {
+              RecordingManager.audioPlayer.audioPlayerFinished(2);
+              RecordingManager.audioPlayer.stopPlayer();
+            }
+
+            RecordingManager.audioPlayer.startPlayer(
+              fromURI: widget.item['message'],
+              codec: Codec.mp3,
+              whenFinished: () {
+                setState(() {
+                  isPlayAudio = false;
+                });
+              },
+            );
+
+            setState(() {
+              isPlayAudio = true;
+            });
+          },
+          child: Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  spreadRadius: 14,
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              textDirection:
+                  isCurrentUser ? TextDirection.rtl : TextDirection.ltr,
+              children: [
+                Transform.scale(
+                  scaleX: -1,
+                  child: AudioIcon(
+                    isPlay: isPlayAudio,
+                  ),
+                ),
+                Text(
+                  audioLength.toString(),
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      case 4:
+        return Text('视频占位');
+      case 5:
+        return Text('文件占位');
+      default:
+        // case 1:
         return Stack(
           children: [
             Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 15,
-              ),
               padding: const EdgeInsets.symmetric(
                 vertical: 6,
-                horizontal: 10,
+                horizontal: 15,
               ),
               constraints: const BoxConstraints(
                 minHeight: 40,
@@ -79,61 +193,7 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
             ),
           ],
         );
-      case 2:
-        return Avatar(
-          imageUrl: widget.item['message'],
-        );
-      case 3:
-        return GestureDetector(
-          onTap: () {
-            print('播放语音');
-            _audioPlayer.startPlayer(
-                fromURI: widget.item['message'], codec: Codec.mp3);
-          },
-          child: Container(
-            height: 40,
-            margin: const EdgeInsets.symmetric(horizontal: 15),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  spreadRadius: 14,
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: AudioIcon(),
-          ),
-        );
-      case 4:
-        return Text('视频占位');
-      case 5:
-        return Text('文件占位');
     }
-
-    return Text('xxx');
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _audioPlayer.openPlayer();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _audioPlayer.closePlayer();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _getMessageWidget(context);
   }
 }
 
@@ -172,4 +232,18 @@ class MessageTriangle extends StatelessWidget {
       ),
     );
   }
+}
+
+String getAudioLength(Duration duration) {
+  int inHours = duration.inHours;
+  int inMinutes = duration.inMinutes;
+  int inSeconds = duration.inSeconds;
+
+  String str = '';
+
+  if (inHours != 0) str += "$inHours'";
+  if (inMinutes != 0) str += "$inMinutes\"";
+  if (inSeconds != 0) str += "$inSeconds\"";
+
+  return str;
 }

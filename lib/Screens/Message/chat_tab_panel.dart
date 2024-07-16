@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/Helpers/audio_serice.dart';
-import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Helpers/system_utils.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 final GlobalKey<_ChatTabPanelState> chatTabPanelKey = GlobalKey();
@@ -46,10 +47,6 @@ class _ChatTabPanelState extends State<ChatTabPanel>
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  final RecordingManager _recordingManager = RecordingManager();
-
-  File? _imageFile;
-
   void onHiddenPanel() {
     setState(() {
       showPanel = false;
@@ -59,11 +56,8 @@ class _ChatTabPanelState extends State<ChatTabPanel>
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+      sendImage(pickedFile.path);
     }
   }
 
@@ -72,25 +66,37 @@ class _ChatTabPanelState extends State<ChatTabPanel>
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
-      // setState(() {
-      //   _imageFile = File(pickedFile.path);
-      // });
-      _imageFile = File(pickedFile.path);
-
+      // File imageFile = File(pickedFile.path);
       print('相机拍照：${pickedFile.path}');
-      print(pickedFile);
-
       if (widget.onSend != null) {
-        List<int> imageBytes = _imageFile!.readAsBytesSync();
+        // List<int> imageBytes = imageFile.readAsBytesSync();
         // String base64Image = base64Encode(imageBytes);
 
-        widget.onSend!({
-          'content': pickedFile.path,
-          'file': imageBytes,
-          'type': messageType['image']?['value']
-        });
+        sendImage(pickedFile.path);
       }
     }
+  }
+
+  void sendImage(String path) async {
+    File imageFile = File(path);
+
+    final directory = await getApplicationDocumentsDirectory();
+
+    List<String> pList = path.split('/');
+
+    String extension = pList.last.split('.')[1];
+
+    File cacheFile = File('${directory.path}/${DateTime.now().millisecondsSinceEpoch}.${extension}');
+
+    await cacheFile.writeAsBytes(imageFile.readAsBytesSync());
+
+    // 缓存图片到本地
+    print('缓存图片的路径：${cacheFile.path}');
+    widget.onSend!({
+      'content': cacheFile.path,
+      'file': cacheFile.readAsBytesSync(),
+      'type': messageType['image']?['value']
+    });
   }
 
   void _showBottomSheet() {
@@ -102,7 +108,7 @@ class _ChatTabPanelState extends State<ChatTabPanel>
   void _handleAudio() async {
     try {
       await requestPermissions();
-      await _recordingManager.startRecording();
+      await RecordingManager.startRecording();
       print('开始录音');
       _showBottomSheet();
     } catch (error) {
@@ -111,7 +117,7 @@ class _ChatTabPanelState extends State<ChatTabPanel>
   }
 
   void _hideBottomSheet() async {
-    String? path = await _recordingManager.stopRecording();
+    String? path = await RecordingManager.stopRecording();
 
     if (path != null) {
       widget.endAudio?.call(path);

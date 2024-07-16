@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class Chat extends StatefulWidget {
@@ -48,6 +49,38 @@ class _ChatState extends State<Chat> {
   bool showAudioPanel = false;
   bool isOverlyClose = false;
 
+  void _handleAudioSend(String path) async {
+    setState(() {
+      showAudioPanel = false;
+    });
+    isOverlyClose = false;
+
+    try {
+      // 获取应用程序的本地存储目录
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      String appDocPath = appDocDir.path;
+
+      // 生成一个唯一的文件名
+      String filePath =
+          '$appDocPath/local-${DateTime.now().millisecondsSinceEpoch}.aac';
+
+      File file = File(filePath);
+
+      File audioFile = File(path);
+
+      await file.writeAsBytes(audioFile.readAsBytesSync());
+
+      sendMessage({
+        'type': 3,
+        'content': filePath,
+        'file': file,
+      });
+      print('语音数据已保存到: $filePath');
+    } catch (error) {
+      print('语音缓存失败: $error');
+    }
+  }
+
   Future<void> sendMessage(Map params) async {
     Box userBox = LocalStorage.getUserBox();
 
@@ -63,14 +96,15 @@ class _ChatState extends State<Chat> {
       'type': params['type'],
     };
 
-    print('xxxxxxxxxxxxxxxx $data');
-
     Map msg = {
       ...data,
-      // 'status': MessageStatus['sending'],
       'status': MessageStatus.sending,
       'created_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
     };
+
+    if (msg.containsKey('file')) {
+      msg.remove('file');
+    }
 
     messageList.add(msg);
     chatMessage.add(msg);
@@ -96,9 +130,9 @@ class _ChatState extends State<Chat> {
     jumpTo(_scrollController);
 
     Future<void> saveData() async {
-      // await userBox.put('chatList', chatList);
-      // await userBox.put('friends', friends);
-      // await userBox.put('chatMessage', chatMessage);
+      await userBox.put('chatList', chatList);
+      await userBox.put('friends', friends);
+      await userBox.put('chatMessage', chatMessage);
     }
 
     final timer = Timer(const Duration(seconds: 15), () async {
@@ -109,6 +143,10 @@ class _ChatState extends State<Chat> {
         ...msg,
         'status': MessageStatus.fail,
       };
+
+      if (data.containsKey('file')) {
+        data.remove('file');
+      }
 
       messageList.add(data);
       chatMessage.add(data);
@@ -127,7 +165,7 @@ class _ChatState extends State<Chat> {
         ...row,
         'status': MessageStatus.success,
       };
-
+      
       messageList.add(data);
       chatMessage.add(data);
 
@@ -210,7 +248,7 @@ class _ChatState extends State<Chat> {
                           controller: _scrollController,
                           itemCount: messageList.length,
                           separatorBuilder: (context, index) {
-                            return const SizedBox(height: 15);
+                            return const SizedBox(height: 20);
                           },
                           itemBuilder: (context, index) {
                             var item = messageList[index];
@@ -280,7 +318,6 @@ class _ChatState extends State<Chat> {
                                                 List chatList = await userBox
                                                     .get('chatList',
                                                         defaultValue: []);
-                                                // List chatMessage = await userBox.get('chatMessage', defaultValue: []);
 
                                                 Map currentFriend = listFind(
                                                   friends,
@@ -346,17 +383,7 @@ class _ChatState extends State<Chat> {
                             showAudioPanel = true;
                           });
                         },
-                        endAudio: (String path) {
-                          setState(() {
-                            showAudioPanel = false;
-                          });
-                          isOverlyClose = false;
-                          sendMessage({
-                            'type': 3,
-                            'content': path,
-                            'file': File(path),
-                          });
-                        },
+                        endAudio: _handleAudioSend,
                         closeBlur: () {
                           setState(() {
                             isOverlyClose = false;
