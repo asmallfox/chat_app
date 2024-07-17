@@ -13,7 +13,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ChatMessage extends StatefulWidget {
@@ -28,7 +27,6 @@ class _ChatMessageState extends State<ChatMessage>
   Box userBox = LocalStorage.getUserBox();
 
   late List chatList = userBox.get('chatList', defaultValue: []);
-  bool showMenu = true;
 
   @override
   Widget build(BuildContext context) {

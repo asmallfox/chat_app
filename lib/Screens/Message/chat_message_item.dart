@@ -1,16 +1,10 @@
-import 'dart:io';
-import 'dart:math';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_app/CustomWidget/audio_icon.dart';
-import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/custom_image.dart';
 import 'package:chat_app/Helpers/audio_serice.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
-import 'package:chat_app/constants/status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:flutter_sound/public/flutter_sound_player.dart';
 
 class ChatMessageItem extends StatefulWidget {
   final Map item;
@@ -27,8 +21,6 @@ class ChatMessageItem extends StatefulWidget {
 class _ChatMessageItemState extends State<ChatMessageItem> {
   final Map userInfo = LocalStorage.getUserInfo();
 
-  // final AudioPlayer _audioPlayer = AudioPlayer();
-
   String audioLength = '';
 
   bool isPlayAudio = false;
@@ -36,7 +28,9 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
   @override
   void initState() {
     super.initState();
-    _initializePlayer();
+    if (widget.item['type'] == 3) {
+      _initializePlayer();
+    }
   }
 
   @override
@@ -48,7 +42,117 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15),
-      child: _getMessageWidget(context),
+      child: GestureDetector(
+        // onLongPressStart: (details) {
+        //   print(details.globalPosition);
+        // },
+        onLongPressStart: (details) {
+          RenderObject contextInfo = context.findRenderObject() as RenderObject;
+
+          Rect rect = contextInfo.paintBounds;
+          print('长按 $rect');
+          print('当前位置：${details.globalPosition}');
+
+          print(contextInfo.paintBounds);
+
+          showGeneralDialog(
+            context: context,
+            barrierLabel: '',
+            barrierColor: Colors.black.withOpacity(0.0),
+            pageBuilder: (context, _, __) {
+              return GestureDetector(
+                onTap: () {
+                  print('点击');
+                  Navigator.of(context).pop();
+                },
+                child: Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      color: Colors.transparent,
+                    ),
+                    Positioned(
+                      left: details.globalPosition.dx,
+                      top: details.globalPosition.dy,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF1e1e1e),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconTheme(
+                          data: const IconThemeData(
+                            color: Colors.white,
+                            size: 36.0,
+                            weight: 0.5,
+                          ),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        content: const Text('确定删除？'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text('取消'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text('删除'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                              const SizedBox(
+                                width: 15,
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  print('复制');
+                                },
+                                icon: const Icon(Icons.copy_rounded),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+
+          // showMenu(
+          //   context: context,
+          //   position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
+          //   items: <PopupMenuEntry>[
+          //     PopupMenuItem(
+          //       value: 1,
+          //       onTap: () {
+          //         print('删除');
+          //       },
+          //       child: Text('删除'),
+          //     ),
+          //   ],
+          // );
+        },
+        child: _getMessageWidget(context),
+      ),
     );
   }
 
@@ -74,11 +178,11 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
 
     switch (widget.item['type']) {
       case 2:
-        return Container(
-          color: Colors.pink,
-          width: 100,
+        return FractionallySizedBox(
+          widthFactor: 0.7,
           child: CustomImage(
             imageUrl: widget.item['message'],
+            fit: BoxFit.fitHeight,
           ),
         );
       case 3:
@@ -173,7 +277,7 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
                 ],
               ),
               child: Text(
-                widget.item['message'],
+                widget.item['message'] ?? 'null',
                 style: TextStyle(
                   fontSize: 18,
                   color: isCurrentUser ? Colors.white : Colors.black,

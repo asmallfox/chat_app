@@ -32,6 +32,9 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = true;
     });
+
+    final ctx = context;
+
     try {
       if (_usernameController.text.isEmpty) throw '请输入账号！';
       if (_passwordController.text.isEmpty) throw '请输入密码！';
@@ -41,11 +44,10 @@ class _LoginPageState extends State<LoginPage> {
         'password': _passwordController.text
       };
 
+      final navigator = Navigator.of(context);
+
       final res = await loginRequest(formData);
       Map<String, dynamic> user = res.data;
-
-      // await Hive.box('settings').put('token', user['token']);
-      // await Hive.box('settings').put('user', user);
 
       Box settingsBox = Hive.box('settings');
 
@@ -61,21 +63,22 @@ class _LoginPageState extends State<LoginPage> {
         users.add(userId);
       }
 
+      String userBoxName = 'user_$userId';
+
       await settingsBox.put('users', users);
 
-      String userBoxName = 'user_$userId';
       await Hive.openBox(userBoxName);
       await Hive.box(userBoxName).put('id', userId);
-
-      if (!context.mounted) return;
-
       await SocketIOClient.getInstance();
 
-      Navigator.of(context).pushReplacement(
+      navigator.pushReplacement(
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
     } catch (err) {
-      showTipMessage(context, err as String);
+      if (context.mounted) {
+        showTipMessage(context, err.toString());
+      }
+
       Logger.root.info(err);
     } finally {
       setState(() {

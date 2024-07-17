@@ -47,6 +47,7 @@ class ChatMessage {
 
 void chatMessageSocket(IO.Socket socket) {
   socket.on('chat_message', (data) async {
+    print('[新消息]：$data');
     final dataList = data as List;
     final messages = dataList.first is List ? dataList.first : [dataList.first];
     final ack = dataList.last as Function;

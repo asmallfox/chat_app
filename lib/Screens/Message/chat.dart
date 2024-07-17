@@ -12,7 +12,6 @@ import 'package:chat_app/Screens/Message/chat_tab_panel.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
-import 'package:chat_app/theme/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,8 +35,7 @@ class Chat extends StatefulWidget {
 
 class _ChatState extends State<Chat> {
   late List messageList;
-  late ScrollController _scrollController;
-  late StreamSubscription _chatListWatch;
+  late final ScrollController _scrollController = ScrollController();
 
   final Map userInfo = LocalStorage.getUserInfo();
   final Box userBox = LocalStorage.getUserBox();
@@ -48,6 +46,24 @@ class _ChatState extends State<Chat> {
   bool showSendButton = false;
   bool showAudioPanel = false;
   bool isOverlyClose = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // 初始化
+  void _initialize() {
+    messageList = widget.chatItem['messages'] ?? [];
+    // _jumpTo();
+  }
 
   void _handleAudioSend(String path) async {
     setState(() {
@@ -91,7 +107,7 @@ class _ChatState extends State<Chat> {
     Map data = {
       'to': widget.chatItem['friendId'],
       'from': userInfo['id'],
-      'message': params['content'],
+      'message': params['content'] ?? params['message'],
       'file': params['file'],
       'type': params['type'],
     };
@@ -127,8 +143,6 @@ class _ChatState extends State<Chat> {
       currentChat['messages'] = messageList;
     }
 
-    jumpTo(_scrollController);
-
     Future<void> saveData() async {
       await userBox.put('chatList', chatList);
       await userBox.put('friends', friends);
@@ -153,7 +167,9 @@ class _ChatState extends State<Chat> {
 
       currentFriend['messages'] = messageList;
       await saveData();
-      setState(() {});
+      // setState(() {
+      //   _jumpTo();
+      // });
     });
 
     SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
@@ -165,36 +181,62 @@ class _ChatState extends State<Chat> {
         ...row,
         'status': MessageStatus.success,
       };
-      
+
       messageList.add(data);
       chatMessage.add(data);
 
       currentFriend['messages'] = messageList;
       await saveData();
-      setState(() {});
+      // setState(() {
+      //   _jumpTo();
+      // });
     });
+
     await saveData();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    messageList = widget.chatItem['messages'] ?? [];
-    _scrollController = ScrollController();
-    _chatListWatch = userBox.watch(key: 'chatList').listen((event) {
-      setState(() {
-        jumpTo(_scrollController);
-      });
+  void deleteChatRecord(int index) async {
+    setState(() {
+      messageList.removeAt(index);
     });
-    jumpTo(_scrollController);
+
+    Box userBox = LocalStorage.getUserBox();
+
+    List friends = await userBox.get('friends', defaultValue: []);
+    List chatList = await userBox.get('chatList', defaultValue: []);
+
+    Map currentFriend = listFind(
+      friends,
+      (item) => item['friendId'] == widget.chatItem['friendId'],
+    );
+
+    Map? currentChat = listFind(
+      chatList,
+      (item) => item['friendId'] == widget.chatItem['friendId'],
+    );
+
+    currentFriend['messages'] = messageList;
+
+    if (currentChat != null) {
+      currentChat['messages'] = messageList;
+    }
+
+    await Hive.box('chat').put('friends', friends);
+    await Hive.box('chat').put('chatList', chatList);
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _chatListWatch.cancel();
-    super.dispose();
-  }
+  // void _jumpTo() {
+  //   Future.delayed(
+  //     const Duration(milliseconds: 80),
+  //     () {
+  //       _scrollController.animateTo(
+  //         _scrollController.position.maxScrollExtent,
+  //         duration: const Duration(milliseconds: 80),
+  //         curve: Curves.linear,
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -236,140 +278,57 @@ class _ChatState extends State<Chat> {
             body: ValueListenableBuilder(
               valueListenable: userBox.listenable(keys: ['chatList']),
               builder: (context, box, _) {
+                final list = messageList.reversed.toList();
+
                 return Container(
                   color: Colors.white,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: ListView.separated(
-                          padding: const EdgeInsets.all(20),
-                          physics: const BouncingScrollPhysics(),
-                          controller: _scrollController,
-                          itemCount: messageList.length,
-                          separatorBuilder: (context, index) {
-                            return const SizedBox(height: 20);
-                          },
-                          itemBuilder: (context, index) {
-                            var item = messageList[index];
-                            bool isCurrentUser = item['from'] == userInfo['id'];
-                            String avatar = isCurrentUser
-                                ? userInfo['avatar']
-                                : widget.chatItem['avatar'];
-
-                            int menuItemIndex = 1;
-
-                            return Column(
-                              key: ValueKey(index),
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  textDirection: isCurrentUser
-                                      ? TextDirection.rtl
-                                      : TextDirection.ltr,
-                                  children: [
-                                    Avatar(
-                                      imageUrl: avatar,
-                                      size: 42,
-                                      rounded: true,
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: ListView.separated(
+                            reverse: true,
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(20),
+                            physics: const BouncingScrollPhysics(),
+                            controller: _scrollController,
+                            itemCount: list.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 20),
+                            itemBuilder: (context, index) {
+                              final item = list[index];
+                              bool isCurrentUser = item['from'] == userInfo['id'];
+                              String avatar = isCurrentUser
+                                  ? userInfo['avatar']
+                                  : widget.chatItem['avatar'];
+                          
+                              return Row(
+                                key: ValueKey(index),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                textDirection: isCurrentUser
+                                    ? TextDirection.rtl
+                                    : TextDirection.ltr,
+                                children: [
+                                  Avatar(
+                                    imageUrl: avatar,
+                                    size: 42,
+                                    rounded: true,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      alignment: isCurrentUser
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      child: ChatMessageItem(item: item),
                                     ),
-                                    Expanded(
-                                      child: Align(
-                                        alignment: isCurrentUser
-                                            ? Alignment.centerRight
-                                            : Alignment.centerLeft,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Visibility(
-                                              visible: item['status'] == null ||
-                                                  item['status'] !=
-                                                      MessageStatus.success,
-                                              child: item['status'] ==
-                                                      MessageStatus.sending
-                                                  ? const SizedBox(
-                                                      width: 20,
-                                                      height: 20,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        strokeWidth: 3,
-                                                      ),
-                                                    )
-                                                  : GestureDetector(
-                                                      child: const Icon(
-                                                        Icons.error_outline,
-                                                        color: AppColors
-                                                            .errorColor,
-                                                      ),
-                                                    ),
-                                            ),
-                                            PopupMenuButton(
-                                              initialValue: menuItemIndex,
-                                              onCanceled: () async {
-                                                messageList.removeAt(index);
-
-                                                Box userBox =
-                                                    LocalStorage.getUserBox();
-
-                                                List friends = await userBox
-                                                    .get('friends',
-                                                        defaultValue: []);
-                                                List chatList = await userBox
-                                                    .get('chatList',
-                                                        defaultValue: []);
-
-                                                Map currentFriend = listFind(
-                                                  friends,
-                                                  (item) =>
-                                                      item['friendId'] ==
-                                                      widget
-                                                          .chatItem['friendId'],
-                                                );
-
-                                                Map? currentChat = listFind(
-                                                  chatList,
-                                                  (item) =>
-                                                      item['friendId'] ==
-                                                      widget
-                                                          .chatItem['friendId'],
-                                                );
-
-                                                currentFriend['messages'] =
-                                                    messageList;
-
-                                                if (currentChat != null) {
-                                                  currentChat['messages'] =
-                                                      messageList;
-                                                }
-                                                await Hive.box('chat')
-                                                    .put('friends', friends);
-                                                await Hive.box('chat')
-                                                    .put('chatList', chatList);
-
-                                                setState(() {});
-                                              },
-                                              itemBuilder: (context) {
-                                                return <PopupMenuEntry>[
-                                                  const PopupMenuItem(
-                                                    child: Text('删除'),
-                                                  ),
-                                                ];
-                                              },
-                                              child: ChatMessageItem(
-                                                item: item,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 36)
-                                  ],
-                                ),
-                              ],
-                            );
-                          },
+                                  ),
+                                  const SizedBox(width: 36)
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                       ChatTabPanel(
@@ -484,17 +443,4 @@ class _ChatState extends State<Chat> {
       ],
     );
   }
-}
-
-void jumpTo(ScrollController controller) {
-  Future.delayed(
-    const Duration(milliseconds: 0),
-    () {
-      controller.animateTo(
-        controller.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 80),
-        curve: Curves.linear,
-      );
-    },
-  );
 }
