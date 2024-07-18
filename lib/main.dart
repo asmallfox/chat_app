@@ -8,8 +8,10 @@ import 'package:chat_app/provider/provider.dart';
 import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
 import 'package:chat_app/constants/constants.dart';
+import 'package:chat_app/test/notification_utils.dart';
 import 'package:chat_app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:logging/logging.dart';
@@ -20,6 +22,8 @@ void main() async {
   // 返回实现 WidgetsBinding 的绑定的实例。
   // 如果尚未初始化绑定，则使用 WidgetsFlutterBinding 类创建和初始化绑定。
   WidgetsFlutterBinding.ensureInitialized();
+  await notification.init();
+
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await Hive.initFlutter('ChatApp/Database');
   } else if (Platform.isIOS) {

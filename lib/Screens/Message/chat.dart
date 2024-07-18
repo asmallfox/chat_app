@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_app/Screens/Message/chat_message_item.dart';
@@ -12,6 +13,7 @@ import 'package:chat_app/Screens/Message/chat_tab_panel.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
+import 'package:chat_app/test/notification_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +21,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class Chat extends StatefulWidget {
@@ -258,9 +261,18 @@ class _ChatState extends State<Chat> {
               title: Text(widget.chatItem['nickname'] ?? 'unknown'),
               actions: [
                 IconButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // ...
                     print('语音');
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder: (context) =>
+                    //         ChatAudioPage(chatItem: widget.chatItem),
+                    //   ),
+                    // );
+                    
+                    notification.send();
+
                   },
                   icon: const Icon(Icons.phone),
                   color: Theme.of(context).colorScheme.primary,
@@ -299,11 +311,12 @@ class _ChatState extends State<Chat> {
                                 const SizedBox(height: 20),
                             itemBuilder: (context, index) {
                               final item = list[index];
-                              bool isCurrentUser = item['from'] == userInfo['id'];
+                              bool isCurrentUser =
+                                  item['from'] == userInfo['id'];
                               String avatar = isCurrentUser
                                   ? userInfo['avatar']
                                   : widget.chatItem['avatar'];
-                          
+
                               return Row(
                                 key: ValueKey(index),
                                 crossAxisAlignment: CrossAxisAlignment.start,

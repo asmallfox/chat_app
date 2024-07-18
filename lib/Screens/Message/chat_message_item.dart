@@ -43,17 +43,27 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15),
       child: GestureDetector(
-        // onLongPressStart: (details) {
-        //   print(details.globalPosition);
-        // },
-        onLongPressStart: (details) {
-          RenderObject contextInfo = context.findRenderObject() as RenderObject;
+        onTap: () {
+          RenderObject renderObject =
+              context.findRenderObject() as RenderObject;
 
-          Rect rect = contextInfo.paintBounds;
-          print('长按 $rect');
-          print('当前位置：${details.globalPosition}');
+          Rect paintBounds = renderObject.paintBounds;
 
-          print(contextInfo.paintBounds);
+          final translation =
+              renderObject.getTransformTo(null).getTranslation();
+          Size size = paintBounds.size;
+
+          double menuItemWidth = 40;
+          double menuItemHeight = 40;
+
+          double right = translation.x +
+              size.width -
+              size.width / 2 -
+              8 -
+              (menuItemWidth * 2 / 2) /* 图标大小 */;
+          double bottom = translation.y + size.height + 10;
+
+          double boxCenterX = right + (menuItemWidth * 2 / 2) - 2;
 
           showGeneralDialog(
             context: context,
@@ -62,7 +72,6 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
             pageBuilder: (context, _, __) {
               return GestureDetector(
                 onTap: () {
-                  print('点击');
                   Navigator.of(context).pop();
                 },
                 child: Stack(
@@ -73,13 +82,13 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
                       color: Colors.transparent,
                     ),
                     Positioned(
-                      left: details.globalPosition.dx,
-                      top: details.globalPosition.dy,
+                      left: right,
+                      top: bottom,
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Color(0xFF1e1e1e),
-                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFF1E1E1E),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: IconTheme(
                           data: const IconThemeData(
@@ -88,8 +97,11 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
                             weight: 0.5,
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
+                              ChatBubbleMenuItem(
+                                width: 40,
+                                height: 40,
                                 onPressed: () {
                                   showDialog(
                                     context: context,
@@ -118,9 +130,11 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
                                 icon: const Icon(Icons.delete_outline),
                               ),
                               const SizedBox(
-                                width: 15,
+                                width: 5,
                               ),
-                              IconButton(
+                              ChatBubbleMenuItem(
+                                width: 40,
+                                height: 40,
                                 onPressed: () {
                                   print('复制');
                                 },
@@ -131,25 +145,45 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
                         ),
                       ),
                     ),
+                    Positioned(
+                      left: boxCenterX,
+                      top: bottom - 18,
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Transform.scale(
+                          scaleX: -1,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.transparent,
+                              border: BorderDirectional(
+                                top: BorderSide(
+                                  color: Colors.transparent,
+                                  width: 8,
+                                ),
+                                bottom: BorderSide(
+                                  color:  Color(0xFF1E1E1E),
+                                  width: 8,
+                                ),
+                                start: BorderSide(
+                                  color: Colors.transparent,
+                                  width: 8,
+                                ),
+                                end: BorderSide(
+                                  color: Colors.transparent,
+                                  width: 8,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );
             },
           );
-
-          // showMenu(
-          //   context: context,
-          //   position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
-          //   items: <PopupMenuEntry>[
-          //     PopupMenuItem(
-          //       value: 1,
-          //       onTap: () {
-          //         print('删除');
-          //       },
-          //       child: Text('删除'),
-          //     ),
-          //   ],
-          // );
         },
         child: _getMessageWidget(context),
       ),
@@ -350,4 +384,39 @@ String getAudioLength(Duration duration) {
   if (inSeconds != 0) str += "$inSeconds\"";
 
   return str;
+}
+
+class ChatBubbleMenuItem extends StatelessWidget {
+  final VoidCallback onPressed;
+  final Icon icon;
+  final double width;
+  final double height;
+  final double iconSize;
+
+  const ChatBubbleMenuItem({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    required this.width,
+    required this.height,
+    this.iconSize = 32,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints(
+          maxWidth: width,
+          minHeight: height,
+        ),
+        onPressed: onPressed,
+        icon: icon,
+        iconSize: iconSize,
+      ),
+    );
+  }
 }
