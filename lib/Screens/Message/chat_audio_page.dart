@@ -1,7 +1,11 @@
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
+import 'package:chat_app/Helpers/local_storage.dart';
+import 'package:chat_app/socket/socket_io.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class ChatAudioPage extends StatefulWidget {
   final Map chatItem;
@@ -18,6 +22,70 @@ class ChatAudioPage extends StatefulWidget {
 class _ChatAudioPageState extends State<ChatAudioPage> {
   bool openSpeaker = false;
   bool openMic = true;
+
+  late final user = LocalStorage.getUserInfo();
+
+  late RTCPeerConnection _peerConnection;
+  late MediaStream _localStream;
+  late MediaStream _remoteStream;
+
+  @override
+  void initState() {
+    super.initState();
+    initWebRTC();
+  }
+
+  void initWebRTC() async {
+    // 初始化 PeerConnection configuration
+    _peerConnection = await createPeerConnection({}, {});
+    // 获取本地媒体流
+    _localStream = await navigator.mediaDevices.getUserMedia({
+      'audio': true,
+      'video': true,
+    });
+
+    // 添加本地媒体流到 PeerConnection
+    _localStream.getTracks().forEach((track) {
+      _peerConnection.addTrack(track, _localStream);
+    });
+
+    // 设置远端流监听器
+    _peerConnection.onTrack = (event) {
+      if (event.track.kind == 'audio') {
+        setState(() {
+          _remoteStream = event.streams[0];
+        });
+      }
+    };
+
+    // 创建 Offer
+    RTCSessionDescription offer = await _peerConnection.createOffer({});
+    await _peerConnection.setLocalDescription(offer);
+
+    // 通知另一客户端
+    SocketIOClient.emitWithAck(
+      'offer',
+      {
+        'from': user['id'],
+        'to': widget.chatItem['friendId'] ?? widget.chatItem['id'],
+        'offer': offer,
+        'type': 3,
+      },
+      ack: (res) {
+        print(res);
+      },
+    );
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    _localStream?.dispose();
+    _remoteStream?.dispose();
+    _peerConnection?.close();
+  }
+
 
   @override
   Widget build(BuildContext context) {
