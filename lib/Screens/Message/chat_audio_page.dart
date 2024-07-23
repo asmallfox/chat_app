@@ -68,16 +68,19 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
 
     // 通知另一客户端
     SocketIOClient.emitWithAck(
-      'offer',
-      {
-        'from': user['id'],
-        'to': widget.chatItem['friendId'] ?? widget.chatItem['id'],
-        'offer': offer,
-        'type': 3,
-      },
-      ack: (res) {
-        print(res);
-      },
+        'offer',
+        {
+          'from': user['id'],
+          'to': widget.chatItem['friendId'] ?? widget.chatItem['id'],
+          'offer': {
+            'sdp': offer.sdp,
+            'type': offer.type,
+          },
+          'type': 3,
+        },
+        ack: (data) {
+          print('xxxxxxxxxxxxxxxxxxxxxxxxxx $data');
+        }
     );
   }
 
@@ -203,7 +206,7 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                           },
                           style: ButtonStyle(
                               backgroundColor:
-                                  WidgetStateProperty.all(Colors.red)),
+                              WidgetStateProperty.all(Colors.red)),
                           child: const Text(
                             '挂断',
                             style: TextStyle(
@@ -217,7 +220,7 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                           },
                           style: ButtonStyle(
                               backgroundColor:
-                                  WidgetStateProperty.all(Colors.green)),
+                              WidgetStateProperty.all(Colors.green)),
                           child: const Text(
                             '接听',
                             style: TextStyle(

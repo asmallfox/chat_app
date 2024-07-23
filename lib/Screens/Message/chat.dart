@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chat_app/Screens/Message/chat_audio_page.dart';
 import 'package:chat_app/Screens/Message/chat_message_item.dart';
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
@@ -264,14 +265,14 @@ class _ChatState extends State<Chat> {
                   onPressed: () async {
                     // ...
                     print('语音');
-                    // Navigator.of(context).push(
-                    //   MaterialPageRoute(
-                    //     builder: (context) =>
-                    //         ChatAudioPage(chatItem: widget.chatItem),
-                    //   ),
-                    // );
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ChatAudioPage(chatItem: widget.chatItem),
+                      ),
+                    );
                     
-                    notification.send();
+                    // notification.send();
 
                   },
                   icon: const Icon(Icons.phone),
