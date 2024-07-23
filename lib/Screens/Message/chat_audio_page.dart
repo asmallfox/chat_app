@@ -37,7 +37,7 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
 
   void initWebRTC() async {
     // 初始化 PeerConnection configuration
-    _peerConnection = await createPeerConnection({}, {});
+    _peerConnection = await createPeerConnection({});
     // 获取本地媒体流
     _localStream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
@@ -56,6 +56,10 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
           _remoteStream = event.streams[0];
         });
       }
+    };
+
+    _peerConnection.onConnectionState = (state) {
+      print('connectionState $state');
     };
 
     // 创建 Offer
