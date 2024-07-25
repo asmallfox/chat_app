@@ -1,7 +1,11 @@
 import 'package:chat_app/Screens/AddressBook/address_book.dart';
+import 'package:chat_app/Screens/Message/chat_audio_page.dart';
 import 'package:chat_app/Screens/Message/message.dart';
 import 'package:chat_app/Screens/Mine/mine.dart';
+import 'package:chat_app/constants/config.dart';
+import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.title = 'homePage'});
@@ -21,7 +25,7 @@ class _MyHomePageState extends State<HomePage> {
     {
       "label": "消息",
       "icon": const Icon(Icons.person_pin_rounded),
-      "child": const ChatMessage()
+      "child": const ChatMessagePage(),
     },
     {
       "label": "通讯录",
@@ -36,16 +40,28 @@ class _MyHomePageState extends State<HomePage> {
     }
   ];
 
+  void _configureSelectNotificationSubject() {
+    selectNotificationStream.stream.listen((String? payload) async {
+      await Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (BuildContext context) => ChatAudioPage(
+          chatItem: context.read<ChatModelProvider>().communicate!,
+        ),
+      ));
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _pageViewController = PageController(initialPage: 0);
+    _configureSelectNotificationSubject();
   }
 
   @override
   void dispose() {
-    super.dispose();
     _pageViewController.dispose();
+    selectNotificationStream.close();
+    super.dispose();
   }
 
   @override

@@ -15,14 +15,14 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
-class ChatMessage extends StatefulWidget {
-  const ChatMessage({super.key});
+class ChatMessagePage extends StatefulWidget {
+  const ChatMessagePage({super.key});
 
   @override
-  State<ChatMessage> createState() => _ChatMessageState();
+  State<ChatMessagePage> createState() => _ChatMessagePageState();
 }
 
-class _ChatMessageState extends State<ChatMessage>
+class _ChatMessagePageState extends State<ChatMessagePage>
     with TickerProviderStateMixin {
   Box userBox = LocalStorage.getUserBox();
 
@@ -117,10 +117,8 @@ class _ChatMessageState extends State<ChatMessage>
                               onTap: () async {
                                 item['newMessageCount'] = 0;
 
-                                Provider.of<ChatModelProvider>(context,
-                                        listen: false)
-                                    .setChat(ChatModelType.fromMap(item));
-                                    
+                                context.read<ChatModelProvider>().setChat(item);
+
                                 Navigator.push(
                                   context,
                                   animationSlideRoute(Chat(chatItem: item)),

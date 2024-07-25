@@ -27,7 +27,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
       };
       SocketIOClient.emit('add_friend', [params]);
     } catch (err) {
-      print('error: $err');
+      print('错误: $err');
       if (!context.mounted) return;
       showTipMessage(context, '添加失败');
     }

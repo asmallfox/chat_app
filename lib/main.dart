@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:chat_app/Helpers/audio_service.dart';
 import 'package:chat_app/Helpers/global_notification.dart';
 import 'package:chat_app/Helpers/route_handler.dart';
-import 'package:chat_app/constants/global_key.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
@@ -37,7 +36,7 @@ void main() async {
   }
 
   final userBox = Hive.box('settings').get('users', defaultValue: []);
-  print(userBox);
+
   if (userBox.length > 0) {
     for (final id in userBox) {
       await openHive(
@@ -97,12 +96,11 @@ Future<void> openHive(String boxName, {bool limit = false}) async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+  
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      key: navigatorKey,
       routes: namesRoutes,
       onGenerateRoute: (RouteSettings settings) {
         return HandleRoute.handleRoute(settings.name);

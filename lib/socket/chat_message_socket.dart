@@ -13,7 +13,7 @@ void chatMessageSocket(IO.Socket socket) {
     final messages = dataList.first is List ? dataList.first : [dataList.first];
     final ack = dataList.last as Function;
 
-    ChatModelType? currentChat = ChatModelProvider().chat;
+    Map? currentChat = ChatModelProvider().chat;
 
     Box userBox = LocalStorage.getUserBox();
 
@@ -49,7 +49,7 @@ void chatMessageSocket(IO.Socket socket) {
         Map? chatItem =
             listFind(chatList, (item) => item['friendId'].toString() == key);
 
-        bool isCurrentChat = currentChat?.friendId == friend['friendId'];
+        bool isCurrentChat = currentChat?['friendId'] == friend['friendId'];
 
         if (chatItem == null) {
           chatList.insert(0, {
@@ -70,7 +70,6 @@ void chatMessageSocket(IO.Socket socket) {
             'title': friend['nickname'],
             'body': value.last['message'],
           });
-          print(value.last);
         }
       }
     });

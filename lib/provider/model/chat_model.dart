@@ -100,11 +100,11 @@ class ChatModelProvider extends ChangeNotifier {
 
   factory ChatModelProvider() => _instance;
 
-  ChatModelType? _chat;
+  Map<dynamic, dynamic>? _chat;
   Map<dynamic, dynamic>? _communicate;
   bool _isCommunicate = false;
 
-  ChatModelType? get chat => _chat;
+  Map<dynamic, dynamic>? get chat => _chat;
   Map? get communicate => _communicate;
   bool get isCommunicate => _isCommunicate;
 
@@ -112,16 +112,17 @@ class ChatModelProvider extends ChangeNotifier {
   MediaStream? _localStream;
   MediaStream? _remoteStream;
 
-  void setChat(ChatModelType chat) {
+  void setChat(Map<dynamic, dynamic> chat) {
     _chat = chat;
     notifyListeners();
   }
 
   void setCommunicate(Map<dynamic, dynamic> communicate) {
     if (_communicate == null) {
-      List friends = LocalStorage.getUserBox().get('Friends', defaultValue: []);
+      List friends = LocalStorage.getUserBox().get('friends', defaultValue: []);
       int userId = LocalStorage.getUserInfo()['id'];
-      int friendId = userId == communicate['from']
+
+      int? friendId = userId == communicate['from']
           ? communicate['to']
           : communicate['from'];
       final chatItem = listFind(
@@ -129,10 +130,11 @@ class ChatModelProvider extends ChangeNotifier {
         (item) => item['friendId'] == friendId,
       );
       _communicate = chatItem;
-    } else {
-      _communicate?['offer'] = communicate['offer'];
-      _communicate?['answer'] = communicate['answer'];
+      print('xxxxxxxxxxxxx $chatItem $friendId $userId ${communicate['from']}');
     }
+
+    _communicate?['offer'] = communicate['offer'];
+    _communicate?['answer'] = communicate['answer'];
     notifyListeners();
   }
 
@@ -164,7 +166,7 @@ class ChatModelProvider extends ChangeNotifier {
 
     SocketIOClient.emit('offer', {
       'from': user['id'],
-      'to': _chat?.friendId,
+      'to': _chat?['friendId'],
       'type': 3,
       'offer': {
         'sdp': offer.sdp,
@@ -185,11 +187,11 @@ class ChatModelProvider extends ChangeNotifier {
   }
 
   void putThrough() async {
-    await communicateOfferSocket(_communicate!);
+    await communicateOfferSocket();
     notifyListeners();
   }
 
-  Future<void> communicateOfferSocket(Map<dynamic, dynamic> communicate) async {
+  Future<void> communicateOfferSocket() async {
     _peerConnection = await createPeerConnection({});
 
     _localStream = await navigator.mediaDevices.getUserMedia({
@@ -206,7 +208,10 @@ class ChatModelProvider extends ChangeNotifier {
       }
     };
 
-    await _peerConnection?.setRemoteDescription(communicate['sdp']);
+    RTCSessionDescription description = RTCSessionDescription(
+        _communicate?['offer']['sdp'], _communicate?['offer']['type']);
+
+    await _peerConnection?.setRemoteDescription(description);
 
     RTCSessionDescription answer = await _peerConnection!.createAnswer();
     await _peerConnection?.setLocalDescription(answer);
@@ -218,21 +223,15 @@ class ChatModelProvider extends ChangeNotifier {
 
     _isCommunicate = true;
 
-    SocketIOClient.emitWithAck(
-      'answer',
-      {
-        'from': user['id'],
-        'to': communicate['from'],
-        'type': 3,
-        'answer': {
-          'sdp': answer.sdp,
-          'type': answer.type,
-        }
-      },
-      ack: (data) {
-        print('setCommunicateSocket: $data');
-      },
-    );
+    SocketIOClient.emit('answer', {
+      'from': user['id'],
+      'to': _communicate?['from'],
+      'type': 3,
+      'answer': {
+        'sdp': answer.sdp,
+        'type': answer.type,
+      }
+    });
   }
 
   void clearChat() {

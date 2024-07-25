@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:chat_app/Helpers/global_notification.dart';
 import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Screens/Message/chat_audio_page.dart';
 import 'package:chat_app/Screens/Message/chat_message_item.dart';
@@ -16,15 +14,9 @@ import 'package:chat_app/Screens/Message/chat_tab_panel.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
-import 'package:chat_app/test/notification_utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class Chat extends StatefulWidget {

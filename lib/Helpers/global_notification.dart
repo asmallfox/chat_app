@@ -1,11 +1,5 @@
-import 'package:chat_app/Screens/AddressBook/address_book.dart';
-import 'package:chat_app/Screens/Message/chat_audio_page.dart';
-import 'package:chat_app/constants/global_key.dart';
-import 'package:chat_app/provider/model/chat_model.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:chat_app/constants/config.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:provider/provider.dart';
 
 class GlobalNotification {
   static final GlobalNotification _instance = GlobalNotification._internal();
@@ -43,19 +37,7 @@ class GlobalNotification {
       initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
-        print('页面跳转');
-
-        navigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (context) {
-              print('xxxxxxxxxxxx');
-              return ChatAudioPage(
-                chatItem: Provider.of<ChatModelProvider>(context, listen: false)
-                    .communicate!,
-              );
-            },
-          ),
-        );
+        selectNotificationStream.add(notificationResponse.payload);
       },
     );
     _isInitialized = true;

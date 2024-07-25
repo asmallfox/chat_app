@@ -27,8 +27,7 @@ class SocketIOClient {
     try {
       await connect();
     } catch (error) {
-      print(error);
-      print('_initialize: socket初始化失败！');
+      print('_initialize: socket初始化失败！ $error');
     }
   }
 
@@ -79,7 +78,6 @@ class SocketIOClient {
   }
 
   static void _handleConnect(IO.Socket socket) {
-    print('_handleConnect');
     socket.onConnect((data) {
       print("[socket] 连接成功~");
       _setupAppSocketEvent();
@@ -114,7 +112,6 @@ class SocketIOClient {
     Function? ack,
     bool binary = false,
   }) {
-    print('[emitWithAck]: ' + eventName);
     _socket!.emitWithAck(eventName, data, ack: ack, binary: binary);
   }
 
