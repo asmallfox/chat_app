@@ -1,58 +1,19 @@
+import 'package:chat_app/Helpers/global_notification.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/util.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class ChatMessage {
-  final int id;
-  final int send_user_id;
-  final int receive_user_id;
-  final int type;
-  final String message;
-  final int to;
-  final int from;
-  final int? is_read;
-  final int? created_at;
-  final int? updated_at;
-
-  ChatMessage({
-    required this.id,
-    required this.send_user_id,
-    required this.receive_user_id,
-    required this.type,
-    required this.message,
-    required this.to,
-    required this.from,
-    this.is_read,
-    this.created_at,
-    this.updated_at,
-  });
-
-  factory ChatMessage.fromMap(Map<String, dynamic> item) {
-    return ChatMessage(
-      id: item['id'],
-      send_user_id: item['send_user_id'],
-      receive_user_id: item['receive_user_id'],
-      type: item['type'],
-      message: item['message'],
-      to: item['to'],
-      from: item['from'],
-      is_read: item['is_read'],
-      created_at: item['created_at'],
-      updated_at: item['updated_at'],
-    );
-  }
-}
-
 void chatMessageSocket(IO.Socket socket) {
+  // 消息通知
   socket.on('chat_message', (data) async {
     print('[新消息]：$data');
     final dataList = data as List;
     final messages = dataList.first is List ? dataList.first : [dataList.first];
     final ack = dataList.last as Function;
 
-    Map? currentChat = ChatModel.staticCurrentChat;
+    ChatModelType? currentChat = ChatModelProvider().chat;
 
     Box userBox = LocalStorage.getUserBox();
 
@@ -88,7 +49,7 @@ void chatMessageSocket(IO.Socket socket) {
         Map? chatItem =
             listFind(chatList, (item) => item['friendId'].toString() == key);
 
-        bool isCurrentChat = currentChat?['friendId'] == friend['friendId'];
+        bool isCurrentChat = currentChat?.friendId == friend['friendId'];
 
         if (chatItem == null) {
           chatList.insert(0, {
@@ -102,6 +63,15 @@ void chatMessageSocket(IO.Socket socket) {
                 isCurrentChat ? 0 : chatItem['newMessageCount'] + value.length,
           });
         }
+
+        // 推送语音通话请求
+        if (!isCurrentChat) {
+          GlobalNotification().send({
+            'title': friend['nickname'],
+            'body': value.last['message'],
+          });
+          print(value.last);
+        }
       }
     });
 
@@ -111,6 +81,27 @@ void chatMessageSocket(IO.Socket socket) {
     await userBox.put('chatList', chatList);
     await userBox.put('chatMessage', chatMessageList);
 
-    ack(null); // 通知服务端已收到消息
+    ack(null);
+  });
+
+  // 语音通话
+  socket.on('offer', (data) {
+    print('[语音通话 offer]');
+
+    ChatModelProvider().setCommunicate(data);
+
+    // 推送语音通话请求
+    GlobalNotification().send({'title': '通话', 'body': '语音通话'});
+  });
+
+  socket.on('answer', (data) {
+    print('[语音通话 answer]');
+
+    ChatModelProvider().setAnswer(data);
+  });
+
+  socket.on('hang-up', (res) {
+    print('[对方拒绝通话]');
+    ChatModelProvider().stopPeerConnection();
   });
 }

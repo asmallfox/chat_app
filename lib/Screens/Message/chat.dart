@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chat_app/Helpers/global_notification.dart';
+import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Screens/Message/chat_audio_page.dart';
 import 'package:chat_app/Screens/Message/chat_message_item.dart';
 import 'package:chat_app/CustomWidget/avatar.dart';
@@ -26,7 +28,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class Chat extends StatefulWidget {
-  final Map chatItem;
+  final Map<dynamic, dynamic> chatItem;
 
   const Chat({
     super.key,
@@ -256,7 +258,8 @@ class _ChatState extends State<Chat> {
             appBar: AppBar(
               leading: BackIconButton(
                 backFn: () {
-                  Provider.of<ChatModel>(context, listen: false).removeChat();
+                  Provider.of<ChatModelProvider>(context, listen: false)
+                      .clearChat();
                 },
               ),
               title: Text(widget.chatItem['nickname'] ?? 'unknown'),
@@ -265,15 +268,24 @@ class _ChatState extends State<Chat> {
                   onPressed: () async {
                     // ...
                     print('语音');
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ChatAudioPage(chatItem: widget.chatItem),
-                      ),
-                    );
-                    
-                    // notification.send();
 
+                    final chatModel = context.read<ChatModelProvider>();
+
+                    if (chatModel.communicate == null ||
+                        chatModel.communicate?['friendId'] ==
+                            widget.chatItem['friendId']) {
+                      if (chatModel.communicate == null) {
+                        chatModel.sendCallAudio(widget.chatItem);
+                      }
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ChatAudioPage(chatItem: widget.chatItem),
+                        ),
+                      );
+                    } else {
+                      showTipMessage(context, '正在通话中..');
+                    }
                   },
                   icon: const Icon(Icons.phone),
                   color: Theme.of(context).colorScheme.primary,

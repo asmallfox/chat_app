@@ -106,8 +106,8 @@ class _ChatMessageState extends State<ChatMessage>
                             );
                           },
                           itemBuilder: (context, index) {
-                            var item = chatList[index];
-                            var newMessage =
+                            final item = chatList[index];
+                            final newMessage =
                                 item['messages'][item['messages'].length - 1];
                             int newMessageCount = item['newMessageCount'] > 99
                                 ? 99
@@ -117,8 +117,10 @@ class _ChatMessageState extends State<ChatMessage>
                               onTap: () async {
                                 item['newMessageCount'] = 0;
 
-                                Provider.of<ChatModel>(context, listen: false)
-                                    .setChat(item);
+                                Provider.of<ChatModelProvider>(context,
+                                        listen: false)
+                                    .setChat(ChatModelType.fromMap(item));
+                                    
                                 Navigator.push(
                                   context,
                                   animationSlideRoute(Chat(chatItem: item)),

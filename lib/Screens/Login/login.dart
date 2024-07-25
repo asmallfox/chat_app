@@ -33,8 +33,6 @@ class _LoginPageState extends State<LoginPage> {
       _loading = true;
     });
 
-    final ctx = context;
-
     try {
       if (_usernameController.text.isEmpty) throw '请输入账号！';
       if (_passwordController.text.isEmpty) throw '请输入密码！';

@@ -77,7 +77,7 @@ class _AddressBookState extends State<AddressBook> {
                       ),
                       title: Text(item['nickname']),
                       onTap: () {
-                        Provider.of<ChatModel>(context, listen: false)
+                        Provider.of<ChatModelProvider>(context, listen: false)
                             .setChat(item);
                         Navigator.push(
                           context,

@@ -1,29 +1,25 @@
 import 'dart:io';
 
-import 'package:chat_app/Helpers/audio_serice.dart';
-import 'package:chat_app/Helpers/logging.dart';
+import 'package:chat_app/Helpers/audio_service.dart';
+import 'package:chat_app/Helpers/global_notification.dart';
 import 'package:chat_app/Helpers/route_handler.dart';
+import 'package:chat_app/constants/global_key.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
-import 'package:chat_app/provider/provider.dart';
 import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
 import 'package:chat_app/constants/constants.dart';
-import 'package:chat_app/test/notification_utils.dart';
 import 'package:chat_app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
+
 void main() async {
   // 返回实现 WidgetsBinding 的绑定的实例。
   // 如果尚未初始化绑定，则使用 WidgetsFlutterBinding 类创建和初始化绑定。
   WidgetsFlutterBinding.ensureInitialized();
-  await notification.init();
-
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await Hive.initFlutter('ChatApp/Database');
@@ -58,7 +54,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => ChatModel(),
+          create: (context) => ChatModelProvider(),
         ),
       ],
       child: const MyApp(),
@@ -68,7 +64,7 @@ void main() async {
 
 Future<void> startService() async {
   // await initializeLogging();
-
+  await GlobalNotification.getInstance();
   await SocketIOClient.getInstance();
   await RecordingManager.getInstance();
 }
@@ -106,6 +102,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      key: navigatorKey,
       routes: namesRoutes,
       onGenerateRoute: (RouteSettings settings) {
         return HandleRoute.handleRoute(settings.name);

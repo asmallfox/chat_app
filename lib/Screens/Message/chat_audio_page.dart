@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
-import 'package:chat_app/socket/socket_io.dart';
+import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
-import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:provider/provider.dart';
 
 class ChatAudioPage extends StatefulWidget {
   final Map chatItem;
@@ -25,74 +27,11 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
 
   late final user = LocalStorage.getUserInfo();
 
-  late RTCPeerConnection _peerConnection;
-  late MediaStream _localStream;
-  late MediaStream _remoteStream;
-
-  @override
-  void initState() {
-    super.initState();
-    initWebRTC();
-  }
-
-  void initWebRTC() async {
-    // 初始化 PeerConnection configuration
-    _peerConnection = await createPeerConnection({});
-    // 获取本地媒体流
-    _localStream = await navigator.mediaDevices.getUserMedia({
-      'audio': true,
-      'video': true,
+  void backFn() {
+    Timer(const Duration(milliseconds: 300), () {
+      Navigator.pop(context);
     });
-
-    // 添加本地媒体流到 PeerConnection
-    _localStream.getTracks().forEach((track) {
-      _peerConnection.addTrack(track, _localStream);
-    });
-
-    // 设置远端流监听器
-    _peerConnection.onTrack = (event) {
-      if (event.track.kind == 'audio') {
-        setState(() {
-          _remoteStream = event.streams[0];
-        });
-      }
-    };
-
-    _peerConnection.onConnectionState = (state) {
-      print('connectionState $state');
-    };
-
-    // 创建 Offer
-    RTCSessionDescription offer = await _peerConnection.createOffer({});
-    await _peerConnection.setLocalDescription(offer);
-
-    // 通知另一客户端
-    SocketIOClient.emitWithAck(
-        'offer',
-        {
-          'from': user['id'],
-          'to': widget.chatItem['friendId'] ?? widget.chatItem['id'],
-          'offer': {
-            'sdp': offer.sdp,
-            'type': offer.type,
-          },
-          'type': 3,
-        },
-        ack: (data) {
-          print('xxxxxxxxxxxxxxxxxxxxxxxxxx $data');
-        }
-    );
   }
-
-
-  @override
-  void dispose() {
-    super.dispose();
-    _localStream?.dispose();
-    _remoteStream?.dispose();
-    _peerConnection?.close();
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,127 +53,159 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
           ),
         ),
         // 中心的图像
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            leading: BackIconButton(
-              color: Colors.white,
-              backFn: () {
-                // Provider.of<ChatModel>(context, listen: false).removeChat();
-              },
-            ),
-            title: const Text(
-              '呼叫中...',
-              style: TextStyle(color: Colors.white),
-            ),
-            centerTitle: true,
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Container(
-                      // margin: const EdgeInsets.only(top: 30),
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 2,
-                            color: Colors.grey.shade500,
-                          ),
-                          borderRadius: BorderRadius.circular(100)),
-                      child: Avatar(
-                        imageUrl: widget.chatItem['avatar'],
-                        size: 100,
-                        rounded: true,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    Text(
-                      widget.chatItem['nickname'],
-                      style: const TextStyle(
-                        fontSize: 26,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+        Consumer<ChatModelProvider>(
+          builder: (context, model, _) {
+            ChatModelProvider chatModel = context.read<ChatModelProvider>();
+            Map? communicate = context.watch<ChatModelProvider>().communicate;
+
+            // 呼叫
+            bool isInCall =
+                communicate?['offer'] == null && communicate?['answer'] == null;
+            // 来电
+            bool isIncomingClass =
+                communicate?['offer'] != null && !chatModel.isCommunicate;
+
+            if (communicate == null) {
+              backFn();
+            }
+
+            String title = chatModel.isCommunicate
+                ? '已接通'
+                : isInCall
+                    ? '呼叫中...'
+                    : '';
+
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                leading: const BackIconButton(
+                  color: Colors.white,
                 ),
-                Column(
+                title: Text(
+                  title,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                centerTitle: true,
+              ),
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    Column(
                       children: [
-                        CommunicateIcon(
-                          label: '免提',
-                          color: Colors.grey.shade400,
-                          icon: openSpeaker
-                              ? Icons.volume_up
-                              : Icons.volume_off_rounded,
-                          onTap: () {
-                            setState(() {
-                              openSpeaker = !openSpeaker;
-                            });
-                          },
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 2,
+                                color: Colors.grey.shade500,
+                              ),
+                              borderRadius: BorderRadius.circular(100)),
+                          child: Avatar(
+                            imageUrl: widget.chatItem['avatar'],
+                            size: 100,
+                            rounded: true,
+                          ),
                         ),
-                        CommunicateIcon(
-                          label: '麦克风',
-                          color: Colors.grey.shade400,
-                          icon: openMic
-                              ? Icons.mic_none_rounded
-                              : Icons.mic_off_sharp,
-                          onTap: () {
-                            setState(() {
-                              openMic = !openMic;
-                            });
-                          },
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        Text(
+                          widget.chatItem['nickname'],
+                          style: const TextStyle(
+                            fontSize: 26,
+                            color: Colors.white,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    Column(
                       children: [
-                        FilledButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          style: ButtonStyle(
-                              backgroundColor:
-                              WidgetStateProperty.all(Colors.red)),
-                          child: const Text(
-                            '挂断',
-                            style: TextStyle(
-                              color: Colors.white,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            CommunicateIcon(
+                              label: '免提',
+                              color: Colors.grey.shade400,
+                              icon: openSpeaker
+                                  ? Icons.volume_up
+                                  : Icons.volume_off_rounded,
+                              onTap: () {
+                                setState(() {
+                                  openSpeaker = !openSpeaker;
+                                });
+                              },
                             ),
-                          ),
+                            CommunicateIcon(
+                              label: '麦克风',
+                              color: Colors.grey.shade400,
+                              icon: openMic
+                                  ? Icons.mic_none_rounded
+                                  : Icons.mic_off_sharp,
+                              onTap: () {
+                                setState(() {
+                                  openMic = !openMic;
+                                });
+                              },
+                            ),
+                          ],
                         ),
-                        FilledButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          style: ButtonStyle(
-                              backgroundColor:
-                              WidgetStateProperty.all(Colors.green)),
-                          child: const Text(
-                            '接听',
-                            style: TextStyle(
-                              color: Colors.white,
+                        const SizedBox(
+                          height: 40,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            FilledButton(
+                              onPressed: () async {
+                                chatModel.stopPeerConnection();
+                              },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    WidgetStateProperty.all(Colors.red),
+                              ),
+                              child: Text(
+                                communicate == null
+                                    ? '通话结束'
+                                    : isIncomingClass
+                                        ? '拒绝'
+                                        : '挂断',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
+                            SizedBox(
+                              width: isIncomingClass ? 50 : 0,
+                            ),
+                            Visibility(
+                              visible: isIncomingClass,
+                              child: FilledButton(
+                                onPressed: () {
+                                  chatModel.putThrough();
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      WidgetStateProperty.all(Colors.green),
+                                ),
+                                child: const Text(
+                                  '接听',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     )
                   ],
-                )
-              ],
-            ),
-          ),
+                ),
+              ),
+            );
+          },
         ),
       ],
     );

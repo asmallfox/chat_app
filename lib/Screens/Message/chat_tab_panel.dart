@@ -1,12 +1,10 @@
 import 'dart:io';
 
 import 'package:chat_app/CustomWidget/custom_icon_button.dart';
-import 'package:chat_app/Helpers/audio_serice.dart';
+import 'package:chat_app/Helpers/audio_service.dart';
 import 'package:chat_app/Helpers/system_utils.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';

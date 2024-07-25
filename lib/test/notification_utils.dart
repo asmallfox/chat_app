@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class Notification {
@@ -6,6 +5,7 @@ class Notification {
       FlutterLocalNotificationsPlugin();
 
   int id = 0;
+
   /// main 初始化
   init() async {
     AndroidInitializationSettings initializationSettingsAndroid =
@@ -20,8 +20,7 @@ class Notification {
       initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
-        print(
-            'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx $notificationResponse');
+        print('xxxxxxxxxxxxxxxxxxxxx $notificationResponse');
       },
     );
   }
