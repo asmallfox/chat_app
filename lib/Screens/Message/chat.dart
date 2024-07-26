@@ -87,7 +87,7 @@ class _ChatState extends State<Chat> {
       sendMessage({
         'type': 3,
         'content': filePath,
-        'file': file,
+        'file': audioFile.readAsBytesSync(),
       });
       print('语音数据已保存到: $filePath');
     } catch (error) {
@@ -172,13 +172,15 @@ class _ChatState extends State<Chat> {
 
     SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
       timer.cancel();
-      messageList.remove(msg);
-      chatMessage.remove(msg);
 
       final data = {
         ...row,
+        'message': row['type'] == 1 ? row['message'] : msg['message'],
         'status': MessageStatus.success,
       };
+
+      messageList.remove(msg);
+      chatMessage.remove(msg);
 
       messageList.add(data);
       chatMessage.add(data);

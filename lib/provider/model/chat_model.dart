@@ -1,9 +1,12 @@
+// import 'package:audioplayers/audioplayers.dart';
+import 'package:chat_app/Helpers/find_data.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/util.dart';
 import 'package:chat_app/socket/socket_io.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:hive/hive.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio/just_audio.dart';
 
 class ChatMessage {
   final int? id;
@@ -111,37 +114,41 @@ class ChatModelProvider extends ChangeNotifier {
   RTCPeerConnection? _peerConnection;
   MediaStream? _localStream;
   MediaStream? _remoteStream;
+  final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
+
+  RTCVideoRenderer get localRenderer => _localRenderer;
+  MediaStream? get localStream => _localStream;
 
   void setChat(Map<dynamic, dynamic> chat) {
     _chat = chat;
     notifyListeners();
   }
 
-  void setCommunicate(Map<dynamic, dynamic> communicate) {
+  void setCommunicate(Map<dynamic, dynamic> data) {
     if (_communicate == null) {
-      List friends = LocalStorage.getUserBox().get('friends', defaultValue: []);
       int userId = LocalStorage.getUserInfo()['id'];
 
-      int? friendId = userId == communicate['from']
-          ? communicate['to']
-          : communicate['from'];
-      final chatItem = listFind(
-        friends,
-        (item) => item['friendId'] == friendId,
-      );
-      _communicate = chatItem;
-      print('xxxxxxxxxxxxx $chatItem $friendId $userId ${communicate['from']}');
+      late int friendId;
+      if (data['friendId'] == null) {
+        friendId = userId == data['from'] ? data['to'] : data['from'];
+      } else {
+        friendId = data['friendId'];
+      }
+
+      final friend = findFriend(friendId, ['messages']);
+
+      _communicate = friend;
     }
 
-    _communicate?['offer'] = communicate['offer'];
-    _communicate?['answer'] = communicate['answer'];
+    _communicate?['offer'] = data['offer'];
+    _communicate?['answer'] = data['answer'];
     notifyListeners();
   }
 
   void sendCallAudio(Map<dynamic, dynamic> communicateChat) async {
     setCommunicate(communicateChat);
-    _peerConnection = await createPeerConnection({});
 
+    _peerConnection = await createPeerConnection({});
     _localStream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
     });
@@ -151,6 +158,8 @@ class ChatModelProvider extends ChangeNotifier {
     });
 
     _peerConnection?.onTrack = (event) {
+      print('远程数据流 $event.track.kind');
+
       if (event.track.kind == 'audio') {
         _remoteStream = event.streams[0];
       }
@@ -159,8 +168,9 @@ class ChatModelProvider extends ChangeNotifier {
     RTCSessionDescription offer = await _peerConnection!.createOffer();
     await _peerConnection?.setLocalDescription(offer);
 
-    _peerConnection?.onIceCandidate =
-        (candidate) => _peerConnection?.addCandidate(candidate);
+    _peerConnection?.onIceCandidate = (candidate) {
+      _peerConnection?.addCandidate(candidate);
+    };
 
     final user = LocalStorage.getUserInfo();
 
@@ -174,15 +184,19 @@ class ChatModelProvider extends ChangeNotifier {
       },
     });
 
+    _localRenderer.srcObject = _localStream;
     notifyListeners();
   }
 
   Future<void> setAnswer(Map<dynamic, dynamic> communicate) async {
     print('setAnswer');
     setCommunicate(communicate);
-    // RTCSessionDescription answer = communicate['answer']['sdp'];
-    print('${communicate['answer']}');
-    await _peerConnection?.setRemoteDescription(communicate['answer']);
+    RTCSessionDescription answer = RTCSessionDescription(
+      communicate['answer']['sdp'],
+      communicate['answer']['type'],
+    );
+
+    await _peerConnection?.setRemoteDescription(answer);
     _isCommunicate = true;
   }
 
