@@ -41,13 +41,13 @@ class _MyHomePageState extends State<HomePage> {
   ];
 
   void _configureSelectNotificationSubject() {
-    selectNotificationStream.stream.listen((String? payload) async {
-      await Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (BuildContext context) => ChatAudioPage(
-          chatItem: context.read<ChatModelProvider>().communicate!,
-        ),
-      ));
-    });
+    // selectNotificationStream.stream.listen((String? payload) async {
+    //   await Navigator.of(context).push(MaterialPageRoute<void>(
+    //     builder: (BuildContext context) => ChatAudioPage(
+    //       chatItem: context.read<ChatModelProvider>().communicate!,
+    //     ),
+    //   ));
+    // });
   }
 
   @override

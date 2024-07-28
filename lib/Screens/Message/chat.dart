@@ -269,14 +269,14 @@ class _ChatState extends State<Chat> {
                         chatModel.communicate?['friendId'] ==
                             widget.chatItem['friendId']) {
                       if (chatModel.communicate == null) {
-                        chatModel.sendCallAudio(widget.chatItem);
+                        // chatModel.sendCallAudio(widget.chatItem);
                       }
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ChatAudioPage(chatItem: widget.chatItem),
-                        ),
-                      );
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //     builder: (context) =>
+                      //         ChatAudioPage(chatItem: widget.chatItem),
+                      //   ),
+                      // );
                     } else {
                       showTipMessage(context, '正在通话中..');
                     }
