@@ -1,5 +1,12 @@
+import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:chat_app/constants/config.dart';
+import 'package:chat_app/provider/model/chat_model.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+final pageConfig = {
+  '1': {'child': Chat(chatItem: ChatModelProvider().chat!)}
+};
 
 class GlobalNotification {
   static final GlobalNotification _instance = GlobalNotification._internal();
@@ -39,6 +46,13 @@ class GlobalNotification {
           (NotificationResponse notificationResponse) {
         selectNotificationStream.add(notificationResponse.payload);
 
+        final item = pageConfig[notificationResponse.payload];
+
+        if (item != null) {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(builder: (context) => item['child'] as Widget),
+          );
+        }
 
         print('处理 ${notificationResponse.payload}');
       },
@@ -54,7 +68,6 @@ class GlobalNotification {
       priority: Priority.high,
       ticker: 'ticker',
       // timeoutAfter: 3000,
-      
     );
 
     // iOS平台的通知设置
@@ -69,7 +82,7 @@ class GlobalNotification {
       data['title'] ?? '通知',
       data['body'] ?? 'body',
       platform,
-      payload: 'Welcome to Flutter Local Notifications',
+      payload: data['payload'],
     );
   }
 }

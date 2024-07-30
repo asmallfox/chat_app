@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chat_app/Helpers/audio_service.dart';
 import 'package:chat_app/Helpers/global_notification.dart';
 import 'package:chat_app/Helpers/route_handler.dart';
+import 'package:chat_app/constants/config.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
 import 'package:chat_app/Screens/Common/routes.dart';
@@ -101,6 +102,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      key: navigatorKey,
       routes: namesRoutes,
       onGenerateRoute: (RouteSettings settings) {
         return HandleRoute.handleRoute(settings.name);
