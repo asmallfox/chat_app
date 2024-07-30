@@ -1,6 +1,6 @@
+import 'package:chat_app/Helpers/find_data.dart';
 import 'package:chat_app/Helpers/global_notification.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
-import 'package:chat_app/Helpers/util.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -23,6 +23,7 @@ void chatMessageSocket(IO.Socket socket) {
 
     Map<String, List<Map<String, dynamic>>> messageGroup = {};
 
+    // 信息按钮用户分组
     for (int i = 0; i < messages.length; i++) {
       final item = messages[i];
 
@@ -36,8 +37,7 @@ void chatMessageSocket(IO.Socket socket) {
     }
 
     messageGroup.forEach((key, value) {
-      Map? friend =
-          listFind(friends, (item) => item['friendId'].toString() == key);
+      Map? friend = findFriend(int.parse(key));
 
       if (friend != null) {
         if (friend.containsKey('messages')) {
@@ -46,8 +46,7 @@ void chatMessageSocket(IO.Socket socket) {
           friend['messages'] = value;
         }
 
-        Map? chatItem =
-            listFind(chatList, (item) => item['friendId'].toString() == key);
+        Map? chatItem = findChatItem(int.parse(key));
 
         bool isCurrentChat = currentChat?['friendId'] == friend['friendId'];
 

@@ -1,15 +1,15 @@
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/util.dart';
 
-Map<dynamic, dynamic>? findFriend(
+Map<dynamic, dynamic>? findDataItem(
+  List<dynamic> data,
+  String key,
   dynamic value, [
   List<String>? excludeKey,
 ]) {
-  final friends = LocalStorage.getUserBox().get('friends', defaultValue: []);
-
   Map<dynamic, dynamic>? result = listFind(
-    friends,
-    (item) => item['friendId'] == value,
+    data,
+    (item) => item[key] == value,
   );
 
   if (result != null && excludeKey != null && excludeKey.isNotEmpty) {
@@ -17,4 +17,24 @@ Map<dynamic, dynamic>? findFriend(
   }
 
   return result;
+}
+
+// 查找好友
+Map<dynamic, dynamic>? findFriend(
+  dynamic value, [
+  List<String>? excludeKey,
+]) {
+  final friends = LocalStorage.getUserBox().get('friends', defaultValue: []);
+
+  return findDataItem(friends, 'friendId', value, excludeKey);
+}
+
+// 查找聊天
+Map<dynamic, dynamic>? findChatItem(
+  dynamic value, [
+  List<String>? excludeKey,
+]) {
+  final chatList = LocalStorage.getUserBox().get('chatList', defaultValue: []);
+
+  return findDataItem(chatList, 'friendId', value, excludeKey);
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chat_app/Helpers/find_data.dart';
 import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Screens/Message/chat_audio_page.dart';
 import 'package:chat_app/Screens/Message/chat_message_item.dart';
@@ -33,6 +34,8 @@ class Chat extends StatefulWidget {
 
 class _ChatState extends State<Chat> {
   late List messageList;
+  late List friends;
+  late List chatList;
   late final ScrollController _scrollController = ScrollController();
 
   final Map userInfo = LocalStorage.getUserInfo();
@@ -60,7 +63,8 @@ class _ChatState extends State<Chat> {
   // 初始化
   void _initialize() {
     messageList = widget.chatItem['messages'] ?? [];
-    // _jumpTo();
+    friends = userBox.get('friends', defaultValue: []);
+    chatList = userBox.get('chatList', defaultValue: []);
   }
 
   void _handleAudioSend(String path) async {
@@ -165,9 +169,6 @@ class _ChatState extends State<Chat> {
 
       currentFriend['messages'] = messageList;
       await saveData();
-      // setState(() {
-      //   _jumpTo();
-      // });
     });
 
     SocketIOClient.emitWithAck('chat_message', data, ack: (row) async {
@@ -187,9 +188,6 @@ class _ChatState extends State<Chat> {
 
       currentFriend['messages'] = messageList;
       await saveData();
-      // setState(() {
-      //   _jumpTo();
-      // });
     });
 
     await saveData();
@@ -225,18 +223,36 @@ class _ChatState extends State<Chat> {
     await Hive.box('chat').put('chatList', chatList);
   }
 
-  // void _jumpTo() {
-  //   Future.delayed(
-  //     const Duration(milliseconds: 80),
-  //     () {
-  //       _scrollController.animateTo(
-  //         _scrollController.position.maxScrollExtent,
-  //         duration: const Duration(milliseconds: 80),
-  //         curve: Curves.linear,
-  //       );
-  //     },
-  //   );
-  // }
+  Future<void> removeChatRecord() async {
+    final item = {...widget.chatItem, 'messages': []};
+
+    Box userBox = LocalStorage.getUserBox();
+
+    List friends = await userBox.get('friends', defaultValue: []);
+    List chatList = await userBox.get('chatList', defaultValue: []);
+    List chatMessage = await userBox.get('chatMessage', defaultValue: []);
+
+    final friend = findDataItem(friends, 'friendId', item['friendId']);
+    final chatItemData = findDataItem(chatList, 'friendId', item['friendId']);
+
+    messageList = [];
+
+    if (friend != null) {
+      friend['messages'] = messageList;
+    }
+    if (chatItemData != null) {
+      chatItemData['messages'] = messageList;
+    }
+
+    chatMessage.removeWhere((item) =>
+        (item['from'] == userInfo['id'] && item['to'] == item['friendId']) ||
+        (item['to'] == userInfo['id'] && item['from'] == item['friendId']));
+
+    userBox.put('friends', friends);
+    userBox.put('chatList', chatList);
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +276,6 @@ class _ChatState extends State<Chat> {
               actions: [
                 IconButton(
                   onPressed: () async {
-                    // ...
                     print('语音');
 
                     final chatModel = context.read<ChatModelProvider>();
@@ -269,14 +284,13 @@ class _ChatState extends State<Chat> {
                         chatModel.communicate?['friendId'] ==
                             widget.chatItem['friendId']) {
                       if (chatModel.communicate == null) {
-                        // chatModel.sendCallAudio(widget.chatItem);
+                        chatModel.sendCallAudio(widget.chatItem);
                       }
-                      // Navigator.of(context).push(
-                      //   MaterialPageRoute(
-                      //     builder: (context) =>
-                      //         ChatAudioPage(chatItem: widget.chatItem),
-                      //   ),
-                      // );
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ChatAudioPage(),
+                        ),
+                      );
                     } else {
                       showTipMessage(context, '正在通话中..');
                     }
@@ -290,6 +304,38 @@ class _ChatState extends State<Chat> {
                     print('视频');
                   },
                   icon: const Icon(Icons.videocam_sharp),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                IconButton(
+                  onPressed: () {
+                    print('更多');
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('是否删除全部聊天记录？'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('取消'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  await removeChatRecord();
+
+                                  if (!context.mounted) return;
+
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('确定'),
+                              ),
+                            ],
+                          );
+                        });
+                  },
+                  icon: const Icon(Icons.more_vert_rounded),
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ],

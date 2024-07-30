@@ -151,6 +151,10 @@ class ChatModelProvider extends ChangeNotifier {
     _peerConnection = await createPeerConnection({});
     _localStream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
+      'video': {
+        'width': 100,
+        'height': 100,
+      }
     });
 
     _localStream?.getTracks().forEach((track) {
@@ -184,7 +188,7 @@ class ChatModelProvider extends ChangeNotifier {
       },
     });
 
-    _localRenderer.srcObject = _localStream;
+    // _localRenderer.srcObject = _localStream;
     notifyListeners();
   }
 

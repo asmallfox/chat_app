@@ -38,6 +38,9 @@ class GlobalNotification {
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
         selectNotificationStream.add(notificationResponse.payload);
+
+
+        print('处理 ${notificationResponse.payload}');
       },
     );
     _isInitialized = true;
@@ -49,6 +52,9 @@ class GlobalNotification {
       'channel name',
       importance: Importance.max,
       priority: Priority.high,
+      ticker: 'ticker',
+      // timeoutAfter: 3000,
+      
     );
 
     // iOS平台的通知设置

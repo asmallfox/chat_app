@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:chat_app/CustomWidget/avatar.dart';
 import 'package:chat_app/CustomWidget/search_user_page.dart';
 import 'package:chat_app/Helpers/animation_slide_route.dart';
@@ -8,10 +6,7 @@ import 'package:chat_app/Helpers/message.dart';
 import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
@@ -30,6 +25,7 @@ class _ChatMessagePageState extends State<ChatMessagePage>
 
   @override
   Widget build(BuildContext context) {
+    print('Chat 页面更新');
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -107,8 +103,10 @@ class _ChatMessagePageState extends State<ChatMessagePage>
                           },
                           itemBuilder: (context, index) {
                             final item = chatList[index];
-                            final newMessage =
-                                item['messages'][item['messages'].length - 1];
+                            final messages = item?['messages'];
+
+                            final newMessage = messages.isEmpty ? null : messages.last;
+
                             int newMessageCount = item['newMessageCount'] > 99
                                 ? 99
                                 : item['newMessageCount'];
@@ -275,6 +273,24 @@ class _ChatMessagePageState extends State<ChatMessagePage>
   }
 }
 
+class ChatEmpty extends StatelessWidget {
+  const ChatEmpty({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.only(
+        top: 30,
+      ),
+      child: Center(
+        child: Text('暂无聊天记录'),
+      ),
+    );
+  }
+}
+
 Future _deleteDialog(BuildContext context, Function? callback) async {
   return showDialog<bool>(
     context: context,
@@ -301,22 +317,4 @@ Future _deleteDialog(BuildContext context, Function? callback) async {
       );
     },
   );
-}
-
-class ChatEmpty extends StatelessWidget {
-  const ChatEmpty({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(
-        top: 30,
-      ),
-      child: Center(
-        child: Text('暂无聊天记录'),
-      ),
-    );
-  }
 }
