@@ -12,6 +12,7 @@ import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Helpers/system_utils.dart';
 import 'package:chat_app/Helpers/util.dart';
 import 'package:chat_app/Screens/Message/chat_tab_panel.dart';
+import 'package:chat_app/constants/config.dart';
 import 'package:chat_app/constants/status.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:chat_app/socket/socket_io.dart';
@@ -40,9 +41,6 @@ class _ChatState extends State<Chat> {
 
   final Map userInfo = LocalStorage.getUserInfo();
   final Box userBox = LocalStorage.getUserBox();
-  final currentUser = Hive.box('settings').get('user', defaultValue: {});
-
-  final GlobalKey audioCloseKey = GlobalKey();
 
   bool showSendButton = false;
   bool showAudioPanel = false;
@@ -65,6 +63,8 @@ class _ChatState extends State<Chat> {
     messageList = widget.chatItem['messages'] ?? [];
     friends = userBox.get('friends', defaultValue: []);
     chatList = userBox.get('chatList', defaultValue: []);
+
+    _handleMessageBadge();
   }
 
   void _handleAudioSend(String path) async {
@@ -80,7 +80,9 @@ class _ChatState extends State<Chat> {
 
       // 生成一个唯一的文件名
       String filePath =
-          '$appDocPath/local-${DateTime.now().millisecondsSinceEpoch}.aac';
+          '$appDocPath/local-${DateTime
+          .now()
+          .millisecondsSinceEpoch}.aac';
 
       File file = File(filePath);
 
@@ -117,7 +119,9 @@ class _ChatState extends State<Chat> {
     Map msg = {
       ...data,
       'status': MessageStatus.sending,
-      'created_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      'created_at': DateTime
+          .now()
+          .millisecondsSinceEpoch ~/ 1000,
     };
 
     if (msg.containsKey('file')) {
@@ -129,12 +133,12 @@ class _ChatState extends State<Chat> {
 
     Map currentFriend = listFind(
       friends,
-      (item) => item['friendId'] == widget.chatItem['friendId'],
+          (item) => item['friendId'] == widget.chatItem['friendId'],
     );
 
     Map? currentChat = listFind(
       chatList,
-      (item) => item['friendId'] == widget.chatItem['friendId'],
+          (item) => item['friendId'] == widget.chatItem['friendId'],
     );
 
     currentFriend['messages'] = messageList;
@@ -205,12 +209,12 @@ class _ChatState extends State<Chat> {
 
     Map currentFriend = listFind(
       friends,
-      (item) => item['friendId'] == widget.chatItem['friendId'],
+          (item) => item['friendId'] == widget.chatItem['friendId'],
     );
 
     Map? currentChat = listFind(
       chatList,
-      (item) => item['friendId'] == widget.chatItem['friendId'],
+          (item) => item['friendId'] == widget.chatItem['friendId'],
     );
 
     currentFriend['messages'] = messageList;
@@ -245,13 +249,29 @@ class _ChatState extends State<Chat> {
     }
 
     chatMessage.removeWhere((item) =>
-        (item['from'] == userInfo['id'] && item['to'] == item['friendId']) ||
+    (item['from'] == userInfo['id'] && item['to'] == item['friendId']) ||
         (item['to'] == userInfo['id'] && item['from'] == item['friendId']));
 
     userBox.put('friends', friends);
     userBox.put('chatList', chatList);
 
     setState(() {});
+  }
+
+  void _handleMessageBadge() {
+    final friend = findDataItem(friends, 'friendId', widget.chatItem['friendId']);
+    final chatData = findDataItem(chatList, 'friendId', widget.chatItem['friendId']);
+
+    if (friend != null) {
+      friend['newMessageCount'] = 0;
+    }
+
+    if (chatData != null) {
+      chatData['newMessageCount'] = 0;
+    }
+
+    userBox.put('friends', friends);
+    userBox.put('chatList', chatList);
   }
 
   @override
@@ -296,7 +316,10 @@ class _ChatState extends State<Chat> {
                     }
                   },
                   icon: const Icon(Icons.phone),
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme
+                      .of(context)
+                      .colorScheme
+                      .primary,
                 ),
                 IconButton(
                   onPressed: () {
@@ -304,7 +327,10 @@ class _ChatState extends State<Chat> {
                     print('视频');
                   },
                   icon: const Icon(Icons.videocam_sharp),
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme
+                      .of(context)
+                      .colorScheme
+                      .primary,
                 ),
                 IconButton(
                   onPressed: () {
@@ -336,7 +362,10 @@ class _ChatState extends State<Chat> {
                         });
                   },
                   icon: const Icon(Icons.more_vert_rounded),
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme
+                      .of(context)
+                      .colorScheme
+                      .primary,
                 ),
               ],
             ),
@@ -361,7 +390,7 @@ class _ChatState extends State<Chat> {
                             controller: _scrollController,
                             itemCount: list.length,
                             separatorBuilder: (_, __) =>
-                                const SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             itemBuilder: (context, index) {
                               final item = list[index];
                               bool isCurrentUser =
@@ -455,8 +484,14 @@ class _ChatState extends State<Chat> {
                           padding: EdgeInsets.all(isOverlyClose ? 10 : 8.0),
                           decoration: BoxDecoration(
                             color: isOverlyClose
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.tertiary,
+                                ? Theme
+                                .of(context)
+                                .colorScheme
+                                .primary
+                                : Theme
+                                .of(context)
+                                .colorScheme
+                                .tertiary,
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: const Icon(
@@ -487,7 +522,10 @@ class _ChatState extends State<Chat> {
                         Container(
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.tertiary,
+                            color: Theme
+                                .of(context)
+                                .colorScheme
+                                .tertiary,
                             // color: isOverlyClose
                             //     ? Theme.of(context).colorScheme.primary
                             //     : Theme.of(context).colorScheme.tertiary,

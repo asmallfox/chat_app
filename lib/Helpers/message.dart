@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 String getDateTime(int date) {
   DateTime dataTime = DateTime.fromMillisecondsSinceEpoch(date * 1000);
   DateTime nowTime = DateTime.now();
-
   bool isYear = dataTime.year == nowTime.year;
   bool isMonth = isYear && dataTime.month == nowTime.month;
 
@@ -14,7 +13,7 @@ String getDateTime(int date) {
   if (isMonth) {
     switch (differDay) {
       case 0:
-        time = DateFormat('HH:mm').format(dataTime);
+        time =  DateFormat('HH:mm').format(dataTime.toLocal());
         break;
       case 1:
         time = '昨天';

@@ -1,11 +1,9 @@
+import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/Screens/AddressBook/address_book.dart';
-import 'package:chat_app/Screens/Message/chat_audio_page.dart';
 import 'package:chat_app/Screens/Message/message.dart';
 import 'package:chat_app/Screens/Mine/mine.dart';
 import 'package:chat_app/constants/config.dart';
-import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.title = 'homePage'});
@@ -21,40 +19,33 @@ class _MyHomePageState extends State<HomePage> {
 
   late PageController _pageViewController;
 
+  late List chatList = LocalStorage.getUserBox().get('chatList', defaultValue: []);
+  int messageCount = 0;
+
   final widgetList = <Map<String, dynamic>>[
     {
       "label": "消息",
-      "icon": const Icon(Icons.person_pin_rounded),
+      "icon": Icons.message_rounded,
       "child": const ChatMessagePage(),
     },
     {
       "label": "通讯录",
-      "icon": const Icon(Icons.person_pin_rounded),
+      "icon": Icons.person_pin_rounded,
       "child": const AddressBook()
     },
     {
       "label": "我的",
-      "icon": const Icon(Icons.person_rounded),
+      "icon": Icons.person_rounded,
       "child": const Mine(),
-      "hiddenAppBar": true
     }
   ];
 
-  void _configureSelectNotificationSubject() {
-    // selectNotificationStream.stream.listen((String? payload) async {
-    //   await Navigator.of(context).push(MaterialPageRoute<void>(
-    //     builder: (BuildContext context) => ChatAudioPage(
-    //       chatItem: context.read<ChatModelProvider>().communicate!,
-    //     ),
-    //   ));
-    // });
-  }
 
   @override
   void initState() {
     super.initState();
     _pageViewController = PageController(initialPage: 0);
-    _configureSelectNotificationSubject();
+    messageCount = chatList.reduce((pre, cur) => (pre['newMessageCount'] ?? 0) + cur['newMessageCount'] ?? 0);
   }
 
   @override
@@ -67,6 +58,7 @@ class _MyHomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: navigatorKey,
       appBar: AppBar(
         toolbarHeight: 0,
         backgroundColor: Colors.transparent,
@@ -94,7 +86,16 @@ class _MyHomePageState extends State<HomePage> {
         items: widgetList.map(
           (item) {
             return BottomNavigationBarItem(
-              icon: item['icon'],
+              icon: Stack(
+                children: [
+                  Icon(item['icon'], size: 30),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Badge(label: Text(messageCount.toString())),
+                  ),
+                ],
+              ),
               label: item['label'],
             );
           },

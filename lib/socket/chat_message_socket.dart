@@ -68,7 +68,7 @@ void chatMessageSocket(IO.Socket socket) {
           GlobalNotification().send({
             'title': friend['nickname'],
             'body': value.last['message'],
-            'payload': 1
+            'payload': '1,${friend['friendId']}', // type,friendId
           });
         }
       }

@@ -25,7 +25,6 @@ class _ChatMessagePageState extends State<ChatMessagePage>
 
   @override
   Widget build(BuildContext context) {
-    print('Chat 页面更新');
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -49,6 +48,13 @@ class _ChatMessagePageState extends State<ChatMessagePage>
         child: ValueListenableBuilder(
           valueListenable: userBox.listenable(keys: ['chatList']),
           builder: (context, box, _) {
+            chatList.sort((a, b) {
+              // 比较时间戳，假设时间戳是保存在 'timestamp' 字段中
+              int timestampA = a['messages']?.isEmpty ? 0 : a['messages'].last['created_at'];
+              int timestampB = b['messages']?.isEmpty ? 0 : b['messages'].last['created_at'];
+              // 返回按时间戳降序排列的顺序
+              return timestampB.compareTo(timestampA);
+            });
             return Column(
               children: [
                 GestureDetector(
@@ -113,8 +119,6 @@ class _ChatMessagePageState extends State<ChatMessagePage>
 
                             return GestureDetector(
                               onTap: () async {
-                                item['newMessageCount'] = 0;
-
                                 context.read<ChatModelProvider>().setChat(item);
 
                                 Navigator.push(
