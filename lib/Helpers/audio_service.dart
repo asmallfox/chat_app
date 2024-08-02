@@ -25,7 +25,7 @@ class RecordingManager {
   }
 
 
-  static FlutterSoundPlayer get audioPlayer => _audioPlayer!;
+  static FlutterSoundPlayer? get audioPlayer => _audioPlayer;
 
   static Future<void> _initialize() async {
     _audioRecorder = FlutterSoundRecorder();

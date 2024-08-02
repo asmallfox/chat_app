@@ -4,6 +4,7 @@ import 'package:chat_app/Screens/Message/message.dart';
 import 'package:chat_app/Screens/Mine/mine.dart';
 import 'package:chat_app/constants/config.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.title = 'homePage'});
@@ -17,16 +18,16 @@ class HomePage extends StatefulWidget {
 class _MyHomePageState extends State<HomePage> {
   int currentPageIndex = 0;
 
-  late PageController _pageViewController;
+  Box userBox = LocalStorage.getUserBox();
 
-  late List chatList = LocalStorage.getUserBox().get('chatList', defaultValue: []);
-  int messageCount = 0;
+  late PageController _pageViewController;
 
   final widgetList = <Map<String, dynamic>>[
     {
       "label": "消息",
       "icon": Icons.message_rounded,
       "child": const ChatMessagePage(),
+      "badge": 0,
     },
     {
       "label": "通讯录",
@@ -40,12 +41,10 @@ class _MyHomePageState extends State<HomePage> {
     }
   ];
 
-
   @override
   void initState() {
     super.initState();
     _pageViewController = PageController(initialPage: 0);
-    messageCount = chatList.reduce((pre, cur) => (pre['newMessageCount'] ?? 0) + cur['newMessageCount'] ?? 0);
   }
 
   @override
@@ -74,32 +73,52 @@ class _MyHomePageState extends State<HomePage> {
         },
         itemBuilder: (_, index) => widgetList[index]["child"],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentPageIndex,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        enableFeedback: false,
-        onTap: (index) {
-          setState(() {
-            _pageViewController.jumpToPage(index);
-          });
-        },
-        items: widgetList.map(
-          (item) {
-            return BottomNavigationBarItem(
-              icon: Stack(
-                children: [
-                  Icon(item['icon'], size: 30),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Badge(label: Text(messageCount.toString())),
+      bottomNavigationBar: ValueListenableBuilder(
+        valueListenable: userBox.listenable(keys: ['chatList']),
+        builder: (context, box, _) {
+          int msgCount = box.get('chatList').reduce((pre, cur) =>
+              (pre['newMessageCount'] ?? 0) + cur['newMessageCount'] ?? 0);
+
+          widgetList[0]['badge'] = msgCount;
+
+          return BottomNavigationBar(
+            currentIndex: currentPageIndex,
+            selectedItemColor: Theme.of(context).colorScheme.primary,
+            enableFeedback: false,
+            onTap: (index) {
+              setState(() {
+                _pageViewController.jumpToPage(index);
+              });
+            },
+            items: widgetList.map(
+              (item) {
+                return BottomNavigationBarItem(
+                  icon: Stack(
+                    children: [
+                      Icon(item['icon'], size: 30),
+                      Visibility(
+                        visible: item['badge'] != null && item['badge'] > 0,
+                        child: Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Badge(
+                            label: Text(
+                              (item['badge'] != null && item['badge'] > 99)
+                                  ? '...'
+                                  : item['badge'].toString(),
+                            ),
+                            backgroundColor: const Color(0xFFf5a13c),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              label: item['label'],
-            );
-          },
-        ).toList(),
+                  label: item['label'],
+                );
+              },
+            ).toList(),
+          );
+        },
       ),
     );
   }

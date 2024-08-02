@@ -31,7 +31,7 @@ class CustomImage extends StatelessWidget {
             fit: fit,
           )
         : CachedNetworkImage(
-            imageUrl: getImageUrl(imageUrl),
+            imageUrl: getNetworkSourceUrl(imageUrl),
             width: width,
             height: height,
             fit: fit,

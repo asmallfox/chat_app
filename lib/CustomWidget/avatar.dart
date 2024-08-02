@@ -84,7 +84,7 @@ class Avatar extends StatelessWidget {
       return const AssetImage('assets/images/default_avatar.png');
     } else {
       // return NetworkImage(getLocalUrl(imageUrl as String));
-      return CachedNetworkImageProvider(getImageUrl(imageUrl as String));
+      return CachedNetworkImageProvider(getNetworkSourceUrl(imageUrl as String));
     }
   }
 }

@@ -9,7 +9,8 @@ dynamic listFind(List list, bool Function(dynamic) fn) {
   );
 }
 
-String getImageUrl(String url) {
+
+String getNetworkSourceUrl(String url) {
   if (url.startsWith(RegExp(r'https'))) {
     return url;
   } else if (url.startsWith(RegExp(r'http://localhost'))) {

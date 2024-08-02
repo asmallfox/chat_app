@@ -5,6 +5,7 @@ import 'package:chat_app/constants/config.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:provider/provider.dart';
 
 final pageConfig = {
   '1': {
@@ -60,19 +61,24 @@ class GlobalNotification {
             final friendId = int.parse(payloadArr[1]);
 
             final friend = findChatItem(friendId) ?? findFriend(friendId);
-            final context =  navigatorKey.currentContext!;
+            final context = navigatorKey.currentContext!;
             switch (type) {
               // 私信
               case '1':
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Chat(chatItem: friend!),
-                  ),
-                );
+                if (context.read<ChatModelProvider>().chat == null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Chat(chatItem: friend!),
+                    ),
+                  );
+                } else {
+                  context.read<ChatModelProvider>().setChat(friend!);
+                }
+
                 break;
               default:
-                print('没有匹配到推送的类型操作哟~');
+                print('没有匹配到推送的类型操作~');
                 break;
             }
           }

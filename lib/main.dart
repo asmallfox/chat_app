@@ -65,7 +65,7 @@ Future<void> startService() async {
   // await initializeLogging();
   await GlobalNotification.getInstance();
   await SocketIOClient.getInstance();
-  await RecordingManager.getInstance();
+  // await RecordingManager.getInstance();
 }
 
 Future<void> openHive(String boxName, {bool limit = false}) async {

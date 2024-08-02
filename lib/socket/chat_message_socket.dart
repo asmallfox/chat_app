@@ -1,9 +1,11 @@
+import 'package:chat_app/Helpers/caceh_network_source.dart';
 import 'package:chat_app/Helpers/find_data.dart';
 import 'package:chat_app/Helpers/global_notification.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:chat_app/provider/model/chat_model.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+
 
 void chatMessageSocket(IO.Socket socket) {
   // 消息通知
@@ -22,12 +24,18 @@ void chatMessageSocket(IO.Socket socket) {
     List chatMessageList = await userBox.get('chatMessage', defaultValue: []);
 
     Map<String, List<Map<String, dynamic>>> messageGroup = {};
-
     // 信息按钮用户分组
     for (int i = 0; i < messages.length; i++) {
       final item = messages[i];
-
       String fromId = item['from'].toString();
+
+      // 需要缓存的文件路径
+      if (item['type'] == 3) {
+        String? msgUrl = await downloadAndSaveFile(item['message']);
+        if (msgUrl != null) {
+          item['message'] = msgUrl;
+        }
+      }
 
       if (messageGroup.containsKey(fromId)) {
         messageGroup[fromId]?.add(item);

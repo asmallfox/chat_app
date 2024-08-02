@@ -3,6 +3,8 @@ import 'package:chat_app/CustomWidget/audio_icon.dart';
 import 'package:chat_app/CustomWidget/custom_image.dart';
 import 'package:chat_app/Helpers/audio_service.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
+import 'package:chat_app/Screens/Message/message_audio.dart';
+import 'package:chat_app/Screens/Message/message_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
@@ -162,7 +164,7 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
                                   width: 8,
                                 ),
                                 bottom: BorderSide(
-                                  color:  Color(0xFF1E1E1E),
+                                  color: Color(0xFF1E1E1E),
                                   width: 8,
                                 ),
                                 start: BorderSide(
@@ -195,7 +197,7 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
       AudioPlayer _audioPlayer = AudioPlayer();
       await _audioPlayer.setSourceUrl(widget.item['message']);
 
-      final audioDuration = await _audioPlayer.getDuration();
+      Duration? audioDuration = await _audioPlayer.getDuration();
 
       if (audioDuration != null) {
         setState(() {
@@ -209,8 +211,10 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
 
   Widget _getMessageWidget(BuildContext context) {
     bool isCurrentUser = widget.item['from'] == userInfo['id'];
-
+    print(widget.item);
     switch (widget.item['type']) {
+      // case 1:
+      //   return MessageText(item: widget.item);
       case 2:
         return FractionallySizedBox(
           widthFactor: 0.7,
@@ -220,155 +224,15 @@ class _ChatMessageItemState extends State<ChatMessageItem> {
           ),
         );
       case 3:
-        return GestureDetector(
-          onTap: () {
-            print('播放语音');
-
-            if (RecordingManager.audioPlayer.isPlaying) {
-              RecordingManager.audioPlayer.audioPlayerFinished(2);
-              RecordingManager.audioPlayer.stopPlayer();
-            }
-
-            RecordingManager.audioPlayer.startPlayer(
-              fromURI: widget.item['message'],
-              codec: Codec.mp3,
-              whenFinished: () {
-                setState(() {
-                  isPlayAudio = false;
-                });
-              },
-            );
-
-            setState(() {
-              isPlayAudio = true;
-            });
-          },
-          child: Container(
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  spreadRadius: 14,
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              textDirection:
-                  isCurrentUser ? TextDirection.rtl : TextDirection.ltr,
-              children: [
-                Transform.scale(
-                  scaleX: -1,
-                  child: AudioIcon(
-                    isPlay: isPlayAudio,
-                  ),
-                ),
-                Text(
-                  audioLength.toString(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+        print('语音： ${widget.item}');
+        return MessageAudio(item: widget.item);
       case 4:
         return Text('视频占位');
       case 5:
         return Text('文件占位');
       default:
-        // case 1:
-        return Stack(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 6,
-                horizontal: 15,
-              ),
-              constraints: const BoxConstraints(
-                minHeight: 40,
-              ),
-              decoration: BoxDecoration(
-                color: isCurrentUser
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    spreadRadius: 14,
-                    blurRadius: 20,
-                    offset: const Offset(6, 8),
-                  ),
-                ],
-              ),
-              child: Text(
-                widget.item['message'] ?? 'null',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: isCurrentUser ? Colors.white : Colors.black,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 15,
-              left: isCurrentUser ? null : 0,
-              right: isCurrentUser ? 0 : null,
-              child: MessageTriangle(
-                isStart: isCurrentUser,
-                color: isCurrentUser
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.white,
-              ),
-            ),
-          ],
-        );
+        return MessageText(item: widget.item);
     }
-  }
-}
-
-class MessageTriangle extends StatelessWidget {
-  final bool isStart;
-  final Color color;
-
-  const MessageTriangle({
-    super.key,
-    this.isStart = true,
-    this.color = Colors.white,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: BorderDirectional(
-          top: const BorderSide(
-            color: Colors.transparent,
-            width: 6,
-          ),
-          bottom: const BorderSide(
-            color: Colors.transparent,
-            width: 6,
-          ),
-          start: BorderSide(
-            color: isStart ? color : Colors.transparent,
-            width: 8,
-          ),
-          end: BorderSide(
-            color: isStart ? Colors.transparent : color,
-            width: 8,
-          ),
-        ),
-      ),
-    );
   }
 }
 

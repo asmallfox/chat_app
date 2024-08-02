@@ -132,7 +132,7 @@ class _AudioIconState extends State<AudioIcon>
           int index = (_controller.value * 10 / 3).floor();
 
           return CustomPaint(
-            size: const Size(38, 38),
+            size: const Size(24, 38),
             painter: AudioIconPaint(
               // actionColor: Theme.of(context).colorScheme.primary,
               actionColor: Colors.red,
