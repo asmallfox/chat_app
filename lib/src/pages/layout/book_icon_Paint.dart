@@ -37,7 +37,6 @@ class BookIconPaint extends CustomPainter {
 
     // 绘制文字
     if (label != null) {
-      print('=============== $label');
       final textSize = size.height * 0.65;
       final textPainter = TextPainter(
         text: TextSpan(

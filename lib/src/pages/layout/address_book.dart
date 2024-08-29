@@ -22,7 +22,8 @@ class _AddressBookState extends State<AddressBook> {
     (index) {
       final random = Random();
       return {
-        'name': letters[random.nextInt(letters.length)] + (index + 1).toString(),
+        'name':
+            letters[random.nextInt(letters.length)] + (index + 1).toString(),
         'date': getDateTime(DateTime.now().microsecond),
         'color': Color.fromARGB(
           255,
@@ -48,7 +49,8 @@ class _AddressBookState extends State<AddressBook> {
   @override
   void initState() {
     super.initState();
-    friends.sort((a, b) => a['name'].toLowerCase().compareTo(b['name'].toLowerCase()));
+    friends.sort(
+        (a, b) => a['name'].toLowerCase().compareTo(b['name'].toLowerCase()));
     friends.insertAll(0, [
       {
         'name': '通知',
@@ -64,7 +66,9 @@ class _AddressBookState extends State<AddressBook> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox renderBox =
           _key.currentContext?.findRenderObject() as RenderBox;
-      _topPosition = renderBox.localToGlobal(Offset.zero).dy;
+      setState(() {
+        _topPosition = renderBox.localToGlobal(Offset.zero).dy;
+      });
     });
   }
 
@@ -116,13 +120,13 @@ class _AddressBookState extends State<AddressBook> {
             alignment: Alignment.centerRight,
             child: Container(
               key: _containerKey,
+              color: Colors.pink[100],
               width: 20,
               margin: const EdgeInsets.only(right: 8),
-              child: ListView.separated(
+              child: ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: keywordList.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 1),
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onPanUpdate: (details) {
@@ -134,9 +138,9 @@ class _AddressBookState extends State<AddressBook> {
                       });
                     },
                     onPanEnd: (_) {
-                      setState(() {
-                        highlightedIndex = null;
-                      });
+                      // setState(() {
+                      //   highlightedIndex = null;
+                      // });
                     },
                     onTapDown: (details) {
                       final activeData = getActiveData(context, details);
@@ -147,18 +151,24 @@ class _AddressBookState extends State<AddressBook> {
                       });
                     },
                     onTapUp: (_) {
-                      setState(() {
-                        highlightedIndex = null;
-                      });
+                      // setState(() {
+                      //   highlightedIndex = null;
+                      // });
                     },
                     child: Container(
                       height: 20,
                       width: 20,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: highlightedIndex == index
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.transparent,
+                        // color: highlightedIndex == index
+                        //     ? Theme.of(context).colorScheme.primary
+                        //     : Colors.transparent,
+                        color: Color.fromARGB(
+                          255,
+                          Random().nextInt(256),
+                          Random().nextInt(256),
+                          Random().nextInt(256),
+                        ),
                         borderRadius: BorderRadius.circular(50.0),
                       ),
                       child: Text(
@@ -184,8 +194,7 @@ class _AddressBookState extends State<AddressBook> {
           visible: highlightedIndex != null,
           child: Positioned(
             right: keywordPosition.dx,
-            top: keywordPosition.dy - iconSize.height / 2,
-            // child: Text('---------'),
+            top: keywordPosition.dy,
             child: CustomPaint(
               size: iconSize,
               painter: BookIconPaint(
@@ -194,6 +203,16 @@ class _AddressBookState extends State<AddressBook> {
             ),
           ),
         ),
+        Positioned(
+          top: _topPosition,
+          right: 45,
+          child: Container(
+            color: Colors.pink,
+            width: 100,
+            height: 200,
+            child: Text(_topPosition.toString()),
+          ),
+        )
       ],
     );
   }
@@ -223,8 +242,12 @@ class _AddressBookState extends State<AddressBook> {
       MediaQuery.of(context).size.width -
           details.globalPosition.dx +
           (details.localPosition.dx + 10),
-      (index - 1) * itemHeight + _topPosition,
+      boxOffset.dy,
     );
+    print(_topPosition);
+    print(boxOffset.dy);
+    print(containerRender.globalToLocal(Offset(0, _topPosition)));
+
     return {
       'index': index,
       'iconOffset': iconOffset,
