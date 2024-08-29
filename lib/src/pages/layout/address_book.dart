@@ -2,9 +2,10 @@ import 'dart:math';
 
 import 'package:chat_app/src/pages/layout/book_icon_Paint.dart';
 import 'package:chat_app/src/utils/get_date_time.dart';
-import 'package:chat_app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+
+const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 class AddressBook extends StatefulWidget {
   const AddressBook({
@@ -21,7 +22,7 @@ class _AddressBookState extends State<AddressBook> {
     (index) {
       final random = Random();
       return {
-        'name': (index + 1).toString(),
+        'name': letters[random.nextInt(letters.length)] + (index + 1).toString(),
         'date': getDateTime(DateTime.now().microsecond),
         'color': Color.fromARGB(
           255,
@@ -39,12 +40,15 @@ class _AddressBookState extends State<AddressBook> {
   Offset keywordPosition = Offset.zero;
   double _topPosition = 0;
   final GlobalKey _key = GlobalKey();
-  final GlobalKey _ContainerKey = GlobalKey();
+  final GlobalKey _containerKey = GlobalKey();
   int? highlightedIndex;
+  double itemHeight = 0;
+  final iconSize = const Size(70, 55);
 
   @override
   void initState() {
     super.initState();
+    friends.sort((a, b) => a['name'].toLowerCase().compareTo(b['name'].toLowerCase()));
     friends.insertAll(0, [
       {
         'name': '通知',
@@ -65,7 +69,13 @@ class _AddressBookState extends State<AddressBook> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isPageChanging = Provider.of<bool>(context);
     return Stack(
       key: _key,
       children: [
@@ -100,112 +110,125 @@ class _AddressBookState extends State<AddressBook> {
             },
           ),
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Container(
-            key: _ContainerKey,
-            // color: Colors.orange,
-            width: 20,
-            // alignment: Alignment.center,
-            margin: const EdgeInsets.only(right: 8),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: keywordList.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 1),
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onPanUpdate: (details) {
-                    final containerRender = _ContainerKey.currentContext!
-                        .findRenderObject() as RenderBox;
-
-                    final boxOffset =
-                        containerRender.localToGlobal(Offset.zero);
-
-                    final renderBox = context.findRenderObject();
-                    final itemHeight = (renderBox?.paintBounds.height ?? 0) /
-                        keywordList.length;
-
-                    final index = ((details.globalPosition.dy - boxOffset.dy) /
-                            itemHeight)
-                        .floor()
-                        .clamp(0, keywordList.length - 1);
-
-                    final p = Offset(
-                      MediaQuery.of(context).size.width -
-                          details.globalPosition.dx +
-                          (details.localPosition.dx + 10),
-                      (index - 1.5) * itemHeight + _topPosition,
-                    );
-
-                    setState(() {
-                      keywordPosition = p;
-                      highlightedIndex = index;
-                    });
-                  },
-                  onPanEnd: (_) {
-                    setState(() {
-                      highlightedIndex = null;
-                    });
-                  },
-                  // onPanUpdate: (details) {
-                  //   print('======== ${index}');
-                  // },
-                  // onTapDown: (details) {
-                  //   final globalPosition = details.globalPosition;
-                  //   final localPosition = details.localPosition;
-
-                  //   final dx = MediaQuery.of(context).size.width -
-                  //       globalPosition.dx +
-                  //       (localPosition.dx + 10);
-                  //   final dy =
-                  //       globalPosition.dy - localPosition.dy - _topPosition;
-
-                  //   setState(() {
-                  //     keywordPosition = Offset(dx, dy);
-                  //   });
-
-                  //   // final elementBox = context.findRenderObject();
-                  //   // print('elementBox: ${elementBox?.paintBounds.height} $keywordPosition');
-                  // },
-                  child: Container(
-                    height: 20,
-                    width: 20,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: highlightedIndex == index
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: Text(
-                      keywordList[index],
-                      style: TextStyle(
+        Visibility(
+          visible: !isPageChanging,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              key: _containerKey,
+              width: 20,
+              margin: const EdgeInsets.only(right: 8),
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: keywordList.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 1),
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onPanUpdate: (details) {
+                      final activeData = getActiveData(context, details);
+                      setState(() {
+                        keywordPosition = activeData['iconOffset'];
+                        highlightedIndex = activeData['index'];
+                        itemHeight = activeData['itemHeight'];
+                      });
+                    },
+                    onPanEnd: (_) {
+                      setState(() {
+                        highlightedIndex = null;
+                      });
+                    },
+                    onTapDown: (details) {
+                      final activeData = getActiveData(context, details);
+                      setState(() {
+                        keywordPosition = activeData['iconOffset'];
+                        highlightedIndex = activeData['index'];
+                        itemHeight = activeData['itemHeight'];
+                      });
+                    },
+                    onTapUp: (_) {
+                      setState(() {
+                        highlightedIndex = null;
+                      });
+                    },
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
                         color: highlightedIndex == index
-                            ? Colors.white
-                            : Colors.black,
-                        fontWeight: highlightedIndex == index
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        fontSize: 14,
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                      child: Text(
+                        keywordList[index],
+                        style: TextStyle(
+                          color: highlightedIndex == index
+                              ? Colors.white
+                              : Colors.black,
+                          fontWeight: highlightedIndex == index
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
-        Positioned(
-          right: keywordPosition.dx,
-          top: keywordPosition.dy,
-          child: AddressBookIcon(),
-        )
+        Visibility(
+          visible: highlightedIndex != null,
+          child: Positioned(
+            right: keywordPosition.dx,
+            top: keywordPosition.dy - iconSize.height / 2,
+            // child: Text('---------'),
+            child: CustomPaint(
+              size: iconSize,
+              painter: BookIconPaint(
+                label: keywordList[highlightedIndex ?? 0],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  int getActiveIndex() {
-    return 1;
+  Map<String, dynamic> getActiveData(BuildContext context, dynamic details) {
+    if (!(details is DragUpdateDetails || details is TapDownDetails)) {
+      return {
+        'index': null,
+        'iconOffset': Offset.zero,
+      };
+    }
+
+    final containerRender =
+        _containerKey.currentContext!.findRenderObject() as RenderBox;
+
+    final boxOffset = containerRender.localToGlobal(Offset.zero);
+
+    final renderBox = context.findRenderObject();
+    final itemHeight =
+        (renderBox?.paintBounds.height ?? 0) / keywordList.length;
+
+    final index = ((details.globalPosition.dy - boxOffset.dy) / itemHeight)
+        .floor()
+        .clamp(0, keywordList.length - 1);
+
+    final iconOffset = Offset(
+      MediaQuery.of(context).size.width -
+          details.globalPosition.dx +
+          (details.localPosition.dx + 10),
+      (index - 1) * itemHeight + _topPosition,
+    );
+    return {
+      'index': index,
+      'iconOffset': iconOffset,
+      'itemHeight': itemHeight,
+    };
   }
 }

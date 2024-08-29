@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './message_list.dart';
 import './address_book.dart';
 import './mine.dart';
@@ -34,11 +35,29 @@ class LayoutPage extends StatefulWidget {
 class _LayoutPageState extends State<LayoutPage> {
   late PageController _pageViewController;
   int currentPageIndex = 1;
+  bool _isPageChanging = false;
 
   @override
   void initState() {
     super.initState();
     _pageViewController = PageController(initialPage: currentPageIndex);
+    _pageViewController.addListener(() {
+      if (_pageViewController.page != currentPageIndex && !_isPageChanging) {
+        setState(() {
+          _isPageChanging = true;
+        });
+      }
+    });
+
+    _pageViewController.addListener(() {
+      if (_pageViewController.page ==
+              _pageViewController.page?.roundToDouble() &&
+          _isPageChanging) {
+        setState(() {
+          _isPageChanging = false;
+        });
+      }
+    });
   }
 
   @override
@@ -55,20 +74,23 @@ class _LayoutPageState extends State<LayoutPage> {
       ),
       body: PageStorage(
         bucket: PageStorageBucket(),
-        child: PageView.builder(
-          itemCount: pageList.length,
-          controller: _pageViewController,
-          itemBuilder: (_, index) => pageList[index]['child'],
-          onPageChanged: (index) {
-            setState(() {
-              currentPageIndex = index;
-            });
-          },
+        child: Provider.value(
+          value: _isPageChanging,
+          child: PageView.builder(
+            itemCount: pageList.length,
+            controller: _pageViewController,
+            itemBuilder: (_, index) => pageList[index]['child'],
+            onPageChanged: (index) {
+              setState(() {
+                currentPageIndex = index;
+              });
+            },
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentPageIndex,
-        // selectedItemColor: Theme.of(context).colorScheme.primary,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
         enableFeedback: false,
         onTap: (index) {
           setState(() {

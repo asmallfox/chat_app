@@ -3,46 +3,72 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class BookIconPaint extends CustomPainter {
-  BookIconPaint();
+  final String? label;
+  BookIconPaint({
+    this.label,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint arcPaint = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.stroke;
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
 
-    canvas.drawArc(
-      Rect.fromCircle(center: const Offset(0, 20), radius: 3.5),
-      0,
-      pi * 2,
-      false,
-      arcPaint,
-    );
+    const offsetRation = 0.625;
+    final hCenter = size.height / 2;
+
+    final path1 = Path()
+      ..moveTo(size.width, hCenter)
+      ..quadraticBezierTo(size.width * offsetRation, 0, hCenter, 0)
+      ..lineTo(hCenter, size.height)
+      ..quadraticBezierTo(
+          size.width * offsetRation, size.height, size.width, hCenter)
+      ..close();
+
+    final path2 = Path()
+      ..addArc(
+        Rect.fromCircle(center: Offset(hCenter, hCenter), radius: hCenter),
+        0,
+        2 * pi,
+      )
+      ..close();
+    canvas.drawPath(path1, paint);
+    canvas.drawPath(path2, paint);
+
+    // 绘制文字
+    if (label != null) {
+      print('=============== $label');
+      final textSize = size.height * 0.65;
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: textSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textAlign: TextAlign.start,
+        textDirection: TextDirection.ltr,
+      );
+
+      // 计算文本的大小
+      textPainter.layout();
+
+      // 在画布上绘制文本
+      textPainter.paint(
+        canvas,
+        Offset(
+          (size.height - textPainter.width) / 2,
+          (size.height - textPainter.height) / 2,
+        ),
+      );
+    }
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     if (oldDelegate is BookIconPaint) {}
     return true;
-  }
-}
-
-class AddressBookIcon extends StatefulWidget {
-  const AddressBookIcon({
-    super.key,
-  });
-
-  @override
-  State<AddressBookIcon> createState() => _AddressBookIconState();
-}
-
-class _AddressBookIconState extends State<AddressBookIcon>
-    with SingleTickerProviderStateMixin {
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(24, 38),
-      painter: BookIconPaint(),
-    );
   }
 }
