@@ -12,12 +12,23 @@ class Mine extends StatefulWidget {
 class _MineState extends State<Mine> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Mine'),
-      ),
-      body: Center(
-        child: Text('This is the Mine page'),
+    return SafeArea(
+      child: Column(
+        children: [
+          Container(
+            height: 80,
+            child: ListTile(
+              minTileHeight: 80,
+              leading: Container(
+                width: 80,
+                height: 80,
+                color: Colors.deepPurple[400],
+              ),
+              title: const Text('小狐幽'),
+              subtitle: const Text('账号：smallfox@99'),
+            ),
+          )
+        ],
       ),
     );
   }

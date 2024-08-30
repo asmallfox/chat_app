@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './message_list.dart';
-import 'addressBook/address_book.dart';
+import 'address_book.dart.bak';
 import './mine.dart';
 
 List pageList = [
@@ -69,7 +69,20 @@ class _LayoutPageState extends State<LayoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentPage = pageList[currentPageIndex];
     return Scaffold(
+      appBar: AppBar(
+        title: Text(currentPage['label']),
+        elevation: 0,
+        leadingWidth: 0,
+      ),
+      // appBar: currentPage['hideAppBar'] == true
+      //     ? null
+      //     : AppBar(
+      //         title: Text(currentPage['label']),
+      //         elevation: 0,
+      //         leadingWidth: 0,
+      //       ),
       body: PageStorage(
         bucket: PageStorageBucket(),
         child: Provider.value(

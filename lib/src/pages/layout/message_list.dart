@@ -32,55 +32,60 @@ class _MessageListState extends State<MessageList> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 4, right: 4, top: 15, bottom: 15),
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: chatList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 20),
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: Container(
-              alignment: Alignment.center,
-              width: 52,
-              height: 52,
-              color: chatList[index]['color'],
-              child: Text(
-                chatList[index]['name'],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                ),
-              ),
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('消息')
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 4, right: 4, top: 15, bottom: 15),
+        child: ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: chatList.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 20),
+          itemBuilder: (context, index) {
+            return ListTile(
+              leading: Container(
+                alignment: Alignment.center,
+                width: 52,
+                height: 52,
+                color: chatList[index]['color'],
+                child: Text(
                   chatList[index]['name'],
                   style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 22,
                   ),
                 ),
-                Text(chatList[index]['date'])
-              ],
-            ),
-            subtitle: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('[新消息] ' + chatList[index]['name']),
-                Badge.count(
-                  count: 99,
-                  backgroundColor: const Color(
-                    0xFFf5a13c,
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    chatList[index]['name'],
+                    style: const TextStyle(
+                      fontSize: 22,
+                    ),
                   ),
-                  isLabelVisible: index % 10 == 2,
-                ),
-              ],
-            ),
-          );
-        },
+                  Text(chatList[index]['date'])
+                ],
+              ),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('[新消息] ' + chatList[index]['name']),
+                  Badge.count(
+                    count: 99,
+                    backgroundColor: const Color(
+                      0xFFf5a13c,
+                    ),
+                    isLabelVisible: index % 10 == 2,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
