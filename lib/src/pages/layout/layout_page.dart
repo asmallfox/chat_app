@@ -1,3 +1,4 @@
+import 'package:chat_app/src/constants/global_key.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './message_list.dart';
@@ -35,7 +36,7 @@ class LayoutPage extends StatefulWidget {
 
 class _LayoutPageState extends State<LayoutPage> {
   late PageController _pageViewController;
-  int currentPageIndex = 1;
+  int currentPageIndex = 0;
   bool _isPageChanging = false;
 
   @override
@@ -87,6 +88,7 @@ class _LayoutPageState extends State<LayoutPage> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        key: bottomNavBarKey,
         currentIndex: currentPageIndex,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         enableFeedback: false,
