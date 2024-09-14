@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:chat_app/src/utils/get_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import './chat_page.dart';
 
 class MessageList extends StatefulWidget {
   const MessageList({
@@ -61,7 +62,7 @@ class _MessageListState extends State<MessageList> {
           itemBuilder: (context, index) {
             return Slidable(
               key: ValueKey(index),
-              // enabled: false,
+              enabled: false,
               endActionPane: null,
               startActionPane: ActionPane(
                 extentRatio: 0.18,
@@ -93,27 +94,32 @@ class _MessageListState extends State<MessageList> {
                 ],
                 builder: (_, MenuController controller, Widget? child) {
                   return GestureDetector(
-                    // onLongPressDown: (details) {
-                    //   setState(() {
-                    //     menuAnchorPosition = details.localPosition;
-                    //   });
-                    // },
+                    onLongPressDown: (details) {
+                      if (!controller.isOpen) {
+                        setState(() {
+                          menuAnchorPosition =
+                              Offset(details.localPosition.dx, -20);
+                        });
+                      }
+                    },
                     child: ListTile(
                       enabled: true,
-                      // onTap: () {
-                      //   if (controller.isOpen) {
-                      //     controller.close();
-                      //   } else {
-                      //     print('跳转两条');
-                      //   }
-                      // },
-                      // onLongPress: () {
-                      //   if (controller.isOpen) {
-                      //     controller.close();
-                      //   } else {
-                      //     controller.open();
-                      //   }
-                      // },
+                      onTap: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const ChatPage(),
+                          ));
+                        }
+                      },
+                      onLongPress: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
                       leading: Container(
                         alignment: Alignment.center,
                         width: 52,

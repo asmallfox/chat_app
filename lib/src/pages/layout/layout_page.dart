@@ -1,7 +1,7 @@
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './message_list.dart';
+import 'message/message_list.dart';
 import 'addressBook/address_book.dart';
 import './mine.dart';
 
