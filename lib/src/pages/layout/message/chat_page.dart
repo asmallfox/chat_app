@@ -55,6 +55,7 @@ class _ChatPageState extends State<ChatPage> {
             ChatPanel(),
           ],
         ),
+        resizeToAvoidBottomInset: false, // 页面是否被软键盘顶起
       ),
     );
   }

@@ -111,3 +111,5 @@ class SettingsAdapter extends TypeAdapter<Settings> {
     writer.writeBool(obj.darkMode);
   }
 }
+
+
