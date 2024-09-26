@@ -1,10 +1,8 @@
 import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
 import 'package:chat_app/src/helpers/keyboard_observer.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 class ChatPanel extends StatefulWidget {
   const ChatPanel({
@@ -19,10 +17,9 @@ class _ChatPanelState extends State<ChatPanel> {
   bool _showSendButton = false;
   bool _showPanel = false;
   bool _showVoiceButton = false;
-  bool _showVoicePanel = false;
 
   final TextEditingController _messageController = TextEditingController();
-  FocusNode focusNode = FocusNode();
+  final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -35,6 +32,7 @@ class _ChatPanelState extends State<ChatPanel> {
     _messageController.dispose();
     focusNode.dispose();
     WidgetsBinding.instance.removeObserver(KeyBoardObserver.instance);
+
     super.dispose();
   }
 
@@ -72,7 +70,6 @@ class _ChatPanelState extends State<ChatPanel> {
                   child: TapRegion(
                     groupId: ConstKeys.chatPanelKey,
                     onTapOutside: (e) {
-                      // SystemChannels.textInput.invokeMethod('TextInput.hide');
                       focusNode.unfocus();
                     },
                     child: Container(
@@ -83,40 +80,26 @@ class _ChatPanelState extends State<ChatPanel> {
                       child: _showVoiceButton
                           ? SizedBox(
                               height: 50,
-                              child: GestureDetector(
+                              child: TextButton(
+                                onPressed: () {},
                                 onLongPress: () {
                                   showVoicePanel(context);
-                                  _showVoicePanel = true;
                                 },
+                                style: ButtonStyle(
+                                  shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.zero,
+                                    ),
+                                  ),
+                                ),
                                 child: const Text(
-                                  'xxxxxxxxxxxxxxxxx',
+                                  '按住 说话',
                                   style: TextStyle(
                                     color: Colors.black,
                                   ),
                                 ),
                               ),
-                              // child: TextButton(
-                              //   onPressed: () {},
-                              //   onLongPress: () {
-                              //     setState(() {
-                              //       _showVoicePanel = true;
-                              //     });
-                              //   },
-                              //   style: ButtonStyle(
-                              //     shape: WidgetStateProperty.all<
-                              //         RoundedRectangleBorder>(
-                              //       const RoundedRectangleBorder(
-                              //         borderRadius: BorderRadius.zero,
-                              //       ),
-                              //     ),
-                              //   ),
-                              //   child: const Text(
-                              //     '按住 说话',
-                              //     style: TextStyle(
-                              //       color: Colors.black,
-                              //     ),
-                              //   ),
-                              // ),
                             )
                           : TextField(
                               minLines: 1,
@@ -124,9 +107,13 @@ class _ChatPanelState extends State<ChatPanel> {
                               focusNode: focusNode,
                               controller: _messageController,
                               decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.only(
-                                      top: 10, bottom: 10, left: 10)),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.only(
+                                  top: 10,
+                                  bottom: 10,
+                                  left: 10,
+                                ),
+                              ),
                               onChanged: (value) {
                                 setState(() {
                                   _showSendButton = value.isNotEmpty;
@@ -229,6 +216,12 @@ class _ChatPanelState extends State<ChatPanel> {
   }
 
   void showVoicePanel(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final voiceCancelKey = GlobalKey();
+    final voiceSendKey = GlobalKey();
+    bool closeButtonCoincide = false;
+    bool sendButtonCoincide = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -236,76 +229,117 @@ class _ChatPanelState extends State<ChatPanel> {
       isDismissible: false,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        final width = MediaQuery.of(context).size.width;
-
         return Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerMove: (detail) {
-            print('移动中');
+          onPointerUp: (event) {
+            if (closeButtonCoincide || sendButtonCoincide) {
+              Navigator.of(context).pop();
+            }
+            setState(() {
+              closeButtonCoincide = false;
+              sendButtonCoincide = false;
+            });
           },
-          child: InkWell(
-            autofocus: true,
-            onLongPress: () {
-              print('xxxxxxxxxxxxxxxxxxxxxxx');
-            },
-            child: Container(
-              color: Colors.transparent,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          onPointerMove: (detail) {
+            bool closeBtnCde = widgetCoincide(voiceCancelKey, detail.position);
+            bool sendBtnCde = widgetCoincide(voiceSendKey, detail.position);
+
+            if (closeButtonCoincide != closeBtnCde) {
+              setState(() {
+                closeButtonCoincide = closeBtnCde;
+              });
+              if (closeBtnCde) {
+                print('取消语音');
+              }
+            }
+            if (sendButtonCoincide != sendBtnCde) {
+              setState(() {
+                sendButtonCoincide = sendBtnCde;
+              });
+              if (sendBtnCde) {
+                print('发送语音');
+              }
+            }
+          },
+          child: Container(
+            color: Colors.transparent,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        key: voiceCancelKey,
+                        width: 50,
+                        height: 50,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: closeButtonCoincide
+                              ? Colors.black26
+                              : Colors.black38,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: closeButtonCoincide
+                              ? Colors.grey[100]
+                              : Colors.grey[500],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: width,
+                  height: 100,
+                  child: Stack(
                     children: [
-                      InkWell(
-                        onHover: (value) {
-                          print('悬浮');
-                        },
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(50),
+                      Positioned(
+                        top: 0,
+                        left: -(width * 0.5 / 2),
+                        child: ClipOval(
+                          child: Container(
+                            key: voiceSendKey,
+                            width: width * 1.5,
+                            height: 400,
+                            color: sendButtonCoincide
+                                ? Colors.black26
+                                : Colors.black38,
                           ),
-                          child: const Icon(Icons.close_rounded),
                         ),
                       ),
                     ],
                   ),
-                  MouseRegion(
-                    child: SizedBox(
-                      width: width,
-                      height: 100,
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 0,
-                            left: -(width * 0.5 / 2),
-                            child: ClipOval(
-                              child: Container(
-                                width: width * 1.5,
-                                height: 400,
-                                color: Colors.black38,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
       },
     );
+  }
+
+  bool widgetCoincide(GlobalKey widgetKey, Offset position) {
+    RenderBox renderBox =
+        widgetKey.currentContext?.findRenderObject() as RenderBox;
+    Offset offset = renderBox.localToGlobal(Offset.zero);
+    double boxX = offset.dx;
+    double boxY = offset.dy;
+    double x = position.dx;
+    double y = position.dy;
+    double size = renderBox.size.width;
+
+    bool coincide =
+        (x > boxX && x < boxX + size) && (y > boxY && y < boxY + size);
+
+    return coincide;
   }
 }
