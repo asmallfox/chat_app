@@ -240,68 +240,62 @@ class _ChatPanelState extends State<ChatPanel> {
 
         return Listener(
           behavior: HitTestBehavior.opaque,
-          onPointerMove: (detail) {
+          onPointerMove: (detail)  {
             print('移动中');
           },
-          child: InkWell(
-            autofocus: true,
-            onLongPress: () {
-              print('xxxxxxxxxxxxxxxxxxxxxxx');
-            },
-            child: Container(
-              color: Colors.transparent,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onHover: (value) {
-                          print('悬浮');
-                        },
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: const Icon(Icons.close_rounded),
+          child: Container(
+            color: Colors.transparent,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onHover: (value) {
+                        print('悬浮');
+                      },
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.black26,
+                          borderRadius: BorderRadius.circular(50),
                         ),
-                      ),
-                    ],
-                  ),
-                  MouseRegion(
-                    child: SizedBox(
-                      width: width,
-                      height: 100,
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 0,
-                            left: -(width * 0.5 / 2),
-                            child: ClipOval(
-                              child: Container(
-                                width: width * 1.5,
-                                height: 400,
-                                color: Colors.black38,
-                              ),
-                            ),
-                          ),
-                        ],
+                        child: const Icon(Icons.close_rounded),
                       ),
                     ),
+                  ],
+                ),
+                MouseRegion(
+                  child: SizedBox(
+                    width: width,
+                    height: 100,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          top: 0,
+                          left: -(width * 0.5 / 2),
+                          child: ClipOval(
+                            child: Container(
+                              width: width * 1.5,
+                              height: 400,
+                              color: Colors.black38,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
