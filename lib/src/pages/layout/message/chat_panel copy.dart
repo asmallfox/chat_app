@@ -1,39 +1,12 @@
 import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
 import 'package:chat_app/src/helpers/keyboard_observer.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class ChatPanel extends StatefulWidget{
-  final void Function(TapDownDetails)? onTapDown;
-  final void Function(TapUpDetails)? onTapUp;
-  final VoidCallback? onLongPress;
-  final VoidCallback? onLongPressUp;
-  final VoidCallback? onLongPressCancel;
-  final void Function(LongPressMoveUpdateDetails)? onLongPressMoveUpdate;
-  final void Function(LongPressDownDetails)? onLongPressDown;
-  final void Function(LongPressStartDetails)? onLongPressStart;
-  final void Function(DragUpdateDetails)? onHorizontalDragUpdate;
-  final void Function(DragDownDetails)? onPanDown;
-  final void Function(DragStartDetails)? onPanStart;
-  final void Function(DragEndDetails)? onPanEnd;
-  final void Function(DragUpdateDetails)? onPanUpdate;
+class ChatPanel extends StatefulWidget {
   const ChatPanel({
     super.key,
-    this.onTapDown,
-    this.onTapUp,
-    this.onLongPress,
-    this.onLongPressMoveUpdate,
-    this.onLongPressUp,
-    this.onLongPressDown,
-    this.onLongPressStart,
-    this.onLongPressCancel,
-    this.onHorizontalDragUpdate,
-    this.onPanDown,
-    this.onPanStart,
-    this.onPanEnd,
-    this.onPanUpdate,
   });
 
   @override
@@ -105,26 +78,27 @@ class _ChatPanelState extends State<ChatPanel> {
                         minHeight: 50,
                       ),
                       child: _showVoiceButton
-                          ? GestureDetector(
-                              onTapDown: widget.onTapDown,
-                              onTapUp: widget.onTapUp,
-                              onLongPress: widget.onLongPress,
-                              onLongPressDown: widget.onLongPressDown,
-                              onLongPressStart: widget.onLongPressStart,
-                              onLongPressMoveUpdate:
-                                  widget.onLongPressMoveUpdate,
-                              onLongPressUp: widget.onLongPressUp,
-                              onLongPressCancel: widget.onLongPressCancel,
-                              onHorizontalDragUpdate: widget.onHorizontalDragUpdate,
-                              onPanDown: widget.onPanDown,
-                              onPanStart: widget.onPanStart,
-                              onPanEnd: widget.onPanEnd,
-                              onPanUpdate: widget.onPanUpdate,
-                              child: Container(
-                                height: 50,
-                                color: Colors.transparent,
-                                alignment: Alignment.center,
-                                child: const Text('按住 说话'),
+                          ? SizedBox(
+                              height: 50,
+                              child: TextButton(
+                                onPressed: () {},
+                                onLongPress: () {
+                                  _showVoicePanel(context);
+                                },
+                                style: ButtonStyle(
+                                  shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.zero,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  '按住 说话',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                  ),
+                                ),
                               ),
                             )
                           : TextField(
@@ -136,8 +110,8 @@ class _ChatPanelState extends State<ChatPanel> {
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.only(
                                   top: 10,
-                                  left: 10,
                                   bottom: 10,
+                                  left: 10,
                                 ),
                               ),
                               onChanged: (value) {
@@ -239,5 +213,133 @@ class _ChatPanelState extends State<ChatPanel> {
         ],
       ),
     );
+  }
+
+  void _showVoicePanel(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final voiceCancelKey = GlobalKey();
+    final voiceSendKey = GlobalKey();
+    bool closeButtonCoincide = false;
+    bool sendButtonCoincide = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      isDismissible: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Listener(
+          onPointerUp: (event) {
+            if (closeButtonCoincide || sendButtonCoincide) {
+              Navigator.of(context).pop();
+            }
+            setState(() {
+              closeButtonCoincide = false;
+              sendButtonCoincide = false;
+            });
+          },
+          onPointerMove: (detail) {
+            bool closeBtnCde = _widgetCoincide(voiceCancelKey, detail.position);
+            bool sendBtnCde = _widgetCoincide(voiceSendKey, detail.position);
+
+            if (closeButtonCoincide != closeBtnCde) {
+              setState(() {
+                closeButtonCoincide = closeBtnCde;
+              });
+              if (closeBtnCde) {
+                print('取消语音');
+              }
+            }
+            if (sendButtonCoincide != sendBtnCde) {
+              setState(() {
+                sendButtonCoincide = sendBtnCde;
+              });
+              if (sendBtnCde) {
+                print('发送语音');
+              }
+            }
+          },
+          child: Container(
+            color: Colors.transparent,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        key: voiceCancelKey,
+                        width: 50,
+                        height: 50,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: closeButtonCoincide
+                              ? Colors.black26
+                              : Colors.black38,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: closeButtonCoincide
+                              ? Colors.grey[100]
+                              : Colors.grey[500],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: width,
+                  height: 100,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 0,
+                        left: -(width * 0.5 / 2),
+                        child: ClipOval(
+                          child: Container(
+                            key: voiceSendKey,
+                            width: width * 1.5,
+                            height: 400,
+                            color: sendButtonCoincide
+                                ? Colors.black26
+                                : Colors.black38,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  bool _widgetCoincide(GlobalKey widgetKey, Offset position) {
+    RenderBox renderBox =
+        widgetKey.currentContext?.findRenderObject() as RenderBox;
+    Offset offset = renderBox.localToGlobal(Offset.zero);
+    double boxX = offset.dx;
+    double boxY = offset.dy;
+    double x = position.dx;
+    double y = position.dy;
+    double size = renderBox.size.width;
+
+    bool coincide =
+        (x > boxX && x < boxX + size) && (y > boxY && y < boxY + size);
+
+    return coincide;
   }
 }
