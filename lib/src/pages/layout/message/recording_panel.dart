@@ -1,4 +1,5 @@
 import 'package:chat_app/src/constants/global_key.dart';
+import 'package:chat_app/src/widgets/audio_cable.dart';
 import 'package:flutter/material.dart';
 
 class RecordingPanel extends StatefulWidget {
@@ -109,12 +110,12 @@ class _RecordingPanelState extends State<RecordingPanel> {
           ),
         ),
         Positioned(
-          top: 20,
-          left: 20,
+          top: (MediaQuery.of(context).size.height - 200) / 2,
+          left: (MediaQuery.of(context).size.width - 200) / 2,
           child: Container(
             width: 200,
             height: 200,
-            color: Colors.pink,
+            child: const AudioCable(),
           )
         )
       ],

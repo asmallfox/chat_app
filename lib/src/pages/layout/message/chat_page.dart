@@ -1,5 +1,7 @@
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
 import 'package:chat_app/src/constants/global_key.dart';
+import 'package:chat_app/src/helpers/permissions_helper.dart';
+import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/pages/layout/message/chat_content.dart';
 import 'package:chat_app/src/pages/layout/message/chat_panel.dart';
 import 'package:chat_app/src/pages/layout/message/recording_panel.dart';
@@ -62,54 +64,18 @@ class _ChatPageState extends State<ChatPage> {
                     child: ChatContent(),
                   ),
                   ChatPanel(
-                    onPanStart: (detail) {
-                      setState(() {
-                        _testShow = true;
-                      });
-                      _handleCoincide(detail);
-                    },
-                    onPanEnd: (detail) {
-                      setState(() {
-                        _testShow = false;
-                        _closeButtonCoincide = false;
-                        _sendButtonCoincide = false;
-                      });
-                    },
-                    onPanUpdate: _handleCoincide,
-                    onTapDown: (detail) {
-                      setState(() {
-                        _testShow = true;
-                      });
-                      _handleCoincide(detail);
-                    },
-                    onTapUp: (detail) {
-                      setState(() {
-                        _testShow = false;
-                        _closeButtonCoincide = false;
-                        _sendButtonCoincide = false;
-                      });
-                    },
                     onLongPressDown: (detail) {
-                      setState(() {
-                        _testShow = true;
-                      });
-                      _handleCoincide(detail);
+                      _showRecordingPanel(detail);
+                      _startRecording();
                     },
+                    onPanStart: _showRecordingPanel,
+                    onTapDown: _showRecordingPanel,
+                    onPanUpdate: _handleCoincide,
                     onLongPressMoveUpdate: _handleCoincide,
-                    onLongPressUp: () {
-                      setState(() {
-                        _testShow = false;
-                        _closeButtonCoincide = false;
-                        _sendButtonCoincide = false;
-                      });
-                    },
-                    onLongPressCancel: () {
-                      setState(() {
-                        _testShow = false;
-                        _closeButtonCoincide = false;
-                        _sendButtonCoincide = false;
-                      });
-                    },
+                    onPanEnd: _cancelRecording,
+                    onTapUp: _cancelRecording,
+                    onLongPressUp: _cancelRecording,
+                    onLongPressCancel: _cancelRecording,
                   ),
                 ],
               ),
@@ -131,6 +97,22 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
+  }
+
+  void _showRecordingPanel(dynamic detail) {
+    setState(() {
+      _testShow = true;
+    });
+    _handleCoincide(detail);
+  }
+
+  void _cancelRecording([dynamic detail]) {
+    setState(() {
+      _testShow = false;
+      _closeButtonCoincide = false;
+      _sendButtonCoincide = false;
+    });
+    _endRecording();
   }
 
   void _handleCoincide(dynamic detail) {
@@ -173,5 +155,24 @@ class _ChatPageState extends State<ChatPage> {
     //   print('===== boxX = $boxX, boxY = $boxY, sizeH = $sizeH');
     // }
     return coincide;
+  }
+
+  Future<void> _startRecording() async {
+    try {
+      print('开始语音录制');
+      await PermissionsHelper.microphone();
+      await RecordingHelper.startRecording();
+    } catch (error) {
+      print('获取��克风权限失败：$error');
+    }
+  }
+
+  Future<void> _endRecording() async {
+    String? path = await RecordingHelper.stopRecording();
+    if (path != null) {
+      print(path);
+    } else {
+      print('结束语音录制，未能获取到语音路径');
+    }
   }
 }

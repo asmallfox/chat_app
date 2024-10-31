@@ -74,3 +74,49 @@ class User {
   @HiveField(2, defaultValue: 0.0)
   double? keyboard_max_height;
 }
+
+
+
+
+
+
+
+app {
+  user1: {
+    settings: {
+      account(账号),
+      userinfo(用户信息),
+      token(登陆凭证),
+      sysSettings(当前用户app基础设置): { ... }
+    },
+    friends: [
+      {
+        messageList: [
+          {
+            from,
+            to,
+            type,
+            sendTime,
+            message(如果非文字类型，存储url):
+          },
+          ...
+        ],
+        ...
+      }
+    ],
+    chatList: [
+      {
+        friendId,
+        lastMessage,
+        lastMessageTime,
+        lastMessageType,
+        unreadCount,
+       ...
+      }
+    ]
+  }
+  user2: {},
+  user3: {}
+}
+
+

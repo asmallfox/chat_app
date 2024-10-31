@@ -38,8 +38,6 @@ class _MessageListState extends State<MessageList> {
   @override
   void initState() {
     super.initState();
-
-    print('======================');
   }
 
   @override

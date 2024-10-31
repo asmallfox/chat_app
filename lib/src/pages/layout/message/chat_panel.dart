@@ -1,11 +1,12 @@
 import 'package:chat_app/CustomWidget/custom_icon_button.dart';
+import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
 import 'package:chat_app/src/helpers/keyboard_observer.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class ChatPanel extends StatefulWidget{
+class ChatPanel extends StatefulWidget {
   final void Function(TapDownDetails)? onTapDown;
   final void Function(TapUpDetails)? onTapUp;
   final VoidCallback? onLongPress;
@@ -115,7 +116,8 @@ class _ChatPanelState extends State<ChatPanel> {
                                   widget.onLongPressMoveUpdate,
                               onLongPressUp: widget.onLongPressUp,
                               onLongPressCancel: widget.onLongPressCancel,
-                              onHorizontalDragUpdate: widget.onHorizontalDragUpdate,
+                              onHorizontalDragUpdate:
+                                  widget.onHorizontalDragUpdate,
                               onPanDown: widget.onPanDown,
                               onPanStart: widget.onPanStart,
                               onPanEnd: widget.onPanEnd,
@@ -156,7 +158,7 @@ class _ChatPanelState extends State<ChatPanel> {
                   groupId: ConstKeys.chatPanelKey,
                   child: _showSendButton
                       ? FilledButton(
-                          onPressed: () {},
+                          onPressed: _sendMessage,
                           style: ButtonStyle(
                             padding:
                                 WidgetStateProperty.all<EdgeInsetsGeometry>(
@@ -239,5 +241,25 @@ class _ChatPanelState extends State<ChatPanel> {
         ],
       ),
     );
+  }
+
+  Future<void> _sendMessage() async {
+    // 发送消息
+    print('发送消息：${_messageController.text}');
+
+    Map mesMap = {
+      'type': MessageType.text.value,
+      'content': _messageController.text,
+      'from': '1',
+      'to': '2',
+      'sendTime': DateTime.now().millisecondsSinceEpoch
+    };
+
+    
+
+    // setState(() {
+    //   _messageController.clear();
+    //   _showSendButton = false;
+    // });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/hive_helper.dart';
+import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/router/routes.dart';
 import 'package:chat_app/src/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +10,16 @@ void main() async {
   // 如果尚未初始化绑定，则使用 WidgetsFlutterBinding 类创建和初始化绑定。
   WidgetsFlutterBinding.ensureInitialized();
 
-  await HiveHelper.getInstance();
+  await startService();
 
   runApp(const MyApp());
+}
+
+Future<void> startService() async {
+  // 初始化本地存储
+  await HiveHelper.getInstance();
+  // 初始化录音插件
+  await RecordingHelper.getInstance();
 }
 
 class MyApp extends StatelessWidget {
