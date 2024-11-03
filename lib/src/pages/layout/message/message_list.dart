@@ -107,7 +107,19 @@ class _MessageListState extends State<MessageList> {
                           controller.close();
                         } else {
                           Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const ChatPage(),
+                            builder: (context) => const ChatPage(
+                              item: {
+                                "id": "2",
+                                "account": "zs",
+                                "name": "张三",
+                                "promoter": "1",
+                                "sex": 1,
+                                "avatar":
+                                    "https://img1.baidu.com/it/u=1317558294,51779109&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=500",
+                                "created_at": "1730631675000",
+                                "updated_at": "1730631675000"
+                              },
+                            ),
                           ));
                         }
                       },

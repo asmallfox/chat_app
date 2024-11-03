@@ -9,8 +9,10 @@ import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:flutter/material.dart';
 
 class ChatPage extends StatefulWidget {
+  final Map item;
   const ChatPage({
     super.key,
+    required this.item,
   });
 
   @override
@@ -33,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
                 leading: BackIconButton(
                   backFn: () {},
                 ),
-                title: const Text('谁在聊天...'),
+                title: Text(widget.item['name']),
                 actions: [
                   IconButton(
                     onPressed: () async {
@@ -60,10 +62,11 @@ class _ChatPageState extends State<ChatPage> {
               ),
               body: Column(
                 children: [
-                  const Expanded(
-                    child: ChatContent(),
+                  Expanded(
+                    child: ChatContent(item: widget.item),
                   ),
                   ChatPanel(
+                    item: widget.item,
                     onLongPressDown: (detail) {
                       _showRecordingPanel(detail);
                       _startRecording();

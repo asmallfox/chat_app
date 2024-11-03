@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:chat_app/Helpers/animation_slide_route.dart';
+import 'package:chat_app/src/helpers/hive_helper.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/pages/layout/layout_page.dart';
 import 'package:chat_app/src/pages/login/custom_text_field.dart';
@@ -6,6 +9,9 @@ import 'package:chat_app/src/pages/login/sign_up_page.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter/services.dart' as rootBundle;
+import 'package:hive_flutter/adapters.dart';
 
 class LogOnPage extends StatefulWidget {
   const LogOnPage({
@@ -17,20 +23,20 @@ class LogOnPage extends StatefulWidget {
 }
 
 class _LogOnPageState extends State<LogOnPage> {
-  late TextEditingController _usernameController;
+  late TextEditingController _accountController;
   late TextEditingController _passwordController;
   bool _loading = false;
 
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController();
+    _accountController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _accountController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -57,7 +63,7 @@ class _LogOnPageState extends State<LogOnPage> {
               ),
               CustomTextField(
                 hintText: "账号",
-                controller: _usernameController,
+                controller: _accountController,
               ),
               const SizedBox(
                 height: 30,
@@ -190,10 +196,22 @@ class _LogOnPageState extends State<LogOnPage> {
 
     try {
       Map<String, String> formData = {
-        'username': _usernameController.text,
+        'account': _accountController.text,
         'password': _passwordController.text,
       };
       print('登录数据：$formData');
+
+      // 创建账号数据
+      await HiveHelper.openHive(formData['account'].toString());
+
+      final jsonString = await rootBundle.rootBundle
+          .loadString('assets/services/user.json');
+
+      final userInfo = json.decode(jsonString);
+
+      await Hive.box('app').put('token', 'token');
+      await Hive.box('app').put('userinfo', userInfo);
+
       navigator.pushReplacement(
         MaterialPageRoute(builder: (_) => const LayoutPage()),
       );

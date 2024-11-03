@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:chat_app/src/pages/layout/addressBook/book_icon_Paint.dart';
+import 'package:chat_app/src/pages/layout/message/chat_page.dart';
 import 'package:chat_app/src/utils/get_date_time.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:pinyin/pinyin.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart' as rootBundle;
 
 const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -18,23 +23,25 @@ class AddressBook extends StatefulWidget {
 }
 
 class _AddressBookState extends State<AddressBook> {
-  List friends = List.generate(
-    100,
-    (index) {
-      final random = Random();
-      return {
-        'name':
-            letters[random.nextInt(letters.length)] + (index + 1).toString(),
-        'date': getDateTime(DateTime.now().microsecond),
-        'color': Color.fromARGB(
-          255,
-          random.nextInt(256),
-          random.nextInt(256),
-          random.nextInt(256),
-        )
-      };
-    },
-  );
+  // List friends = List.generate(
+  //   100,
+  //   (index) {
+  //     final random = Random();
+  //     return {
+  //       'name':
+  //           letters[random.nextInt(letters.length)] + (index + 1).toString(),
+  //       'date': getDateTime(DateTime.now().microsecond),
+  //       'color': Color.fromARGB(
+  //         255,
+  //         random.nextInt(256),
+  //         random.nextInt(256),
+  //         random.nextInt(256),
+  //       )
+  //     };
+  //   },
+  // );
+
+  late List friends = [];
 
   List keywordList =
       List.generate(26, (index) => String.fromCharCode(index + 65));
@@ -50,12 +57,39 @@ class _AddressBookState extends State<AddressBook> {
   final List<Map<String, dynamic>> names = [];
   final ScrollController _scrollController = ScrollController();
 
+  Future<void> getFriends() async {
+    try {
+      final jsonString = await rootBundle.rootBundle
+          .loadString('assets/services/friends.json');
+
+      friends = json.decode(jsonString);
+      final userBox = await Hive.openBox('smallfox@99');
+      final localFriends = userBox.get('friends', defaultValue: []);
+      if (friends.isNotEmpty) {
+        for (int i = 0; i < friends.length; i++) {
+          int index = localFriends
+              .indexWhere((e) => e['account'] == friends[i]['account']);
+          if (index != -1) {
+            // 更新信息
+            // localFriends[index] = localFriends[index].addAll(friends[i]);
+          } else {
+            localFriends.add(friends[i]);
+          }
+        }
+      //   await userBox.put('friends', localFriends);
+      }
+      initWidgets();
+    } catch (error) {
+      print('获取好友列表错误 $error');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    initWidgets();
     keywordList.insert(0, '~');
     keywordList.add('#');
+    getFriends();
   }
 
   void initWidgets() {
@@ -122,18 +156,31 @@ class _AddressBookState extends State<AddressBook> {
           return SizedBox(
             height: 52,
             child: ListTile(
+              onTap: () async {
+                print(item);
+                // final currentUserInfo = await Hive.box('app').get('userinfo');
+                // final userBox = Hive.box(currentUserInfo['account']);
+                // final List chats = await userBox.get('chats', defaultValue: []);
+                // final chatItem = chats.firstWhere((element) => element['account'] == item['account']);
+                Navigator.of(context)
+                    .push(PageRouteBuilder(pageBuilder: (_, __, ___) {
+                  return ChatPage(item: item);
+                }));
+              },
               leading: Container(
                 alignment: Alignment.center,
                 width: 52,
                 height: 52,
-                color: item['color'],
-                child: Text(
-                  item['name'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                  ),
-                ),
+                color: item['color'] ?? Colors.white,
+                child: item['avatar'] == null
+                    ? Text(
+                        item['name'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                        ),
+                      )
+                    : Image.network(item['avatar']),
               ),
               title: Text(
                 item['name'],
@@ -152,6 +199,9 @@ class _AddressBookState extends State<AddressBook> {
       alignment: Alignment.center,
       child: Text('${friends.length - 2} 个好友'),
     ));
+
+    // 更新界面
+    setState(() {});
   }
 
   @override

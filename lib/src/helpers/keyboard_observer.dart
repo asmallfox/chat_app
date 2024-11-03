@@ -44,10 +44,10 @@ class KeyBoardObserver extends WidgetsBindingObserver {
 
   void _getHeightToHive() async {
     keyboardHeight =
-        await Hive.box('settings').get(KEYBOARD_MAX_HEIGHT, defaultValue: 0.0);
+        await Hive.box('app').get(KEYBOARD_MAX_HEIGHT, defaultValue: 0.0);
   }
 
   Future<void> _saveKeyboardHeight() async {
-    Hive.box('settings').put(KEYBOARD_MAX_HEIGHT, keyboardHeight);
+    Hive.box('app').put(KEYBOARD_MAX_HEIGHT, keyboardHeight);
   }
 }

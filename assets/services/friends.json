@@ -1,0 +1,22 @@
+[
+  {
+    "id": "2",
+    "account": "zs",
+    "name": "张三",
+    "promoter": "1",
+    "sex": 1,
+    "avatar": "https://img1.baidu.com/it/u=1317558294,51779109&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=500",
+    "created_at": "1730631675000",
+    "updated_at": "1730631675000"
+  },
+  {
+    "id": "3",
+    "account": "lisi",
+    "name": "丽丝",
+    "promoter": "1",
+    "sex": 2,
+    "avatar": "https://img2.baidu.com/it/u=2996521979,1092155558&fm=253&fmt=auto?w=400&h=400",
+    "created_at": "1730631675000",
+    "updated_at": "1730631675000"
+  }
+]

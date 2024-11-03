@@ -1,14 +1,24 @@
+// const hiveBoxes = [
+//   {
+//     'name': 'settings',
+//     'limit': false,
+//   },
+//   {
+//     'name': 'cache',
+//     'limit': false,
+//   },
+//   {
+//     'name': 'chat',
+//     'limit': false,
+//   }
+// ];
 const hiveBoxes = [
   {
-    'name': 'settings',
+    'name': 'app',
     'limit': false,
   },
-  {
-    'name': 'cache',
-    'limit': false,
-  },
-  {
-    'name': 'chat',
-    'limit': false,
-  }
+  // {
+  //   'name': 'userId',
+  //   'limit': false,
+  // }
 ];

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
@@ -5,8 +7,10 @@ import 'package:chat_app/src/helpers/keyboard_observer.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class ChatPanel extends StatefulWidget {
+  final Map item;
   final void Function(TapDownDetails)? onTapDown;
   final void Function(TapUpDetails)? onTapUp;
   final VoidCallback? onLongPress;
@@ -22,6 +26,7 @@ class ChatPanel extends StatefulWidget {
   final void Function(DragUpdateDetails)? onPanUpdate;
   const ChatPanel({
     super.key,
+    required this.item,
     this.onTapDown,
     this.onTapUp,
     this.onLongPress,
@@ -255,11 +260,24 @@ class _ChatPanelState extends State<ChatPanel> {
       'sendTime': DateTime.now().millisecondsSinceEpoch
     };
 
-    
+    final userInfo = await Hive.box('app').get('userinfo');
+    final userBox = Hive.box(userInfo['account']);
 
-    // setState(() {
-    //   _messageController.clear();
-    //   _showSendButton = false;
-    // });
+    final List friends = await userBox.get('friends', defaultValue: []);
+
+    final index = friends
+        .indexWhere((element) => element['account'] == widget.item['account']);
+    print('====== $index $friends ${widget.item}');
+    if (index != -1) {
+      friends[index]['messages'] = widget.item['messages'] == null
+          ? [mesMap]
+          : widget.item['messages'].add(mesMap);
+      print('执行');
+    }
+
+    setState(() {
+      _messageController.clear();
+      _showSendButton = false;
+    });
   }
 }
