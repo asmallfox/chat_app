@@ -1,5 +1,6 @@
 import 'package:chat_app/src/pages/login/log_on_page.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class Mine extends StatefulWidget {
   const Mine({
@@ -83,7 +84,10 @@ class _MineState extends State<Mine> {
                 onTap: () {},
               ),
               FilledButton(
-                onPressed: () {
+                onPressed: () async {
+                  final appBox = Hive.box('app');
+                  appBox.put('token', null);
+                  appBox.put('userInfo', null);
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => const LogOnPage(),

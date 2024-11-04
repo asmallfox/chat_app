@@ -1,19 +1,21 @@
 import 'package:hive/hive.dart';
 
-class User extends HiveObject {
+class UserHiveModel extends HiveObject {
   final String id;
+  final String name;
   final String account;
-  final String username;
+  final String avatar;
   final Map<String, dynamic> setting;
 
   final List<dynamic> friends;
   final List<dynamic> messages;
   final List<dynamic> chatList;
 
-  User({
+  UserHiveModel({
     required this.id,
+    required this.name,
     required this.account,
-    required this.username,
+    required this.avatar,
     Map<String, dynamic>? setting,
     List<dynamic>? friends,
     List<dynamic>? messages,
@@ -24,16 +26,17 @@ class User extends HiveObject {
         chatList = chatList ?? [];
 }
 
-class UserAdapter extends TypeAdapter<User> {
+class UserAdapter extends TypeAdapter<UserHiveModel> {
   @override
   final typeId = 0;
 
   @override
-  User read(BinaryReader reader) {
-    return User(
+  UserHiveModel read(BinaryReader reader) {
+    return UserHiveModel(
       id: reader.readString(),
+      name: reader.readString(),
       account: reader.readString(),
-      username: reader.readString(),
+      avatar: reader.readString(),
       setting: reader.readMap().cast<String, dynamic>(),
       friends: reader.readList(),
       messages: reader.readList(),
@@ -42,14 +45,15 @@ class UserAdapter extends TypeAdapter<User> {
   }
 
   @override
-  void write(BinaryWriter writer, User obj) {
+  void write(BinaryWriter writer, UserHiveModel obj) {
     // .. 表示连续调用，可以省略前面的对象
     // writer.writeString(obj.id)
     // writer.writeString(obj.account)
     writer
       ..writeString(obj.id)
+      ..writeString(obj.name)
       ..writeString(obj.account)
-      ..writeString(obj.username)
+      ..writeString(obj.avatar)
       ..writeMap(obj.setting)
       ..writeList(obj.friends)
       ..writeList(obj.messages)
@@ -110,4 +114,3 @@ class UserAdapter extends TypeAdapter<User> {
 //   }
 // }
 
-class Account extends HiveObject {}

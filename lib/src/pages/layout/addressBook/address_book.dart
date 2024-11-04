@@ -57,6 +57,8 @@ class _AddressBookState extends State<AddressBook> {
   final List<Map<String, dynamic>> names = [];
   final ScrollController _scrollController = ScrollController();
 
+  final userInfo = Hive.box('app').get('userInfo');
+
   Future<void> getFriends() async {
     try {
       final jsonString = await rootBundle.rootBundle
@@ -76,7 +78,7 @@ class _AddressBookState extends State<AddressBook> {
             localFriends.add(friends[i]);
           }
         }
-      //   await userBox.put('friends', localFriends);
+        //   await userBox.put('friends', localFriends);
       }
       initWidgets();
     } catch (error) {
@@ -211,88 +213,99 @@ class _AddressBookState extends State<AddressBook> {
 
   @override
   Widget build(BuildContext context) {
+    
     final isPageChanging = Provider.of<bool>(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('通讯录'),
-      ),
-      body: Stack(
-        key: _stackGlobalKey,
-        fit: StackFit.expand,
-        children: [
-          SingleChildScrollView(
-            controller: _scrollController,
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: widgets.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
-              itemBuilder: (context, index) => widgets[index],
-            ),
+    return ValueListenableBuilder(
+      valueListenable: Hive.box(userInfo['account']).get('friends'),
+      builder: (context, box, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('通讯录'),
           ),
-          Visibility(
-            visible: !isPageChanging,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                key: _containerKey,
-                width: 20,
-                margin: const EdgeInsets.only(right: 8),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: keywordList.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onPanUpdate: (details) => getActiveData(context, details),
-                      onTapDown: (details) => getActiveData(context, details),
-                      onPanEnd: (_) => resetHighlightedIndex(),
-                      onTapUp: (_) => resetHighlightedIndex(),
-                      child: Container(
-                        height: 20,
-                        width: 20,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: _highlightedIndex == index
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(50.0),
-                        ),
-                        child: Text(
-                          keywordList[index],
-                          style: TextStyle(
-                            color: _highlightedIndex == index
-                                ? Colors.white
-                                : Colors.black,
-                            fontWeight: _highlightedIndex == index
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-          Visibility(
-            visible: _highlightedIndex != null,
-            child: Positioned(
-              right: _keywordPosition.dx,
-              top: _keywordPosition.dy,
-              child: CustomPaint(
-                size: iconSize,
-                painter: BookIconPaint(
-                  label: keywordList[_highlightedIndex ?? 0],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: const Text('通讯录'),
+    //   ),
+    //   body: Stack(
+    //     key: _stackGlobalKey,
+    //     fit: StackFit.expand,
+    //     children: [
+    //       SingleChildScrollView(
+    //         controller: _scrollController,
+    //         child: ListView.separated(
+    //           shrinkWrap: true,
+    //           physics: const NeverScrollableScrollPhysics(),
+    //           itemCount: widgets.length,
+    //           separatorBuilder: (context, index) => const SizedBox(height: 10),
+    //           itemBuilder: (context, index) => widgets[index],
+    //         ),
+    //       ),
+    //       Visibility(
+    //         visible: !isPageChanging,
+    //         child: Align(
+    //           alignment: Alignment.centerRight,
+    //           child: Container(
+    //             key: _containerKey,
+    //             width: 20,
+    //             margin: const EdgeInsets.only(right: 8),
+    //             child: ListView.builder(
+    //               shrinkWrap: true,
+    //               physics: const NeverScrollableScrollPhysics(),
+    //               itemCount: keywordList.length,
+    //               itemBuilder: (context, index) {
+    //                 return GestureDetector(
+    //                   onPanUpdate: (details) => getActiveData(context, details),
+    //                   onTapDown: (details) => getActiveData(context, details),
+    //                   onPanEnd: (_) => resetHighlightedIndex(),
+    //                   onTapUp: (_) => resetHighlightedIndex(),
+    //                   child: Container(
+    //                     height: 20,
+    //                     width: 20,
+    //                     alignment: Alignment.center,
+    //                     decoration: BoxDecoration(
+    //                       color: _highlightedIndex == index
+    //                           ? Theme.of(context).colorScheme.primary
+    //                           : Colors.transparent,
+    //                       borderRadius: BorderRadius.circular(50.0),
+    //                     ),
+    //                     child: Text(
+    //                       keywordList[index],
+    //                       style: TextStyle(
+    //                         color: _highlightedIndex == index
+    //                             ? Colors.white
+    //                             : Colors.black,
+    //                         fontWeight: _highlightedIndex == index
+    //                             ? FontWeight.bold
+    //                             : FontWeight.normal,
+    //                         fontSize: 14,
+    //                       ),
+    //                     ),
+    //                   ),
+    //                 );
+    //               },
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //       Visibility(
+    //         visible: _highlightedIndex != null,
+    //         child: Positioned(
+    //           right: _keywordPosition.dx,
+    //           top: _keywordPosition.dy,
+    //           child: CustomPaint(
+    //             size: iconSize,
+    //             painter: BookIconPaint(
+    //               label: keywordList[_highlightedIndex ?? 0],
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 
   void getActiveData(BuildContext context, dynamic details) {
