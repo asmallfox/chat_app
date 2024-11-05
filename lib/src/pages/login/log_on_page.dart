@@ -14,6 +14,7 @@ import 'package:flutter/services.dart' as rootBundle;
 
 import 'package:chat_app/src/models/app.dart';
 import 'package:chat_app/src/models/user.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class LogOnPage extends StatefulWidget {
   const LogOnPage({
@@ -211,21 +212,28 @@ class _LogOnPageState extends State<LogOnPage> {
 
       final userInfo = json.decode(jsonString);
 
-      UserHiveModel userModel = UserHiveModel(
-        id: userInfo['id'],
-        account: userInfo['account'],
-        name: userInfo['name'],
-        avatar: userInfo['avatar'],
-      );
-      AppHiveModel appModel = AppHiveModel(token: 'token', userInfo: userModel);
+      // UserHiveModel userModel = UserHiveModel(
+      //   id: userInfo['id'],
+      //   account: userInfo['account'],
+      //   name: userInfo['name'],
+      //   avatar: userInfo['avatar'],
+      // );
+      // AppHiveModel appModel = AppHiveModel(token: 'token', userInfo: userModel);
 
-      appModel.save();
-      userModel.save();
+      // appModel.save();
+      // userModel.save();
 
       // await Hive.box('app').put('token', 'token');
       // await Hive.box('app').put('userInfo', userInfo);
 
       // await Hive.box(formData['account'].toString()).put('friends', []);
+
+      final appBox = Hive.box('app');
+
+      appBox.put('token', '======token=======');
+      appBox.put('userInfo', userInfo);
+
+      await Hive.box(formData['account'].toString()).put('friends', []);
 
       navigator.pushReplacement(
         MaterialPageRoute(builder: (_) => const LayoutPage()),

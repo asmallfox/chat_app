@@ -1,4 +1,6 @@
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class ChatContent extends StatefulWidget {
   final Map item;
@@ -13,11 +15,12 @@ class ChatContent extends StatefulWidget {
 
 class _ChatContentState extends State<ChatContent>
     with SingleTickerProviderStateMixin {
-  List messageList = [];
+  List<Map> messageList = [];
 
   final ScrollController _scrollController = ScrollController();
 
   Future<void> _initMessages() async {
+    final user = UserHive.getUserInfo();
     messageList = widget.item['messages'] ?? [];
   }
 
@@ -35,7 +38,6 @@ class _ChatContentState extends State<ChatContent>
 
   @override
   Widget build(BuildContext context) {
-    print(widget.item);
     return ListView.builder(
       controller: _scrollController,
       itemCount: messageList.length,
@@ -44,10 +46,18 @@ class _ChatContentState extends State<ChatContent>
         return ListTile(
           leading: CircleAvatar(
             backgroundColor: Colors.blue,
-            child: Text("A ${index}"),
+            child: msgItem['avatar'] == null
+                ? Text(
+                    msgItem['name'],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                    ),
+                  )
+                : Image.network(msgItem['avatar']),
           ),
           title: const Text('Hello, World!'),
-          subtitle: Text(msgItem['message']),
+          subtitle: Text(msgItem['content']),
         );
       },
     );

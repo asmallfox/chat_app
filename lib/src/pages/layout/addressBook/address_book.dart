@@ -41,8 +41,6 @@ class _AddressBookState extends State<AddressBook> {
   //   },
   // );
 
-  late List friends = [];
-
   List keywordList =
       List.generate(26, (index) => String.fromCharCode(index + 65));
 
@@ -53,19 +51,18 @@ class _AddressBookState extends State<AddressBook> {
   Offset _keywordPosition = Offset.zero;
   Offset? _containerOffset;
   int? _highlightedIndex;
-  final List<Widget> widgets = [];
+  List<Widget> widgetList = [];
   final List<Map<String, dynamic>> names = [];
   final ScrollController _scrollController = ScrollController();
 
   final userInfo = Hive.box('app').get('userInfo');
+  late final userBox = Hive.box(userInfo['account']);
 
   Future<void> getFriends() async {
     try {
       final jsonString = await rootBundle.rootBundle
           .loadString('assets/services/friends.json');
-
-      friends = json.decode(jsonString);
-      final userBox = await Hive.openBox('smallfox@99');
+      final friends = json.decode(jsonString);
       final localFriends = userBox.get('friends', defaultValue: []);
       if (friends.isNotEmpty) {
         for (int i = 0; i < friends.length; i++) {
@@ -73,14 +70,16 @@ class _AddressBookState extends State<AddressBook> {
               .indexWhere((e) => e['account'] == friends[i]['account']);
           if (index != -1) {
             // 更新信息
-            // localFriends[index] = localFriends[index].addAll(friends[i]);
+            localFriends[index] = {
+              ...localFriends[index],
+              ...(friends[i] as Map)
+            };
           } else {
             localFriends.add(friends[i]);
           }
         }
-        //   await userBox.put('friends', localFriends);
+        await userBox.put('friends', localFriends);
       }
-      initWidgets();
     } catch (error) {
       print('获取好友列表错误 $error');
     }
@@ -94,118 +93,6 @@ class _AddressBookState extends State<AddressBook> {
     getFriends();
   }
 
-  void initWidgets() {
-    final Map<String, List<dynamic>> result = {};
-    friends.sort(
-        (a, b) => a['name'].toLowerCase().compareTo(b['name'].toLowerCase()));
-
-    friends.insertAll(0, [
-      {
-        'name': '通知',
-        'color': const Color.fromARGB(255, 43, 145, 46),
-        'function': true,
-      },
-      {
-        'name': '群聊',
-        'color': const Color.fromARGB(255, 148, 139, 62),
-        'function': true,
-      }
-    ]);
-
-    for (Map item in friends) {
-      String firstChar = item['name'][0];
-      String key = PinyinHelper.getPinyin(item['name']).toUpperCase()[0];
-      if (item['function'] == true) {
-        if (result.containsKey('~')) {
-          result['~']!.add(item);
-        } else {
-          result['~'] = [item];
-        }
-      } else if (RegExp(r'^[a-zA-Z\u4e00-\u9fa5]').hasMatch(firstChar)) {
-        if (result.containsKey(key)) {
-          result[key]!.add(item);
-        } else {
-          result[key] = [item];
-        }
-      } else {
-        if (result.containsKey('#')) {
-          result['#']!.add(item);
-        } else {
-          result['#'] = [item];
-        }
-      }
-    }
-
-    result.forEach((key, value) {
-      if (value.isNotEmpty) {
-        if (key != '~') {
-          widgets.add(SizedBox(
-            height: 30,
-            child: ListTile(
-              title: Text(key),
-            ),
-          ));
-          names.add({
-            'key': key,
-            'isKey': true,
-          });
-        }
-        names.addAll(value.map((item) {
-          return {'key': item['name'], 'isKey': false};
-        }));
-
-        widgets.addAll(value.map((item) {
-          return SizedBox(
-            height: 52,
-            child: ListTile(
-              onTap: () async {
-                print(item);
-                // final currentUserInfo = await Hive.box('app').get('userinfo');
-                // final userBox = Hive.box(currentUserInfo['account']);
-                // final List chats = await userBox.get('chats', defaultValue: []);
-                // final chatItem = chats.firstWhere((element) => element['account'] == item['account']);
-                Navigator.of(context)
-                    .push(PageRouteBuilder(pageBuilder: (_, __, ___) {
-                  return ChatPage(item: item);
-                }));
-              },
-              leading: Container(
-                alignment: Alignment.center,
-                width: 52,
-                height: 52,
-                color: item['color'] ?? Colors.white,
-                child: item['avatar'] == null
-                    ? Text(
-                        item['name'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                        ),
-                      )
-                    : Image.network(item['avatar']),
-              ),
-              title: Text(
-                item['name'],
-                style: const TextStyle(
-                  fontSize: 22,
-                ),
-              ),
-            ),
-          );
-        }).toList());
-      }
-    });
-
-    widgets.add(Container(
-      height: 50,
-      alignment: Alignment.center,
-      child: Text('${friends.length - 2} 个好友'),
-    ));
-
-    // 更新界面
-    setState(() {});
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -213,99 +100,97 @@ class _AddressBookState extends State<AddressBook> {
 
   @override
   Widget build(BuildContext context) {
-    
     final isPageChanging = Provider.of<bool>(context);
     return ValueListenableBuilder(
-      valueListenable: Hive.box(userInfo['account']).get('friends'),
+      valueListenable: userBox.listenable(keys: ['friends']),
       builder: (context, box, child) {
+        widgetList = _getWidgets(box.get('friends'));
         return Scaffold(
           appBar: AppBar(
             title: const Text('通讯录'),
           ),
+          body: Stack(
+            key: _stackGlobalKey,
+            fit: StackFit.expand,
+            children: [
+              SingleChildScrollView(
+                controller: _scrollController,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: widgetList.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 10),
+                  itemBuilder: (context, index) => widgetList[index],
+                ),
+              ),
+              Visibility(
+                visible: !isPageChanging,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    key: _containerKey,
+                    width: 20,
+                    margin: const EdgeInsets.only(right: 8),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: keywordList.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onPanUpdate: (details) =>
+                              getActiveData(context, details),
+                          onTapDown: (details) =>
+                              getActiveData(context, details),
+                          onPanEnd: (_) => resetHighlightedIndex(),
+                          onTapUp: (_) => resetHighlightedIndex(),
+                          child: Container(
+                            height: 20,
+                            width: 20,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: _highlightedIndex == index
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            child: Text(
+                              keywordList[index],
+                              style: TextStyle(
+                                color: _highlightedIndex == index
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontWeight: _highlightedIndex == index
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: _highlightedIndex != null,
+                child: Positioned(
+                  right: _keywordPosition.dx,
+                  top: _keywordPosition.dy,
+                  child: CustomPaint(
+                    size: iconSize,
+                    painter: BookIconPaint(
+                      label: keywordList[_highlightedIndex ?? 0],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: const Text('通讯录'),
-    //   ),
-    //   body: Stack(
-    //     key: _stackGlobalKey,
-    //     fit: StackFit.expand,
-    //     children: [
-    //       SingleChildScrollView(
-    //         controller: _scrollController,
-    //         child: ListView.separated(
-    //           shrinkWrap: true,
-    //           physics: const NeverScrollableScrollPhysics(),
-    //           itemCount: widgets.length,
-    //           separatorBuilder: (context, index) => const SizedBox(height: 10),
-    //           itemBuilder: (context, index) => widgets[index],
-    //         ),
-    //       ),
-    //       Visibility(
-    //         visible: !isPageChanging,
-    //         child: Align(
-    //           alignment: Alignment.centerRight,
-    //           child: Container(
-    //             key: _containerKey,
-    //             width: 20,
-    //             margin: const EdgeInsets.only(right: 8),
-    //             child: ListView.builder(
-    //               shrinkWrap: true,
-    //               physics: const NeverScrollableScrollPhysics(),
-    //               itemCount: keywordList.length,
-    //               itemBuilder: (context, index) {
-    //                 return GestureDetector(
-    //                   onPanUpdate: (details) => getActiveData(context, details),
-    //                   onTapDown: (details) => getActiveData(context, details),
-    //                   onPanEnd: (_) => resetHighlightedIndex(),
-    //                   onTapUp: (_) => resetHighlightedIndex(),
-    //                   child: Container(
-    //                     height: 20,
-    //                     width: 20,
-    //                     alignment: Alignment.center,
-    //                     decoration: BoxDecoration(
-    //                       color: _highlightedIndex == index
-    //                           ? Theme.of(context).colorScheme.primary
-    //                           : Colors.transparent,
-    //                       borderRadius: BorderRadius.circular(50.0),
-    //                     ),
-    //                     child: Text(
-    //                       keywordList[index],
-    //                       style: TextStyle(
-    //                         color: _highlightedIndex == index
-    //                             ? Colors.white
-    //                             : Colors.black,
-    //                         fontWeight: _highlightedIndex == index
-    //                             ? FontWeight.bold
-    //                             : FontWeight.normal,
-    //                         fontSize: 14,
-    //                       ),
-    //                     ),
-    //                   ),
-    //                 );
-    //               },
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //       Visibility(
-    //         visible: _highlightedIndex != null,
-    //         child: Positioned(
-    //           right: _keywordPosition.dx,
-    //           top: _keywordPosition.dy,
-    //           child: CustomPaint(
-    //             size: iconSize,
-    //             painter: BookIconPaint(
-    //               label: keywordList[_highlightedIndex ?? 0],
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 
   void getActiveData(BuildContext context, dynamic details) {
@@ -373,5 +258,114 @@ class _AddressBookState extends State<AddressBook> {
     setState(() {
       _highlightedIndex = null;
     });
+  }
+
+  List<Widget> _getWidgets(List friends) {
+    final Map<String, List<dynamic>> result = {};
+    List<Widget> widgets = [];
+    List friendList = [...friends];
+
+    friendList.sort(
+        (a, b) => a['name'].toLowerCase().compareTo(b['name'].toLowerCase()));
+
+    friendList.insertAll(0, [
+      {
+        'name': '通知',
+        'color': const Color.fromARGB(255, 43, 145, 46),
+        'function': true,
+      },
+      {
+        'name': '群聊',
+        'color': const Color.fromARGB(255, 148, 139, 62),
+        'function': true,
+      }
+    ]);
+
+    for (Map item in friendList) {
+      String firstChar = item['name'][0];
+      String key = PinyinHelper.getPinyin(item['name']).toUpperCase()[0];
+      if (item['function'] == true) {
+        if (result.containsKey('~')) {
+          result['~']!.add(item);
+        } else {
+          result['~'] = [item];
+        }
+      } else if (RegExp(r'^[a-zA-Z\u4e00-\u9fa5]').hasMatch(firstChar)) {
+        if (result.containsKey(key)) {
+          result[key]!.add(item);
+        } else {
+          result[key] = [item];
+        }
+      } else {
+        if (result.containsKey('#')) {
+          result['#']!.add(item);
+        } else {
+          result['#'] = [item];
+        }
+      }
+    }
+
+    result.forEach((key, value) {
+      if (value.isNotEmpty) {
+        if (key != '~') {
+          widgets.add(SizedBox(
+            height: 30,
+            child: ListTile(
+              title: Text(key),
+            ),
+          ));
+          names.add({
+            'key': key,
+            'isKey': true,
+          });
+        }
+        names.addAll(value.map((item) {
+          return {'key': item['name'], 'isKey': false};
+        }));
+
+        widgets.addAll(value.map((item) {
+          return SizedBox(
+            height: 52,
+            child: ListTile(
+              onTap: () {
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => ChatPage(item: item)),
+                );
+              },
+              leading: Container(
+                alignment: Alignment.center,
+                width: 52,
+                height: 52,
+                color: item['color'] ?? Colors.white,
+                child: item['avatar'] == null
+                    ? Text(
+                        item['name'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                        ),
+                      )
+                    : Image.network(item['avatar']),
+              ),
+              title: Text(
+                item['name'],
+                style: const TextStyle(
+                  fontSize: 22,
+                ),
+              ),
+            ),
+          );
+        }).toList());
+      }
+    });
+
+    widgets.add(Container(
+      height: 50,
+      alignment: Alignment.center,
+      child: Text('${friendList.length - 2} 个好友'),
+    ));
+
+    return widgets;
   }
 }

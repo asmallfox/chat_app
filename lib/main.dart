@@ -5,6 +5,8 @@ import 'package:chat_app/src/router/routes.dart';
 import 'package:chat_app/src/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
+import 'package:chat_app/src/router/route_handle.dart';
+
 void main() async {
   // 返回实现 WidgetsBinding 的绑定的实例。
   // 如果尚未初始化绑定，则使用 WidgetsFlutterBinding 类创建和初始化绑定。
@@ -19,7 +21,7 @@ Future<void> startService() async {
   // 初始化本地存储
   await HiveHelper.getInstance();
   // 初始化录音插件
-  await RecordingHelper.getInstance();
+  // await RecordingHelper.getInstance();
 }
 
 class MyApp extends StatelessWidget {
@@ -31,6 +33,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: appNavigatorKey,
       routes: namesRoutes,
+      // onGenerateRoute: (settings) {
+      //    return HandleRoute.handleRoute(settings.name);
+      // },
       themeMode: ThemeMode.light,
       theme: AppTheme.lightTheme(context: context),
       darkTheme: AppTheme.darkTheme(context: context),

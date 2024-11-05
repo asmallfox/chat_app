@@ -267,13 +267,14 @@ class _ChatPanelState extends State<ChatPanel> {
 
     final index = friends
         .indexWhere((element) => element['account'] == widget.item['account']);
-    print('====== $index $friends ${widget.item}');
+        
     if (index != -1) {
       friends[index]['messages'] = widget.item['messages'] == null
           ? [mesMap]
           : widget.item['messages'].add(mesMap);
-      print('执行');
     }
+
+    await userBox.put('friends', friends);
 
     setState(() {
       _messageController.clear();

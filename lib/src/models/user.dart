@@ -28,7 +28,7 @@ class UserHiveModel extends HiveObject {
 
 class UserAdapter extends TypeAdapter<UserHiveModel> {
   @override
-  final typeId = 0;
+  final typeId = 2;
 
   @override
   UserHiveModel read(BinaryReader reader) {

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/src/constants/hive_boxes.dart';
+import 'package:chat_app/src/models/app.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -38,10 +39,12 @@ class HiveHelper {
       await openHive(box['name'].toString(), limit: box['limit'] as bool);
     }
 
-    final token = await Hive.box('app').get('token', defaultValue: null);
-    final userinfo = await Hive.box('app').get('userinfo', defaultValue: null);
-    if (token != null && userinfo != null) {
-      await openHive(userinfo['account']);
+    final appBox = Hive.box('app');
+    final token = appBox.get('token');
+    final userInfo = appBox.get('userInfo');
+
+    if (token != null && userInfo != null) {
+      await openHive(userInfo['account']);
     }
   }
 
@@ -72,14 +75,14 @@ class HiveHelper {
   }
 }
 
-@HiveType(typeId: 1)
-class User {
-  @HiveField(1)
-  String? token;
+// @HiveType(typeId: 1)
+// class User {
+//   @HiveField(1)
+//   String? token;
 
-  @HiveField(2, defaultValue: 0.0)
-  double? keyboard_max_height;
-}
+//   @HiveField(2, defaultValue: 0.0)
+//   double? keyboard_max_height;
+// }
 
 
 // app {
