@@ -6,6 +6,7 @@ import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/pages/layout/layout_page.dart';
 import 'package:chat_app/src/pages/login/custom_text_field.dart';
 import 'package:chat_app/src/pages/login/sign_up_page.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
@@ -230,10 +231,13 @@ class _LogOnPageState extends State<LogOnPage> {
 
       final appBox = Hive.box('app');
 
-      appBox.put('token', '======token=======');
-      appBox.put('userInfo', userInfo);
+      appBox.putAll({'token': 'token', 'userInfo': userInfo});
 
-      await Hive.box(formData['account'].toString()).put('friends', []);
+      UserHive.box.putAll({
+        'friends': [],
+        ...UserHive.userInfo,
+        ...userInfo,
+      });
 
       navigator.pushReplacement(
         MaterialPageRoute(builder: (_) => const LayoutPage()),

@@ -16,6 +16,8 @@ class UserHive extends AppHive {
   // 使用 Account 字段作为 Box 的名称
   static Box? _box;
 
+  static Map? _userInfo;
+
   // 获取对应的 Box
   static Box get box {
     final currentUser = AppHive.getCurrentUser();
@@ -31,5 +33,9 @@ class UserHive extends AppHive {
   static Map getUserInfo() {
     final currentUserBox = box;
     return currentUserBox.toMap(); // 你可以根据 Box 存储的数据结构来调整这里的实现
+  }
+
+  static Map get userInfo {
+    return getUserInfo();
   }
 }

@@ -4,6 +4,7 @@ import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
 import 'package:chat_app/src/helpers/keyboard_observer.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -251,34 +252,39 @@ class _ChatPanelState extends State<ChatPanel> {
   Future<void> _sendMessage() async {
     // 发送消息
     print('发送消息：${_messageController.text}');
+    print(UserHive.userInfo);
 
     Map mesMap = {
       'type': MessageType.text.value,
       'content': _messageController.text,
-      'from': '1',
-      'to': '2',
+      'from': UserHive.userInfo['account'],
+      'to': widget.item['account'],
       'sendTime': DateTime.now().millisecondsSinceEpoch
     };
 
-    final userInfo = await Hive.box('app').get('userinfo');
-    final userBox = Hive.box(userInfo['account']);
+    final List friends = UserHive.userInfo['friends'];
 
-    final List friends = await userBox.get('friends', defaultValue: []);
+    final friend = friends
+        .firstWhere((element) => element['account'] == widget.item['account']);
 
-    final index = friends
-        .indexWhere((element) => element['account'] == widget.item['account']);
-        
-    if (index != -1) {
-      friends[index]['messages'] = widget.item['messages'] == null
-          ? [mesMap]
-          : widget.item['messages'].add(mesMap);
+    if (friend != null) {
+      // friend['messages'] = friend['messages'] == null
+      //     ? [mesMap]
+      //     : [...friend['messages'], mesMap];
+      if (friend['messages'] == null) {
+        friend['messages'] = [mesMap];
+      } else {
+        friend['messages'].add(mesMap);
+      }
+
+      // friend['messages'] = [];
     }
-
-    await userBox.put('friends', friends);
 
     setState(() {
       _messageController.clear();
       _showSendButton = false;
     });
+
+    UserHive.box.put('friends', friends);
   }
 }
