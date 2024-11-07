@@ -23,16 +23,22 @@ class RecordingHelper {
     return _instance;
   }
 
-  static FlutterSoundPlayer? get audioPlayer => _audioPlayer;
-
   static Future<void> _initialize() async {
     _audioRecorder = FlutterSoundRecorder();
     _audioPlayer = FlutterSoundPlayer();
 
     // await _audioRecorder?.openRecorder();
-    await _audioPlayer?.openPlayer();
+    // await _audioPlayer?.openPlayer();
 
     _isInitialized = true;
+  }
+
+  static FlutterSoundPlayer get audioPlayer {
+    if (_audioPlayer == null) {
+      throw Exception('音频插件未初始化！');
+    }
+
+    return _audioPlayer!;
   }
 
   static Future<void> startRecording() async {

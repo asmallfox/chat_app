@@ -21,7 +21,7 @@ Future<void> startService() async {
   // 初始化本地存储
   await HiveHelper.getInstance();
   // 初始化录音插件
-  // await RecordingHelper.getInstance();
+  await RecordingHelper.getInstance();
 }
 
 class MyApp extends StatelessWidget {

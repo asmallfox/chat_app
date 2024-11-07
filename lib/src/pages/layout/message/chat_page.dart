@@ -1,12 +1,17 @@
+import 'dart:io';
+
 import 'package:chat_app/CustomWidget/back_icon_button.dart';
+import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/permissions_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/pages/layout/message/chat_content.dart';
 import 'package:chat_app/src/pages/layout/message/chat_panel.dart';
 import 'package:chat_app/src/pages/layout/message/recording_panel.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ChatPage extends StatefulWidget {
   final Map item;
@@ -31,6 +36,7 @@ class _ChatPageState extends State<ChatPage> {
         child: Stack(
           children: [
             Scaffold(
+              backgroundColor: const Color.fromRGBO(245, 245, 245, 1),
               appBar: AppBar(
                 leading: BackIconButton(
                   backFn: () {},
@@ -173,7 +179,43 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _endRecording() async {
     String? path = await RecordingHelper.stopRecording();
     if (path != null) {
-      print(path);
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      String appDocPath = appDocDir.path;
+      // 生成一个唯一的文件名
+      String filePath =
+          '$appDocPath/local-${DateTime.now().millisecondsSinceEpoch}.aac';
+
+      File file = File(filePath);
+
+      File audioFile = File(path);
+
+      await file.writeAsBytes(audioFile.readAsBytesSync());
+
+      Map msgData = {
+        'type': MessageType.voice.value,
+        'content': filePath,
+        'from': UserHive.userInfo['account'],
+        'to': widget.item['account'],
+        'file': audioFile.readAsBytesSync(),
+        'sendTime': DateTime.now().millisecondsSinceEpoch
+      };
+
+      final List friends = UserHive.userInfo['friends'];
+
+      final friend = friends.firstWhere(
+          (element) => element['account'] == widget.item['account']);
+
+      if (friend != null) {
+        if (friend['messages'] == null) {
+          friend['messages'] = [msgData];
+        } else {
+          friend['messages'].add(msgData);
+        }
+      }
+
+      UserHive.box.put('friends', friends);
+
+      print(msgData);
     } else {
       print('结束语音录制，未能获取到语音路径');
     }
