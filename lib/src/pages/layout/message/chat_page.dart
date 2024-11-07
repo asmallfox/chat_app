@@ -29,6 +29,10 @@ class _ChatPageState extends State<ChatPage> {
   bool _closeButtonCoincide = false;
   bool _sendButtonCoincide = false;
 
+  bool _isRecording = false;
+  int _recordingStartTime = 0;
+  int _recordingDuration = 0; // 录音时长
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -121,6 +125,7 @@ class _ChatPageState extends State<ChatPage> {
       _closeButtonCoincide = false;
       _sendButtonCoincide = false;
     });
+
     _endRecording();
   }
 
@@ -167,57 +172,81 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _startRecording() async {
+    if (_isRecording) return;
     try {
       print('开始语音录制');
       await PermissionsHelper.microphone();
-      await RecordingHelper.startRecording();
+      RecordingHelper.startRecording();
+      _isRecording = true;
+      _recordingStartTime = DateTime.now().millisecondsSinceEpoch;
     } catch (error) {
       print('获取��克风权限失败：$error');
     }
   }
 
   Future<void> _endRecording() async {
-    String? path = await RecordingHelper.stopRecording();
-    if (path != null) {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      String appDocPath = appDocDir.path;
-      // 生成一个唯一的文件名
-      String filePath =
-          '$appDocPath/local-${DateTime.now().millisecondsSinceEpoch}.aac';
+    if (!_isRecording) return;
+    try {
+      String? path = await RecordingHelper.stopRecording();
+      if (path != null) {
+        _recordingDuration =
+            (DateTime.now().millisecondsSinceEpoch - _recordingStartTime) ~/
+                1000; // 计算录音时长（秒）
 
-      File file = File(filePath);
+        if (_recordingDuration < 1) {
+          const snackBar = SnackBar(
+            content: Text('录音时长太短'),
+            duration: Duration(seconds: 2),
+          );
 
-      File audioFile = File(path);
-
-      await file.writeAsBytes(audioFile.readAsBytesSync());
-
-      Map msgData = {
-        'type': MessageType.voice.value,
-        'content': filePath,
-        'from': UserHive.userInfo['account'],
-        'to': widget.item['account'],
-        'file': audioFile.readAsBytesSync(),
-        'sendTime': DateTime.now().millisecondsSinceEpoch
-      };
-
-      final List friends = UserHive.userInfo['friends'];
-
-      final friend = friends.firstWhere(
-          (element) => element['account'] == widget.item['account']);
-
-      if (friend != null) {
-        if (friend['messages'] == null) {
-          friend['messages'] = [msgData];
-        } else {
-          friend['messages'].add(msgData);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          throw Exception('录音时长太短~');
         }
+
+        Directory appDocDir = await getApplicationDocumentsDirectory();
+        String appDocPath = appDocDir.path;
+        // 生成一个唯一的文件名
+        String filePath =
+            '$appDocPath/local-${DateTime.now().millisecondsSinceEpoch}.aac';
+
+        File file = File(filePath);
+
+        File audioFile = File(path);
+
+        await file.writeAsBytes(audioFile.readAsBytesSync());
+
+        Map msgData = {
+          'type': MessageType.voice.value,
+          'content': filePath,
+          'from': UserHive.userInfo['account'],
+          'to': widget.item['account'],
+          'file': audioFile.readAsBytesSync(),
+          'sendTime': DateTime.now().millisecondsSinceEpoch
+        };
+
+        final List friends = UserHive.userInfo['friends'];
+
+        final friend = friends.firstWhere(
+            (element) => element['account'] == widget.item['account']);
+
+        if (friend != null) {
+          if (friend['messages'] == null) {
+            friend['messages'] = [msgData];
+          } else {
+            friend['messages'].add(msgData);
+          }
+        }
+
+        UserHive.box.put('friends', friends);
+
+        setState(() {
+          _isRecording = false;
+        });
+      } else {
+        print('结束语音录制，未能获取到语音路径');
       }
-
-      UserHive.box.put('friends', friends);
-
-      print(msgData);
-    } else {
-      print('结束语音录制，未能获取到语音路径');
+    } catch (error) {
+      print('录音失败');
     }
   }
 }

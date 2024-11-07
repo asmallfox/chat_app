@@ -30,20 +30,11 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
     _init();
   }
 
-  void _init() async {
-    try {
-      AudioPlayer audioPlayer = AudioPlayer();
-
-      audioDuration = await audioPlayer.setUrl(widget.msgItem['content']);
-
-      if (audioDuration != null) {
-        setState(() {
-          audioLength = _getAudioLength(audioDuration!);
-        });
-      }
-    } catch (error) {
-      print('[Error] $error');
-    }
+  @override
+  void dispose() {
+    RecordingHelper.audioPlayer.stopPlayer();
+    RecordingHelper.audioPlayer.closePlayer();
+    super.dispose();
   }
 
   @override
@@ -63,17 +54,6 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
         );
       },
       child: Container(
-        // decoration: BoxDecoration(
-        //   borderRadius: BorderRadius.circular(6),
-        //   boxShadow: [
-        //     BoxShadow(
-        //       color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        //       spreadRadius: 14,
-        //       blurRadius: 20,
-        //       offset: const Offset(0, 4),
-        //     ),
-        //   ],
-        // ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           textDirection: widget.isSelf ? TextDirection.rtl : TextDirection.ltr,
@@ -97,18 +77,34 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
       ),
     );
   }
-}
 
-String _getAudioLength(Duration duration) {
-  int inHours = duration.inHours;
-  int inMinutes = duration.inMinutes;
-  int inSeconds = duration.inSeconds + (duration.inMilliseconds > 0 ? 1 : 0);
+  void _init() async {
+    try {
+      AudioPlayer audioPlayer = AudioPlayer();
 
-  String str = '';
+      audioDuration = await audioPlayer.setUrl(widget.msgItem['content']);
 
-  if (inHours != 0) str += "$inHours'";
-  if (inMinutes != 0) str += "$inMinutes\"";
-  if (inSeconds != 0) str += "$inSeconds\"";
+      if (audioDuration != null) {
+        setState(() {
+          audioLength = _getAudioLength(audioDuration!);
+        });
+      }
+    } catch (error) {
+      print('[Error] $error');
+    }
+  }
 
-  return str;
+  String _getAudioLength(Duration duration) {
+    int inHours = duration.inHours;
+    int inMinutes = duration.inMinutes;
+    int inSeconds = duration.inSeconds + (duration.inMilliseconds > 0 ? 1 : 0);
+
+    String str = '';
+
+    if (inHours != 0) str += "$inHours'";
+    if (inMinutes != 0) str += "$inMinutes\"";
+    if (inSeconds != 0) str += "$inSeconds\"";
+
+    return str;
+  }
 }

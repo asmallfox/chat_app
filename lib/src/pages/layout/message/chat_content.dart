@@ -50,12 +50,6 @@ class _ChatContentState extends State<ChatContent>
               Future.delayed(Duration.zero, () => _scrollController.jumpTo(0));
             } else {
               if (_scrollController.offset >= 120) {
-                // Future.delayed(Duration.zero, () {
-                // _scrollController.jumpTo(_scrollController.position.maxScrollExtent - _scrollController.offset);
-                // double m = _scrollController.position.maxScrollExtent;
-                // double f = m - _scrollController.offset;
-                // _scrollController.jumpTo(80+ _scrollController.offset);
-                // });
               }
             }
           }

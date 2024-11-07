@@ -10,7 +10,6 @@ class RecordingHelper {
   RecordingHelper._internal();
 
   static FlutterSoundRecorder? _audioRecorder;
-  // 音频播放
   static FlutterSoundPlayer? _audioPlayer;
 
   static bool _isInitialized = false;
@@ -33,11 +32,17 @@ class RecordingHelper {
     _isInitialized = true;
   }
 
+  static FlutterSoundRecorder get audioRecorder {
+    if (_audioRecorder == null) {
+      throw Exception('录音插件未初始化！');
+    }
+    return _audioRecorder!;
+  }
+
   static FlutterSoundPlayer get audioPlayer {
     if (_audioPlayer == null) {
       throw Exception('音频插件未初始化！');
     }
-
     return _audioPlayer!;
   }
 
