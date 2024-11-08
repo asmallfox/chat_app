@@ -5,12 +5,14 @@ import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/permissions_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
+import 'package:chat_app/src/pages/layout/message/chat_audio_page.dart';
 import 'package:chat_app/src/pages/layout/message/chat_content.dart';
 import 'package:chat_app/src/pages/layout/message/chat_panel.dart';
 import 'package:chat_app/src/pages/layout/message/recording_panel.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ChatPage extends StatefulWidget {
@@ -33,6 +35,16 @@ class _ChatPageState extends State<ChatPage> {
   int _recordingStartTime = 0;
   int _recordingDuration = 0; // 录音时长
 
+  final player = AudioPlayer();
+
+  @override
+  void dispose() {
+    super.dispose();
+    RecordingHelper.audioPlayer.stopPlayer();
+    RecordingHelper.audioPlayer.closePlayer();
+    player.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -49,7 +61,12 @@ class _ChatPageState extends State<ChatPage> {
                 actions: [
                   IconButton(
                     onPressed: () async {
-                      print('语音');
+                      // print('语音');
+                      Navigator.of(context).push(
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => const ChatAudioPage(),
+                        ),
+                      );
                     },
                     icon: const Icon(Icons.phone),
                     color: Theme.of(context).colorScheme.primary,
@@ -72,9 +89,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
               body: Column(
                 children: [
-                  Expanded(
-                    child: ChatContent(item: widget.item),
-                  ),
+                  ChatContent(item: widget.item),
                   ChatPanel(
                     item: widget.item,
                     onLongPressDown: (detail) {
@@ -180,7 +195,7 @@ class _ChatPageState extends State<ChatPage> {
       _isRecording = true;
       _recordingStartTime = DateTime.now().millisecondsSinceEpoch;
     } catch (error) {
-      print('获取��克风权限失败：$error');
+      print('获取麦克风权限失败：$error');
     }
   }
 
@@ -196,7 +211,7 @@ class _ChatPageState extends State<ChatPage> {
         if (_recordingDuration < 1) {
           const snackBar = SnackBar(
             content: Text('录音时长太短'),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 1),
           );
 
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -215,13 +230,16 @@ class _ChatPageState extends State<ChatPage> {
 
         await file.writeAsBytes(audioFile.readAsBytesSync());
 
+        final duration = await player.setUrl(path);
+
         Map msgData = {
           'type': MessageType.voice.value,
           'content': filePath,
           'from': UserHive.userInfo['account'],
           'to': widget.item['account'],
           'file': audioFile.readAsBytesSync(),
-          'sendTime': DateTime.now().millisecondsSinceEpoch
+          'duration': (duration!.inMilliseconds / 1000).ceil(),
+          'sendTime': DateTime.now().millisecondsSinceEpoch,
         };
 
         final List friends = UserHive.userInfo['friends'];

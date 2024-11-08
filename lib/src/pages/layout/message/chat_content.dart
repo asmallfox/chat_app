@@ -28,6 +28,13 @@ class _ChatContentState extends State<ChatContent>
   }
 
   @override
+  void didUpdateWidget(covariant ChatContent oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
@@ -38,6 +45,7 @@ class _ChatContentState extends State<ChatContent>
     return ValueListenableBuilder(
       valueListenable: userBox.listenable(keys: ['friends']),
       builder: (context, box, child) {
+        
         final friend = box.get('friends', defaultValue: []).firstWhere(
                 (element) => element['account'] == widget.item['account']) ??
             {};
@@ -49,60 +57,34 @@ class _ChatContentState extends State<ChatContent>
             if (_isSelf(messages.last)) {
               Future.delayed(Duration.zero, () => _scrollController.jumpTo(0));
             } else {
-              if (_scrollController.offset >= 120) {
-              }
+              if (_scrollController.offset >= 120) {}
             }
           }
         }
 
         messageList = messages.reversed.toList();
-        return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          reverse: true,
-          controller: _scrollController,
-          itemCount: messageList.length,
-          separatorBuilder: (context, index) => const SizedBox(
-            height: 20,
+
+        return Expanded(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ListView.separated(
+              reverse: true,
+              shrinkWrap: true,
+              controller: _scrollController,
+              itemCount: messageList.length,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              separatorBuilder: (context, index) => const SizedBox(height: 20),
+              itemBuilder: (context, index) {
+                final msgItem = messageList[index];
+                bool isSelf = _isSelf(msgItem);
+                return ContentItem(
+                  isSelf: isSelf,
+                  msgItem: msgItem,
+                  friend: widget.item,
+                );
+              },
+            ),
           ),
-          itemBuilder: (context, index) {
-            final msgItem = messageList[index];
-            bool isSelf = _isSelf(msgItem);
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              textDirection: isSelf ? TextDirection.rtl : TextDirection.ltr,
-              children: [
-                CircleAvatar(
-                  backgroundColor: Colors.blue,
-                  radius: 30,
-                  child: friend['avatar'] == null
-                      ? Text(
-                          friend['name'],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                          ),
-                        )
-                      : Image.network(
-                          isSelf ? box.get('avatar') : friend['avatar']),
-                ),
-                const SizedBox(
-                  width: 15,
-                ),
-                Expanded(
-                  child: Container(
-                    alignment:
-                        isSelf ? Alignment.centerRight : Alignment.centerLeft,
-                    child: ContentItem(
-                      isSelf: isSelf,
-                      msgItem: msgItem,
-                      friend: widget.item,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 60),
-              ],
-            );
-          },
         );
       },
     );

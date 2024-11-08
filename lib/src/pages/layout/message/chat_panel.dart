@@ -181,8 +181,6 @@ class _ChatPanelState extends State<ChatPanel> {
                           onPressed: () {
                             SystemChannels.textInput
                                 .invokeMethod('TextInput.hide');
-
-                            print(KeyBoardObserver.instance.keyboardHeight);
                             setState(() {
                               _showPanel = true;
                             });
@@ -203,9 +201,10 @@ class _ChatPanelState extends State<ChatPanel> {
             child: Visibility(
               visible: _showPanel || focusNode.hasFocus,
               child: Container(
-                height: KeyBoardObserver.instance.keyboardHeight == 0
-                    ? null
-                    : KeyBoardObserver.instance.keyboardHeight,
+                height: 0,
+                // height: KeyBoardObserver.instance.keyboardHeight == 0
+                //     ? null
+                //     : KeyBoardObserver.instance.keyboardHeight,
                 child: Opacity(
                   opacity: _showPanel ? 1 : 0,
                   child: GridView.count(

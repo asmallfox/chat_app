@@ -27,7 +27,7 @@ class RecordingHelper {
     _audioPlayer = FlutterSoundPlayer();
 
     // await _audioRecorder?.openRecorder();
-    // await _audioPlayer?.openPlayer();
+    await _audioPlayer?.openPlayer();
 
     _isInitialized = true;
   }

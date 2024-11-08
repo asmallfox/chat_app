@@ -36,12 +36,9 @@ class _ContentItemState extends State<ContentItem> {
     return GestureDetector(
       onLongPress: () {
         RenderObject renderObject = context.findRenderObject() as RenderObject;
-
         Rect paintBounds = renderObject.paintBounds;
-
         final translation = renderObject.getTransformTo(null).getTranslation();
         Size size = paintBounds.size;
-
         double menuItemWidth = 40;
         double menuItemHeight = 40;
 
@@ -51,7 +48,6 @@ class _ContentItemState extends State<ContentItem> {
             8 -
             (menuItemWidth * 2 / 2) /* 图标大小 */;
         double bottom = translation.y + size.height + 10;
-
         double boxCenterX = right + (menuItemWidth * 2 / 2) - 2;
 
         showGeneralDialog(
@@ -150,27 +146,54 @@ class _ContentItemState extends State<ContentItem> {
           },
         );
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: 15,
-          horizontal: 15,
-        ),
-        constraints: const BoxConstraints(
-          minHeight: 60,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
-          color: widget.isSelf ? AppColors.primary : Colors.white,
-        ),
-        child: _getContentItemWidget(context),
+      child: Row(
+        key: UniqueKey(),
+        textDirection: widget.isSelf ? TextDirection.rtl : TextDirection.ltr,
+        children: [
+          CircleAvatar(
+            backgroundColor: Colors.blue,
+            radius: 30,
+            child: widget.friend['avatar'] == null
+                ? Text(
+                    widget.friend['name'],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                    ),
+                  )
+                : Image.network(
+                    widget.isSelf
+                        ? UserHive.userInfo['avatar']
+                        : widget.friend['avatar'],
+                  ),
+          ),
+          const SizedBox(
+            width: 15,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 15,
+              horizontal: 15,
+            ),
+            constraints: const BoxConstraints(
+              minHeight: 60,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
+              color: widget.isSelf ? AppColors.primary : Colors.white,
+            ),
+            child: _getContentItemWidget(context),
+          ),
+          const SizedBox(
+            width: 40,
+          )
+        ],
       ),
     );
   }
 
   Widget _getContentItemWidget(BuildContext context) {
     switch (widget.msgItem['type']) {
-      // case 1:
-      //   return getContentItemText();
       case 2:
         return getContentItemImage();
       case 3:
@@ -225,10 +248,12 @@ class _ContentItemState extends State<ContentItem> {
             TextButton(
               child: const Text('删除'),
               onPressed: () {
-                MessageUtil.delete(
+                setState(() {
+                  MessageUtil.delete(
                   account: widget.friend['account'],
                   sendTime: widget.msgItem['sendTime'],
                 );
+                });
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
