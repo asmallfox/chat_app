@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 
 class ChatAudioPage extends StatefulWidget {
+  final Map friend;
+
   const ChatAudioPage({
     super.key,
+    required this.friend,
   });
 
   @override
@@ -14,11 +18,26 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // 模糊效果
+        Positioned.fill(
+          child: Image.asset(
+            'assets/images/default_avatar.png',
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.fill,
+          ),
+        ),
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 100, sigmaY: 100),
+            child: const SizedBox(),
+          ),
+        ),
         Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             title: Text(
-              'title',
+              widget.friend['name'],
               style: const TextStyle(color: Colors.white),
             ),
             centerTitle: true,
@@ -26,6 +45,18 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
           body: Center(
             child: Column(
               children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      width: 2,
+                      color: Colors.grey.shade500,
+                    ),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Text('xx'),
+                ),
+                const SizedBox(height: 30),
                 Row(
                   children: [
                     CommunicateIcon(

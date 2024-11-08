@@ -64,7 +64,8 @@ class _ChatPageState extends State<ChatPage> {
                       // print('语音');
                       Navigator.of(context).push(
                         PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const ChatAudioPage(),
+                          pageBuilder: (_, __, ___) =>
+                              ChatAudioPage(friend: widget.item),
                         ),
                       );
                     },
