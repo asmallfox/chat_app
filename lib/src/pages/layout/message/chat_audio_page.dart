@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
+import 'package:flutter/widgets.dart';
+
 class ChatAudioPage extends StatefulWidget {
   final Map friend;
 
@@ -14,7 +16,12 @@ class ChatAudioPage extends StatefulWidget {
 }
 
 class _ChatAudioPageState extends State<ChatAudioPage> {
+  // 正在通话
   bool isOnCall = false;
+  // 扩音
+  bool isExpanded = false;
+  // 静音
+  bool isMuted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +78,12 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                 ),
                 const SizedBox(height: 30),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
+                    // 免提
                     Visibility(
-                      visible: false,
+                      visible: isOnCall,
                       child: CommunicateIcon(
-                        // label: '免提',
                         color: Colors.grey.shade300,
                         icon: Icons.volume_off_rounded,
                         onTap: () {},
@@ -85,17 +92,20 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                     RoundedButton(
                       icon: Icons.local_phone_rounded,
                       color: Colors.white,
-                      backgtoundColor: Colors.red,
+                      backgroundColor: Colors.red,
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        setState(() {
+                          isOnCall = false;
+                        });
+                        // Navigator.of(context).pop();
                       },
                     ),
-                    Offstage(
-                      offstage: true,
+                    Visibility(
+                      visible: !isOnCall,
                       child: RoundedButton(
                         icon: Icons.local_phone_rounded,
                         color: Colors.white,
-                        backgtoundColor: Colors.green,
+                        backgroundColor: Colors.green,
                         onPressed: () {
                           setState(() {
                             isOnCall = true;
@@ -103,21 +113,15 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                         },
                       ),
                     ),
-                    Offstage(
-                      offstage: isOnCall,
+                    // 静音
+                    Visibility(
+                      visible: isOnCall,
                       child: CommunicateIcon(
-                        // label: '静音',
                         color: Colors.grey.shade300,
-                        icon: Icons.mic_none_rounded,
+                        icon: isMuted ? Icons.mic_external_off_rounded : Icons.mic_none_rounded,
                         onTap: () {},
                       ),
-                    )
-                    // CommunicateIcon(
-                    //   label: '录音',
-                    //   color: Colors.grey.shade400,
-                    //   icon: Icons.mic_none_rounded,
-                    //   onTap: () {},
-                    // ),
+                    ),
                   ],
                 ),
               ],
@@ -133,14 +137,14 @@ class RoundedButton extends StatelessWidget {
   final IconData icon;
   final double? size;
   final Color? color;
-  final Color backgtoundColor;
+  final Color backgroundColor;
   final VoidCallback? onPressed;
   const RoundedButton({
     super.key,
     required this.icon,
     this.size = 48,
     this.color = Colors.black,
-    this.backgtoundColor = Colors.white,
+    this.backgroundColor = Colors.white,
     required this.onPressed,
   });
 
@@ -154,7 +158,7 @@ class RoundedButton extends StatelessWidget {
         size: size,
       ),
       style: ButtonStyle(
-        backgroundColor: WidgetStatePropertyAll<Color>(backgtoundColor),
+        backgroundColor: WidgetStatePropertyAll<Color>(backgroundColor),
       ),
     );
   }
