@@ -1,3 +1,5 @@
+import 'package:chat_app/src/widgets/communicate_icon_button.dart';
+import 'package:chat_app/src/widgets/rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
@@ -83,7 +85,7 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                     // 免提
                     Visibility(
                       visible: isOnCall,
-                      child: CommunicateIcon(
+                      child: CommunicateIconButton(
                         color: Colors.grey.shade300,
                         icon: Icons.volume_off_rounded,
                         onTap: () {},
@@ -116,7 +118,7 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                     // 静音
                     Visibility(
                       visible: isOnCall,
-                      child: CommunicateIcon(
+                      child: CommunicateIconButton(
                         color: Colors.grey.shade300,
                         icon: isMuted ? Icons.mic_external_off_rounded : Icons.mic_none_rounded,
                         onTap: () {},
@@ -133,87 +135,3 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
   }
 }
 
-class RoundedButton extends StatelessWidget {
-  final IconData icon;
-  final double? size;
-  final Color? color;
-  final Color backgroundColor;
-  final VoidCallback? onPressed;
-  const RoundedButton({
-    super.key,
-    required this.icon,
-    this.size = 48,
-    this.color = Colors.black,
-    this.backgroundColor = Colors.white,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(
-        icon,
-        color: color,
-        size: size,
-      ),
-      style: ButtonStyle(
-        backgroundColor: WidgetStatePropertyAll<Color>(backgroundColor),
-      ),
-    );
-  }
-}
-
-class CommunicateIcon extends StatelessWidget {
-  final IconData icon;
-  final String? label;
-  final Color color;
-  final VoidCallback? onTap;
-
-  const CommunicateIcon({
-    super.key,
-    required this.icon,
-    this.label,
-    this.color = Colors.black,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onTap?.call(),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(
-                width: 2,
-                color: color,
-              ),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: Icon(
-              icon,
-              size: 40,
-              color: color,
-            ),
-          ),
-          Visibility(
-            visible: label != null,
-            child: Container(
-              margin: const EdgeInsets.only(top: 10),
-              child: Text(
-                label ?? '',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: color,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

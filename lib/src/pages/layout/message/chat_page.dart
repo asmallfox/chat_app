@@ -8,6 +8,7 @@ import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/pages/layout/message/chat_audio_page.dart';
 import 'package:chat_app/src/pages/layout/message/chat_content.dart';
 import 'package:chat_app/src/pages/layout/message/chat_panel.dart';
+import 'package:chat_app/src/pages/layout/message/chat_video.page.dart';
 import 'package:chat_app/src/pages/layout/message/recording_panel.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
@@ -74,7 +75,11 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      print('视频');
+                      // print('视频');
+                      Navigator.of(context).push(
+                        PageRouteBuilder(
+                            pageBuilder: (_, __, ___) => ChatVideoPage(friend: widget.item),),
+                      );
                     },
                     icon: const Icon(Icons.videocam_sharp),
                     color: Theme.of(context).colorScheme.primary,
