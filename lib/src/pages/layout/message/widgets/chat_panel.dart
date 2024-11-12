@@ -6,7 +6,6 @@ import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
 import 'package:chat_app/src/helpers/keyboard_observer.dart';
-import 'package:chat_app/src/utils/chat_util.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
 import 'package:flutter/gestures.dart';
@@ -278,18 +277,4 @@ class _ChatPanelState extends State<ChatPanel> {
       );
     }
   }
-
-  // Future<void> _takePicture() async {
-  //   final picker = ImagePicker();
-  //   final pickedFile = await picker.pickImage(source: ImageSource.camera);
-
-  //   if (pickedFile != null) {
-  //     MessageUtil.sendMessage(
-  //       type: MessageType.text.value,
-  //       content: pickedFile.path,
-  //       from: UserHive.userInfo['account'],
-  //       to: widget.item['account'],
-  //     );
-  //   }
-  // }
 }
