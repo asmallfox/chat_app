@@ -40,6 +40,7 @@ class UserHive extends AppHive {
   static Map get userInfo => _getUserInfo();
 
   static List get friends => box.get('friends', defaultValue: []);
+  static List get chatList => box.get('chatList', defaultValue: []);
 
   static void updateFriend(
     String findKey,

@@ -23,6 +23,14 @@ class MessageUtil {
     }
 
     UserHive.box.put('friends', friends);
+
+    final List chatList = UserHive.chatList;
+    final Map? chatItem = chatList
+        .firstWhere((item) => item['account'] == account, orElse: () => null);
+    if (chatItem == null) {
+      chatList.add(friend);
+      UserHive.box.put('chatList', chatList);
+    }
   }
 
   static void update(Map msg) {}
@@ -33,7 +41,7 @@ class MessageUtil {
   }) {
     final List friends = UserHive.userInfo['friends'] ?? [];
 
-    final friend = friends.firstWhere((item) => item['account'] == account,
+    final Map? friend = friends.firstWhere((item) => item['account'] == account,
         orElse: () => null);
 
     if (friend != null) {
@@ -46,11 +54,10 @@ class MessageUtil {
       } else {
         throw Exception('删除记录失败~');
       }
+      UserHive.box.put('friends', friends);
     } else {
       print('找不到好友 $account');
     }
-
-    UserHive.box.put('friends', friends);
   }
 
   static Future<void> sendMessage({
@@ -79,7 +86,7 @@ class MessageUtil {
       msgData.putIfAbsent('file', () => base64Encode(imageBytes));
     } else if (type == MessageType.voice.value) {
       File file = await pathTransformFile(content, 'acc');
-       msgData['content'] = file.path;
+      msgData['content'] = file.path;
       msgData.putIfAbsent('file', () => file.readAsBytesSync());
     } else if (type == MessageType.video.value) {
     } else if (type == MessageType.file.value) {}

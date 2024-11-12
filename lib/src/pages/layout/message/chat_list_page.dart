@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:chat_app/src/utils/get_date_time.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:hive_flutter/adapters.dart';
 import './chat_page.dart';
 
 class ChatListPage extends StatefulWidget {
@@ -35,7 +37,7 @@ class _ChatListPageState extends State<ChatListPage> {
   //   },
   // );
 
-  List chatList = [];
+  // List chatList =[];
 
   @override
   void initState() {
@@ -50,134 +52,139 @@ class _ChatListPageState extends State<ChatListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('消息')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 4, right: 4, top: 15, bottom: 15),
-        child: ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: chatList.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
-          itemBuilder: (context, index) {
-            return Slidable(
-              key: ValueKey(index),
-              enabled: false,
-              endActionPane: null,
-              startActionPane: ActionPane(
-                extentRatio: 0.18,
-                motion: const ScrollMotion(),
-                children: [
-                  SlidableAction(
-                    icon: Icons.delete_sharp,
-                    onPressed: (context) {
-                      _deleteDialog(context, () async {
-                        chatList.removeAt(index);
-                        // await userBox.put('chatList', chatList);
-                      });
-                    },
+    return ValueListenableBuilder(
+      valueListenable: UserHive.box.listenable(keys: ['chatList']),
+      builder: (context, box, child) {
+        List chatList = box.get('chatList', defaultValue: []);
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('消息')),
+          body: SingleChildScrollView(
+            padding:
+                const EdgeInsets.only(left: 4, right: 4, top: 15, bottom: 15),
+            child: ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: chatList.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 20),
+              itemBuilder: (context, index) {
+                return Slidable(
+                  key: ValueKey(index),
+                  enabled: false,
+                  endActionPane: null,
+                  startActionPane: ActionPane(
+                    extentRatio: 0.18,
+                    motion: const ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        icon: Icons.delete_sharp,
+                        onPressed: (context) {
+                          _deleteDialog(context, () async {
+                            chatList.removeAt(index);
+                            // await userBox.put('chatList', chatList);
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: MenuAnchor(
-                childFocusNode: _buttonFocusNode,
-                alignmentOffset: menuAnchorPosition,
-                menuChildren: <Widget>[
-                  MenuItemButton(
-                    onPressed: () {},
-                    child: const Text('置顶聊天'),
-                  ),
-                  MenuItemButton(
-                    onPressed: () {},
-                    child: const Text('删除聊天'),
-                  ),
-                ],
-                builder: (_, MenuController controller, Widget? child) {
-                  return GestureDetector(
-                    onLongPressDown: (details) {
-                      if (!controller.isOpen) {
-                        setState(() {
-                          menuAnchorPosition =
-                              Offset(details.localPosition.dx, -20);
-                        });
-                      }
-                    },
-                    child: ListTile(
-                      enabled: true,
-                      onTap: () {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const ChatPage(
-                              item: {
-                                "id": "2",
-                                "account": "zs",
-                                "name": "张三",
-                                "promoter": "1",
-                                "sex": 1,
-                                "avatar":
-                                    "https://img1.baidu.com/it/u=1317558294,51779109&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=500",
-                                "created_at": "1730631675000",
-                                "updated_at": "1730631675000"
-                              },
-                            ),
-                          ));
-                        }
-                      },
-                      onLongPress: () {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
-                      },
-                      leading: Container(
-                        alignment: Alignment.center,
-                        width: 52,
-                        height: 52,
-                        color: chatList[index]['color'],
-                        child: Text(
-                          chatList[index]['name'],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
+                  child: MenuAnchor(
+                    childFocusNode: _buttonFocusNode,
+                    alignmentOffset: menuAnchorPosition,
+                    menuChildren: <Widget>[
+                      MenuItemButton(
+                        onPressed: () {},
+                        child: const Text('置顶聊天'),
+                      ),
+                      MenuItemButton(
+                        onPressed: () {},
+                        child: const Text('删除聊天'),
+                      ),
+                    ],
+                    builder: (_, MenuController controller, Widget? child) {
+                      Map chatItem = chatList[index];
+                      List chatItemMsgs = chatItem['messages'];
+                      Map? lastMessage = chatItemMsgs[chatItemMsgs.length - 1];
+                      print(chatItem);
+                      return GestureDetector(
+                        onLongPressDown: (details) {
+                          if (!controller.isOpen) {
+                            setState(() {
+                              menuAnchorPosition =
+                                  Offset(details.localPosition.dx, -20);
+                            });
+                          }
+                        },
+                        child: ListTile(
+                          enabled: true,
+                          onTap: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ChatPage(item: chatItem),
+                                ),
+                              );
+                            }
+                          },
+                          onLongPress: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          },
+                          leading: Container(
+                            alignment: Alignment.center,
+                            width: 52,
+                            height: 52,
+                            // color: Colors.pink,
+                            child: Image.network(chatItem['avatar']),
                           ),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                chatList[index]['name'],
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                ),
+                              ),
+                              Text(
+                                lastMessage == null
+                                    ? ''
+                                    : getDateTime(chatList[index]['messages'][0]
+                                        ['sendTime']),
+                              )
+                            ],
+                          ),
+                          subtitle: lastMessage == null
+                              ? null
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('[新消息] ${lastMessage['content']}'),
+                                    Badge.count(
+                                      count: 99,
+                                      backgroundColor: const Color(
+                                        0xFFf5a13c,
+                                      ),
+                                      isLabelVisible: index % 10 == 2,
+                                    ),
+                                  ],
+                                ),
                         ),
-                      ),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            chatList[index]['name'],
-                            style: const TextStyle(
-                              fontSize: 22,
-                            ),
-                          ),
-                          Text(chatList[index]['date'])
-                        ],
-                      ),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('[新消息] ' + chatList[index]['name']),
-                          Badge.count(
-                            count: 99,
-                            backgroundColor: const Color(
-                              0xFFf5a13c,
-                            ),
-                            isLabelVisible: index % 10 == 2,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
-        ),
-      ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

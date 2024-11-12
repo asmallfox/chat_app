@@ -148,6 +148,7 @@ class _ContentItemState extends State<ContentItem> {
       },
       child: Row(
         key: UniqueKey(),
+        crossAxisAlignment: CrossAxisAlignment.start,
         textDirection: widget.isSelf ? TextDirection.rtl : TextDirection.ltr,
         children: [
           CircleAvatar(
@@ -170,19 +171,12 @@ class _ContentItemState extends State<ContentItem> {
           const SizedBox(
             width: 15,
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 15,
-              horizontal: 15,
+          Expanded(
+            child: Align(
+              alignment:
+                  widget.isSelf ? Alignment.centerRight : Alignment.centerLeft,
+              child: _getContentItemWidget(context),
             ),
-            constraints: const BoxConstraints(
-              minHeight: 60,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(6)),
-              color: widget.isSelf ? AppColors.primary : Colors.white,
-            ),
-            child: _getContentItemWidget(context),
           ),
           const SizedBox(
             width: 40,
@@ -211,18 +205,30 @@ class _ContentItemState extends State<ContentItem> {
   }
 
   Widget getContentItemText() {
-    return Text(
-      widget.msgItem['content'],
-      style: TextStyle(
-        fontSize: 20,
-        color: widget.isSelf ? Colors.white : Colors.black,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: 15,
+        horizontal: 15,
+      ),
+      constraints: const BoxConstraints(
+        minHeight: 60,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+        color: widget.isSelf ? AppColors.primary : Colors.white,
+      ),
+      child: Text(
+        widget.msgItem['content'],
+        style: TextStyle(
+          fontSize: 20,
+          color: widget.isSelf ? Colors.white : Colors.black,
+        ),
       ),
     );
   }
 
   Widget getContentItemImage() {
-    return FractionallySizedBox(
-      widthFactor: 0.7,
+    return Container(
       child: isNetSource(widget.msgItem['content'])
           ? Image.network(
               getSourceUrl(widget.msgItem['content']),
@@ -250,9 +256,9 @@ class _ContentItemState extends State<ContentItem> {
               onPressed: () {
                 setState(() {
                   MessageUtil.delete(
-                  account: widget.friend['account'],
-                  sendTime: widget.msgItem['sendTime'],
-                );
+                    account: widget.friend['account'],
+                    sendTime: widget.msgItem['sendTime'],
+                  );
                 });
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
