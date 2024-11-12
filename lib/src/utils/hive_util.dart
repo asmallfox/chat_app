@@ -12,11 +12,14 @@ class AppHive {
   }
 }
 
+class HiveSaveType {
+  static const cover = 'cover';
+  static const append = 'append';
+}
+
 class UserHive extends AppHive {
   // 使用 Account 字段作为 Box 的名称
   static Box? _box;
-
-  static Map? _userInfo;
 
   // 获取对应的 Box
   static Box get box {
@@ -29,13 +32,43 @@ class UserHive extends AppHive {
     throw Exception('No valid account found');
   }
 
-  // 获取用户信息
-  static Map getUserInfo() {
+  static Map _getUserInfo() {
     final currentUserBox = box;
-    return currentUserBox.toMap(); // 你可以根据 Box 存储的数据结构来调整这里的实现
+    return currentUserBox.toMap();
   }
 
-  static Map get userInfo {
-    return getUserInfo();
+  static Map get userInfo => _getUserInfo();
+
+  static List get friends => box.get('friends', defaultValue: []);
+
+  static void updateFriend(
+    String findKey,
+    dynamic findValue,
+    String updateKey,
+    dynamic value, [
+    String? type = HiveSaveType.cover,
+  ]) {
+    final list = friends;
+    final friend = list.firstWhere((element) => element[findKey] == findValue);
+
+    if (friend != null) {
+      if (type == HiveSaveType.cover) {
+        friend[updateKey] = value;
+      } else if (type == HiveSaveType.append) {
+        if (friend[updateKey] == null) {
+          friend[updateKey] = [value];
+        } else {
+          friend[updateKey].add(value);
+        }
+      }
+
+      box.put('friends', list);
+    } else {
+      throw Exception('No valid find item found');
+    }
+  }
+
+  static void saveFriends(List friends) {
+    box.put('friends', friends);
   }
 }

@@ -6,6 +6,7 @@ import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
 import 'package:chat_app/src/helpers/keyboard_observer.dart';
+import 'package:chat_app/src/utils/chat_util.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
 import 'package:flutter/gestures.dart';
@@ -187,7 +188,7 @@ class _ChatPanelState extends State<ChatPanel> {
                           },
                           icon: const Icon(Icons.add),
                         ),
-                )
+                ),
               ],
             ),
           ),
@@ -201,10 +202,9 @@ class _ChatPanelState extends State<ChatPanel> {
             child: Visibility(
               visible: _showPanel || focusNode.hasFocus,
               child: Container(
-                height: 0,
-                // height: KeyBoardObserver.instance.keyboardHeight == 0
-                //     ? null
-                //     : KeyBoardObserver.instance.keyboardHeight,
+                height: KeyBoardObserver.instance.keyboardHeight == 0
+                    ? null
+                    : KeyBoardObserver.instance.keyboardHeight,
                 child: Opacity(
                   opacity: _showPanel ? 1 : 0,
                   child: GridView.count(
@@ -215,21 +215,17 @@ class _ChatPanelState extends State<ChatPanel> {
                     crossAxisCount: 4,
                     shrinkWrap: true,
                     children: [
+                      // 图片
                       CustomIconButton(
                         icon: Icons.photo,
                         color: Theme.of(context).colorScheme.primary,
-                        onPressed: () {
-                          // print('图片');
-                          _pickImage();
-                        },
+                        onPressed: () => _pickImage(ImageSource.gallery),
                       ),
+                      // 拍照
                       CustomIconButton(
                         icon: Icons.camera_alt_outlined,
                         color: Theme.of(context).colorScheme.primary,
-                        onPressed: () {
-                          // print('照相');
-                          _takePicture();
-                        },
+                        onPressed: () => _pickImage(ImageSource.camera),
                       ),
                       CustomIconButton(
                         icon: Icons.phone,
@@ -238,12 +234,11 @@ class _ChatPanelState extends State<ChatPanel> {
                           print('语音');
                         },
                       ),
+                      // 视频
                       CustomIconButton(
                         icon: Icons.videocam_sharp,
                         color: Theme.of(context).colorScheme.primary,
-                        onPressed: () {
-                          print('视频');
-                        },
+                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -257,85 +252,44 @@ class _ChatPanelState extends State<ChatPanel> {
   }
 
   Future<void> _sendMessage() async {
-    // 发送消息
-    print('发送消息：${_messageController.text}');
-
-    Map msgData = {
-      'type': MessageType.text.value,
-      'content': _messageController.text,
-      'from': UserHive.userInfo['account'],
-      'to': widget.item['account'],
-      'sendTime': DateTime.now().millisecondsSinceEpoch
-    };
-
-    final List friends = UserHive.userInfo['friends'];
-
-    final friend = friends
-        .firstWhere((element) => element['account'] == widget.item['account']);
-
-    if (friend != null) {
-      if (friend['messages'] == null) {
-        friend['messages'] = [msgData];
-      } else {
-        friend['messages'].add(msgData);
-      }
-
-      // friend['messages'] = [];
-    }
+    MessageUtil.sendMessage(
+      type: MessageType.text.value,
+      content: _messageController.text,
+      from: UserHive.userInfo['account'],
+      to: widget.item['account'],
+    );
 
     setState(() {
       _messageController.clear();
       _showSendButton = false;
     });
-
-    UserHive.box.put('friends', friends);
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      print(pickedFile.path);
-      // Directory appDocDir = await getApplicationDocumentsDirectory();
-      // String appDocPath = appDocDir.path;
-      // // 生成一个唯一的文件名
-      // String filePath =
-      //     '$appDocPath/local-${DateTime.now().millisecondsSinceEpoch}.aac';
-
-      // File file = File(filePath);
-
-      // File audioFile = File(path);
-      // await file.writeAsBytes(audioFile.readAsBytesSync());
-      Map msgData = {
-        'type': MessageType.image.value,
-        'content': pickedFile.path,
-        'from': UserHive.userInfo['account'],
-        'to': widget.item['account'],
-        'sendTime': DateTime.now().millisecondsSinceEpoch,
-      };
-
-      MessageUtil.add(widget.item['account'], msgData);
+      print('文件路径：${pickedFile.path}');
+      MessageUtil.sendMessage(
+        type: MessageType.image.value,
+        content: pickedFile.path,
+        from: UserHive.userInfo['account'],
+        to: widget.item['account'],
+      );
     }
   }
 
-  Future<void> _takePicture() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+  // Future<void> _takePicture() async {
+  //   final picker = ImagePicker();
+  //   final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
-    if (pickedFile != null) {
-      print('相机拍照：${pickedFile.path}');
-      // File imageFile = File(pickedFile.path);
-      // List<int> imageBytes = imageFile.readAsBytesSync();
-      // String base64Image = base64Encode(imageBytes);
-      Map msgData = {
-        'type': MessageType.image.value,
-        'content': pickedFile.path,
-        'from': UserHive.userInfo['account'],
-        'to': widget.item['account'],
-        'sendTime': DateTime.now().millisecondsSinceEpoch,
-      };
-
-      MessageUtil.add(widget.item['account'], msgData);
-    }
-  }
+  //   if (pickedFile != null) {
+  //     MessageUtil.sendMessage(
+  //       type: MessageType.text.value,
+  //       content: pickedFile.path,
+  //       from: UserHive.userInfo['account'],
+  //       to: widget.item['account'],
+  //     );
+  //   }
+  // }
 }

@@ -5,12 +5,14 @@ class CommunicateIconButton extends StatelessWidget {
   final String? label;
   final Color color;
   final VoidCallback? onTap;
+  final TextStyle? style;
 
   const CommunicateIconButton({
     super.key,
     required this.icon,
     this.label,
     this.color = Colors.black,
+    this.style,
     this.onTap,
   });
 
@@ -23,9 +25,10 @@ class CommunicateIconButton extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.48),
               border: Border.all(
                 width: 2,
-                color: color,
+                color: color.withOpacity(0.42),
               ),
               borderRadius: BorderRadius.circular(50),
             ),
@@ -41,10 +44,11 @@ class CommunicateIconButton extends StatelessWidget {
               margin: const EdgeInsets.only(top: 10),
               child: Text(
                 label ?? '',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: color,
-                ),
+                style: style ??
+                    TextStyle(
+                      fontSize: 24,
+                      color: color,
+                    ),
               ),
             ),
           ),

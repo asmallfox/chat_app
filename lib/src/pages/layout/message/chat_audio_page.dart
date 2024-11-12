@@ -92,7 +92,7 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                       ),
                     ),
                     RoundedButton(
-                      icon: Icons.local_phone_rounded,
+                      icon: Icons.call_end_rounded,
                       color: Colors.white,
                       backgroundColor: Colors.red,
                       onPressed: () {

@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:chat_app/src/pages/layout/addressBook/book_icon_Paint.dart';
+import 'package:chat_app/src/pages/layout/addressBook/group_page.dart';
+import 'package:chat_app/src/pages/layout/addressBook/notice_page.dart';
+import 'package:chat_app/src/pages/layout/addressBook/widgets/book_icon_Paint.dart';
 import 'package:chat_app/src/pages/layout/message/chat_page.dart';
-import 'package:chat_app/src/utils/get_date_time.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:pinyin/pinyin.dart';
@@ -13,16 +15,16 @@ import 'package:flutter/services.dart' as rootBundle;
 
 const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-class AddressBook extends StatefulWidget {
-  const AddressBook({
+class AddressBookPage extends StatefulWidget {
+  const AddressBookPage({
     super.key,
   });
 
   @override
-  State<AddressBook> createState() => _AddressBookState();
+  State<AddressBookPage> createState() => _AddressBookPageState();
 }
 
-class _AddressBookState extends State<AddressBook> {
+class _AddressBookPageState extends State<AddressBookPage> {
   // List friends = List.generate(
   //   100,
   //   (index) {
@@ -63,7 +65,7 @@ class _AddressBookState extends State<AddressBook> {
       final jsonString = await rootBundle.rootBundle
           .loadString('assets/services/friends.json');
       final friends = json.decode(jsonString);
-      final localFriends = userBox.get('friends', defaultValue: []);
+      final localFriends = UserHive.friends;
       if (friends.isNotEmpty) {
         for (int i = 0; i < friends.length; i++) {
           int index = localFriends
@@ -78,7 +80,7 @@ class _AddressBookState extends State<AddressBook> {
             localFriends.add(friends[i]);
           }
         }
-        await userBox.put('friends', localFriends);
+        UserHive.saveFriends(localFriends);
       }
     } catch (error) {
       print('获取好友列表错误 $error');
@@ -273,11 +275,13 @@ class _AddressBookState extends State<AddressBook> {
         'name': '通知',
         'color': const Color.fromARGB(255, 43, 145, 46),
         'function': true,
+        'page': const NoticePage()
       },
       {
         'name': '群聊',
         'color': const Color.fromARGB(255, 148, 139, 62),
         'function': true,
+        'page': const GroupPage()
       }
     ]);
 
@@ -328,10 +332,19 @@ class _AddressBookState extends State<AddressBook> {
             height: 52,
             child: ListTile(
               onTap: () {
-                Navigator.of(context).push(
-                  PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => ChatPage(item: item)),
-                );
+                if (item['page'] == null) {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => ChatPage(item: item),
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => item['page'],
+                    ),
+                  );
+                }
               },
               leading: Container(
                 alignment: Alignment.center,

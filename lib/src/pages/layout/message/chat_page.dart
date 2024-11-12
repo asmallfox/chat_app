@@ -6,10 +6,10 @@ import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/permissions_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/pages/layout/message/chat_audio_page.dart';
-import 'package:chat_app/src/pages/layout/message/chat_content.dart';
-import 'package:chat_app/src/pages/layout/message/chat_panel.dart';
+import 'package:chat_app/src/pages/layout/message/widgets/chat_content.dart';
+import 'package:chat_app/src/pages/layout/message/widgets/chat_panel.dart';
 import 'package:chat_app/src/pages/layout/message/chat_video.page.dart';
-import 'package:chat_app/src/pages/layout/message/recording_panel.dart';
+import 'package:chat_app/src/pages/layout/message/widgets/recording_panel.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +53,7 @@ class _ChatPageState extends State<ChatPage> {
         child: Stack(
           children: [
             Scaffold(
-              backgroundColor: const Color.fromRGBO(245, 245, 245, 1),
+              backgroundColor: Colors.grey.shade100,
               appBar: AppBar(
                 leading: BackIconButton(
                   backFn: () {},
@@ -62,7 +62,6 @@ class _ChatPageState extends State<ChatPage> {
                 actions: [
                   IconButton(
                     onPressed: () async {
-                      // print('语音');
                       Navigator.of(context).push(
                         PageRouteBuilder(
                           pageBuilder: (_, __, ___) =>
@@ -75,10 +74,11 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      // print('视频');
                       Navigator.of(context).push(
                         PageRouteBuilder(
-                            pageBuilder: (_, __, ___) => ChatVideoPage(friend: widget.item),),
+                          pageBuilder: (_, __, ___) =>
+                              ChatVideoPage(friend: widget.item),
+                        ),
                       );
                     },
                     icon: const Icon(Icons.videocam_sharp),
@@ -243,25 +243,19 @@ class _ChatPageState extends State<ChatPage> {
           'content': filePath,
           'from': UserHive.userInfo['account'],
           'to': widget.item['account'],
-          'file': audioFile.readAsBytesSync(),
+          // 'file': audioFile.readAsBytesSync(),
           'duration': (duration!.inMilliseconds / 1000).ceil(),
           'sendTime': DateTime.now().millisecondsSinceEpoch,
         };
 
-        final List friends = UserHive.userInfo['friends'];
-
-        final friend = friends.firstWhere(
-            (element) => element['account'] == widget.item['account']);
-
-        if (friend != null) {
-          if (friend['messages'] == null) {
-            friend['messages'] = [msgData];
-          } else {
-            friend['messages'].add(msgData);
-          }
-        }
-
-        UserHive.box.put('friends', friends);
+        // 更新本地数据
+        UserHive.updateFriend(
+          'account',
+          widget.item['account'],
+          'messages',
+          msgData,
+          HiveSaveType.append,
+        );
 
         setState(() {
           _isRecording = false;

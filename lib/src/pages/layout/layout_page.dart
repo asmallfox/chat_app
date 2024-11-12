@@ -1,21 +1,21 @@
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'message/message_list.dart';
-import 'addressBook/address_book.dart';
-import './mine.dart';
+import 'message/chat_list_page.dart';
+import 'addressBook/address_book_page.dart';
+import 'mine/mine.dart';
 
 List pageList = [
   {
     'label': '消息',
     "icon": Icons.message_rounded,
-    'child': const MessageList(),
+    'child': const ChatListPage(),
     'badge': 0,
   },
   {
     'label': '通讯录',
     "icon": Icons.person_pin_rounded,
-    'child': const AddressBook(),
+    'child': const AddressBookPage(),
   },
   {
     'label': '我的',

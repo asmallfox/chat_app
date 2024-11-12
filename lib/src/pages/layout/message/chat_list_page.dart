@@ -5,35 +5,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import './chat_page.dart';
 
-class MessageList extends StatefulWidget {
-  const MessageList({
+class ChatListPage extends StatefulWidget {
+  const ChatListPage({
     super.key,
   });
 
   @override
-  State<MessageList> createState() => _MessageListState();
+  State<ChatListPage> createState() => _ChatListPageState();
 }
 
-class _MessageListState extends State<MessageList> {
+class _ChatListPageState extends State<ChatListPage> {
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   Offset menuAnchorPosition = const Offset(0, 0);
 
-  List chatList = List.generate(
-    20,
-    (index) {
-      final random = Random();
-      return {
-        'name': (index + 1).toString(),
-        'date': getDateTime(DateTime.now().microsecond),
-        'color': Color.fromARGB(
-          255,
-          random.nextInt(256),
-          random.nextInt(256),
-          random.nextInt(256),
-        )
-      };
-    },
-  );
+  // List chatList = List.generate(
+  //   20,
+  //   (index) {
+  //     final random = Random();
+  //     return {
+  //       'name': (index + 1).toString(),
+  //       'date': getDateTime(DateTime.now().microsecond),
+  //       'color': Color.fromARGB(
+  //         255,
+  //         random.nextInt(256),
+  //         random.nextInt(256),
+  //         random.nextInt(256),
+  //       )
+  //     };
+  //   },
+  // );
+
+  List chatList = [];
 
   @override
   void initState() {

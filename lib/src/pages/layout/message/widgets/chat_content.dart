@@ -29,7 +29,6 @@ class _ChatContentState extends State<ChatContent>
 
   @override
   void didUpdateWidget(covariant ChatContent oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }

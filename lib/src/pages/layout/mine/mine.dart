@@ -1,6 +1,10 @@
 import 'package:chat_app/src/pages/login/log_on_page.dart';
+import 'package:chat_app/src/providers/model/user_provider.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
+import 'package:chat_app/src/utils/share.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:provider/provider.dart';
 
 class Mine extends StatefulWidget {
   const Mine({
@@ -12,37 +16,53 @@ class Mine extends StatefulWidget {
 }
 
 class _MineState extends State<Mine> {
+  final userInfo = UserHive.userInfo;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+            padding: const EdgeInsets.only(top: 28, left: 20, right: 20),
             child: Row(
               children: [
                 Container(
                   width: 75,
                   height: 75,
                   decoration: BoxDecoration(
-                      color: Colors.deepPurple[400],
-                      borderRadius: BorderRadius.circular(8.0)),
+                    color: Colors.deepPurple[400],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Image.network(
+                    getSourceUrl(
+                      userInfo['avatar'],
+                    ),
+                  ),
                 ),
-                const SizedBox(
-                  width: 15,
-                ),
-                const Expanded(
+                const SizedBox(width: 20),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '小狐幽',
-                        style: TextStyle(
+                        userInfo['name'].toString(),
+                        style: const TextStyle(
                           fontSize: 20,
                         ),
                       ),
-                      SizedBox(height: 6),
-                      Text('账号：smallfox@99'),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text(
+                            '账号：',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(userInfo['account'])
+                        ],
+                      )
                     ],
                   ),
                 ),
@@ -86,6 +106,7 @@ class _MineState extends State<Mine> {
               FilledButton(
                 onPressed: () async {
                   final appBox = Hive.box('app');
+                  UserHive.box.clear();
                   appBox.put('token', null);
                   appBox.put('userInfo', null);
                   Navigator.of(context).pushReplacement(
