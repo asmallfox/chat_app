@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/utils/get_date_time.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
+import 'package:chat_app/src/utils/message_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -53,10 +55,9 @@ class _ChatListPageState extends State<ChatListPage> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: UserHive.box.listenable(keys: ['chatList']),
+      valueListenable: UserHive.box.listenable(keys: ['friends']),
       builder: (context, box, child) {
         List chatList = box.get('chatList', defaultValue: []);
-
         return Scaffold(
           appBar: AppBar(title: const Text('消息')),
           body: SingleChildScrollView(
@@ -102,9 +103,11 @@ class _ChatListPageState extends State<ChatListPage> {
                     ],
                     builder: (_, MenuController controller, Widget? child) {
                       Map chatItem = chatList[index];
-                      List chatItemMsgs = chatItem['messages'];
-                      Map? lastMessage = chatItemMsgs[chatItemMsgs.length - 1];
-                      print(chatItem);
+                      List chatItemMsgs =
+                          MessageUtil.getMessages(chatItem['account']);
+
+                      Map msgData = _getMessageData(chatItemMsgs);
+
                       return GestureDetector(
                         onLongPressDown: (details) {
                           if (!controller.isOpen) {
@@ -151,30 +154,22 @@ class _ChatListPageState extends State<ChatListPage> {
                                   fontSize: 22,
                                 ),
                               ),
-                              Text(
-                                lastMessage == null
-                                    ? ''
-                                    : getDateTime(chatList[index]['messages'][0]
-                                        ['sendTime']),
-                              )
+                              Text(msgData['sendTime'])
                             ],
                           ),
-                          subtitle: lastMessage == null
-                              ? null
-                              : Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('[新消息] ${lastMessage['content']}'),
-                                    Badge.count(
-                                      count: 99,
-                                      backgroundColor: const Color(
-                                        0xFFf5a13c,
-                                      ),
-                                      isLabelVisible: index % 10 == 2,
-                                    ),
-                                  ],
+                          subtitle: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(msgData['content']),
+                              Badge.count(
+                                count: msgData['newCount'],
+                                backgroundColor: const Color(
+                                  0xFFf5a13c,
                                 ),
+                                isLabelVisible: msgData['newCount'] > 0,
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -186,6 +181,33 @@ class _ChatListPageState extends State<ChatListPage> {
         );
       },
     );
+  }
+
+  Map _getMessageData(List messages) {
+    Map m = {'newCount': 0, 'sendTime': '', 'content': ''};
+
+    if (messages.isNotEmpty) {
+      m['content'] = _getFormatMsgContent(messages.last);
+      m['sendTime'] = getDateTime(messages.last['sendTime']);
+      m['newCount'] = (<dynamic>[0] + messages)
+          .reduce((value, element) => value + (element['read'] == 1 ? 1 : 0));
+    }
+
+    return m;
+  }
+
+  String _getFormatMsgContent(Map msg) {
+    int type = msg['type'];
+    String ctx = '';
+    if (type == MessageType.text.value) {
+      ctx += msg['content'];
+    } else if (type == MessageType.image.value) {
+      ctx += '图片';
+    } else if (type == MessageType.voice.value) {
+      ctx += '语音';
+    }
+
+    return "${msg['read'] == 1 ? '[新消息]' : ''} $ctx";
   }
 }
 

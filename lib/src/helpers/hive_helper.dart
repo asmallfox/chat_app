@@ -42,7 +42,7 @@ class HiveHelper {
     final appBox = Hive.box('app');
     final token = appBox.get('token');
     final userInfo = appBox.get('userInfo');
-
+    print('app 初始化完毕');
     if (token != null && userInfo != null) {
       await openHive(userInfo['account']);
     }

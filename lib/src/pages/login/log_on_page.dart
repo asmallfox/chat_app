@@ -4,7 +4,7 @@ import 'package:chat_app/Helpers/animation_slide_route.dart';
 import 'package:chat_app/src/helpers/hive_helper.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/pages/layout/layout_page.dart';
-import 'package:chat_app/src/pages/login/custom_text_field.dart';
+import 'package:chat_app/src/pages/login/widgets/custom_text_field.dart';
 import 'package:chat_app/src/pages/login/sign_up_page.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';

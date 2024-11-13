@@ -1,7 +1,9 @@
+import 'package:chat_app/src/api/api.dart';
+import 'package:chat_app/src/utils/toast.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/key_board_container.dart';
-import './custom_text_field.dart';
+import 'widgets/custom_text_field.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({
@@ -13,8 +15,8 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  late TextEditingController _nicknameController;
-  late TextEditingController _usernameController;
+  late TextEditingController _nameController;
+  late TextEditingController _accountController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
   bool _loading = false;
@@ -22,16 +24,16 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   void initState() {
     super.initState();
-    _nicknameController = TextEditingController();
-    _usernameController = TextEditingController();
+    _nameController = TextEditingController();
+    _accountController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _nicknameController.dispose();
-    _usernameController.dispose();
+    _nameController.dispose();
+    _accountController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -61,14 +63,14 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               CustomTextField(
                 hintText: "名称",
-                controller: _nicknameController,
+                controller: _nameController,
               ),
               const SizedBox(
                 height: 20,
               ),
               CustomTextField(
                 hintText: "用户名",
-                controller: _usernameController,
+                controller: _accountController,
               ),
               const SizedBox(
                 height: 20,
@@ -171,22 +173,56 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  bool _vaildFormData() {
+    String? errorMessage;
+    if (_nameController.text.isEmpty) {
+      errorMessage = '用户名不能为空';
+    } else if (_accountController.text.isEmpty) {
+      errorMessage = '账户不能为空';
+    } else if (_passwordController.text.isEmpty) {
+      errorMessage = '密码不能为空';
+    } else if (_confirmPasswordController.text.isEmpty) {
+      errorMessage = '确认密码不能为空';
+    } else if (_passwordController.text != _confirmPasswordController.text) {
+      errorMessage = '两次密码不一致！';
+    }
+    if (errorMessage != null) {
+      showToast(context, message: errorMessage);
+    }
+    return errorMessage == null;
+  }
+
   Future<void> _onRegister() async {
-    setState(() {
-      _loading = true;
-    });
+    // if (_vaildFormData()) {
+    //   return;
+    // }
 
     try {
+      setState(() {
+        _loading = true;
+      });
       Map<String, String> formData = {
-        'nickname': _nicknameController.text,
-        'username': _usernameController.text,
+        'name': _nameController.text,
+        'account': _accountController.text,
         'password': _passwordController.text,
         'confirmPassword': _confirmPasswordController.text,
       };
 
-      print('注册数据：$formData');
-    } catch (err) {
-      print('[error]: $err');
+      // print('注册数据：$formData');
+      Map params = {
+        'name': '小狐幽',
+        'account': 'smallfox@99',
+        'password': '123456',
+        'confirmPassword': '123456',
+      };
+
+      final res = await registerApi(params);
+      print("数据：  ${res}");
+    } catch (error) {
+      print('[error]: $error');
+      if (mounted) {
+       // showToast(context, message: );
+      }
     } finally {
       setState(() {
         _loading = false;

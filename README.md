@@ -24,3 +24,5 @@
 
 
 
+构建：flutter build apk --split-per-abi.
+

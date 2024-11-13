@@ -96,4 +96,14 @@ class MessageUtil {
 
     // send
   }
+
+  static List getMessages(String account) {
+    final List friends = UserHive.userInfo['friends'];
+    final Map? friend = friends.firstWhere((item) => item['account'] == account,
+        orElse: () => null);
+    if (friend != null) {
+      return friend['messages'] ?? [];
+    }
+    return [];
+  }
 }
