@@ -55,12 +55,12 @@ class HttpRequest {
       final responseJson = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (responseJson['status'] != 200) {
-        throw Exception(responseJson['message']);
+        throw responseJson;
       }
       return responseJson;
     } catch (error) {
       print('Error in post request: $error');
-      throw Exception(error);
+      rethrow;
     }
   }
 }

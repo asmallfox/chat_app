@@ -220,8 +220,8 @@ class _SignUpPageState extends State<SignUpPage> {
       print("数据：  ${res}");
     } catch (error) {
       print('[error]: $error');
-      if (mounted) {
-       // showToast(context, message: );
+      if (mounted && error is Map) {
+       showToast(context, message: error['message']);
       }
     } finally {
       setState(() {
