@@ -12,6 +12,6 @@ class HttpBaseClient extends http.BaseClient {
       request.headers['Authorization'] = 'Bearer $token';
     }
 
-    return _inner.send(request);
+    return _inner.send(request).timeout(const Duration(seconds: 3));
   }
 }

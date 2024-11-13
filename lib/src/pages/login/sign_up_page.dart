@@ -187,7 +187,7 @@ class _SignUpPageState extends State<SignUpPage> {
       errorMessage = '两次密码不一致！';
     }
     if (errorMessage != null) {
-      showToast(context, message: errorMessage);
+      showToast(context: context, message: errorMessage);
     }
     return errorMessage == null;
   }
@@ -211,17 +211,23 @@ class _SignUpPageState extends State<SignUpPage> {
       // print('注册数据：$formData');
       Map params = {
         'name': '小狐幽',
-        'account': 'smallfox@99',
+        'account': 'smallfox@99111121222211',
         'password': '123456',
         'confirmPassword': '123456',
       };
 
-      final res = await registerApi(params);
-      print("数据：  ${res}");
+      await registerApi(params);
+
+      if (mounted) {
+        showToast(message: '注册成功，请前往登陆');
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.of(context).pop();
+        });
+      }
     } catch (error) {
       print('[error]: $error');
       if (mounted && error is Map) {
-       showToast(context, message: error['message']);
+        showToast(context: context, message: error['message']);
       }
     } finally {
       setState(() {

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:chat_app/src/api/http/http_base_client.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
+import 'package:chat_app/src/utils/toast.dart';
 import 'package:http/http.dart' as http;
 
 class HttpRequest {
@@ -51,15 +52,17 @@ class HttpRequest {
         headers: headers,
         encoding: encoding,
       );
-
       final responseJson = jsonDecode(response.body) as Map<String, dynamic>;
 
-      if (responseJson['status'] != 200) {
-        throw responseJson;
+      if (response.statusCode == 200) {
+        return responseJson;
       }
-      return responseJson;
+      throw responseJson;
     } catch (error) {
-      print('Error in post request: $error');
+      if (error is TimeoutException) {
+        showToast(message: '请求超时！');
+      }
+      print('Error in post request: ${error is TimeoutException} $error');
       rethrow;
     }
   }
