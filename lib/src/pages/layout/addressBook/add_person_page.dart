@@ -20,7 +20,9 @@ class _AddPersonPageState extends State<AddPersonPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            child: TextField(),
+            child: TextField(
+              
+            ),
           )
         ],
       ),
