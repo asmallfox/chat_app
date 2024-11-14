@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/utils/get_date_time.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
@@ -59,7 +57,9 @@ class _ChatListPageState extends State<ChatListPage> {
       builder: (context, box, child) {
         List chatList = box.get('chatList', defaultValue: []);
         return Scaffold(
-          appBar: AppBar(title: const Text('消息')),
+          appBar: AppBar(
+            title: const Text('消息'),
+          ),
           body: SingleChildScrollView(
             padding:
                 const EdgeInsets.only(left: 4, right: 4, top: 15, bottom: 15),

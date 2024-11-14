@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -20,7 +19,6 @@ String getSourceUrl(String url) {
 }
 
 String formattedDuration(int second) {
-  print(second);
   int h = second ~/ 3600;
   int m = (second % 3600) ~/ 60;
   int s = second % 60;

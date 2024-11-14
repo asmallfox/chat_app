@@ -1,20 +1,22 @@
 import 'dart:convert';
 
 import 'package:chat_app/Helpers/animation_slide_route.dart';
+import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/helpers/hive_helper.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
+import 'package:chat_app/src/models/app.dart';
+import 'package:chat_app/src/models/user.dart';
 import 'package:chat_app/src/pages/layout/layout_page.dart';
 import 'package:chat_app/src/pages/login/widgets/custom_text_field.dart';
 import 'package:chat_app/src/pages/login/sign_up_page.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
+import 'package:chat_app/src/utils/toast.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart' as rootBundle;
 
-import 'package:chat_app/src/models/app.dart';
-import 'package:chat_app/src/models/user.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class LogOnPage extends StatefulWidget {
@@ -35,7 +37,7 @@ class _LogOnPageState extends State<LogOnPage> {
   void initState() {
     super.initState();
     _accountController = TextEditingController(text: 'smallfox@99');
-    _passwordController = TextEditingController(text: '123456aa');
+    _passwordController = TextEditingController(text: '123456');
   }
 
   @override
@@ -193,9 +195,19 @@ class _LogOnPageState extends State<LogOnPage> {
   }
 
   Future<void> _onLogin(BuildContext context) async {
+    if (_accountController.text.isEmpty) {
+      MessageHelper.showToast(message: '账户不能为空');
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      MessageHelper.showToast(message: '密码不能为空');
+      return;
+    }
+
     setState(() {
       _loading = true;
     });
+
     final navigator = Navigator.of(context);
 
     try {
@@ -205,49 +217,43 @@ class _LogOnPageState extends State<LogOnPage> {
       };
       print('登录数据：$formData');
 
-      // 创建账号数据
-      await HiveHelper.openHive(formData['account'].toString());
+      Map? res = await loginApi(formData);
 
-      final jsonString =
-          await rootBundle.rootBundle.loadString('assets/services/user.json');
+      if (res.isEmpty) {
+        MessageHelper.showToast(message: '登陆失败');
+      } else {
+        final String userBoxName = formData['account'].toString();
+        // 创建账号数据
+        await HiveHelper.openHive(userBoxName);
 
-      final userInfo = json.decode(jsonString);
+        // final jsonString =
+        //     await rootBundle.rootBundle.loadString('assets/services/user.json');
 
-      // UserHiveModel userModel = UserHiveModel(
-      //   id: userInfo['id'],
-      //   account: userInfo['account'],
-      //   name: userInfo['name'],
-      //   avatar: userInfo['avatar'],
-      // );
-      // AppHiveModel appModel = AppHiveModel(token: 'token', userInfo: userModel);
+        final userInfo = res['data'];
+        String token = userInfo['token'];
 
-      // appModel.save();
-      // userModel.save();
+        // UserHiveModel userModel = UserHiveModel(
+        //   id: userInfo['id'],
+        //   account: userInfo['account'],
+        //   name: userInfo['name'],
+        //   avatar: userInfo['avatar'],
+        // );
+        // AppHiveModel appModel = AppHiveModel(token: token, userInfo: userModel);
 
-      // await Hive.box('app').put('token', 'token');
-      // await Hive.box('app').put('userInfo', userInfo);
+        // appModel.save();
+        // userModel.save();
 
-      // await Hive.box(formData['account'].toString()).put('friends', []);
+        await Hive.box('app').putAll({'token': token, 'userInfo': userInfo});
 
-      final appBox = Hive.box('app');
+        await UserHive.setBoxData(userInfo);
 
-      appBox.putAll({'token': 'token', 'userInfo': userInfo});
-
-      UserHive.box.putAll({
-        'friends': [],
-        ...UserHive.userInfo,
-        ...userInfo,
-      });
-
-      navigator.pushReplacement(
-        MaterialPageRoute(builder: (_) => const LayoutPage()),
-      );
-    } catch (err) {
-      print('[error] $err');
-      MessageHelper.showModel(
-        message: 'Login',
-        type: ModelType.error,
-      );
+        navigator.pushReplacement(
+          MaterialPageRoute(builder: (_) => const LayoutPage()),
+        );
+      }
+    } catch (error) {
+      print('[error] $error');
+      MessageHelper.showToast(message: (error as Map)['message']);
     } finally {
       setState(() {
         _loading = false;

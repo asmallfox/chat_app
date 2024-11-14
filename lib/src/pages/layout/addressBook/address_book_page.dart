@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:chat_app/src/pages/layout/addressBook/add_person_page.dart';
 import 'package:chat_app/src/pages/layout/addressBook/group_page.dart';
 import 'package:chat_app/src/pages/layout/addressBook/notice_page.dart';
 import 'package:chat_app/src/pages/layout/addressBook/widgets/book_icon_Paint.dart';
@@ -106,10 +107,22 @@ class _AddressBookPageState extends State<AddressBookPage> {
     return ValueListenableBuilder(
       valueListenable: userBox.listenable(keys: ['friends']),
       builder: (context, box, child) {
-        widgetList = _getWidgets(box.get('friends'));
+        widgetList = _getWidgets(box.get('friends', defaultValue: []));
         return Scaffold(
           appBar: AppBar(
             title: const Text('通讯录'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.person_add_outlined),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AddPersonPage(),
+                    ),
+                  );
+                },
+              )
+            ],
           ),
           body: Stack(
             key: _stackGlobalKey,

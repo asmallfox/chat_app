@@ -1,20 +1,26 @@
 import 'package:hive_flutter/adapters.dart';
 
-class AppHive {
-  static final appBox = Hive.box('app');
-
-  static String? getToken() {
-    return appBox.get('token');
-  }
-
-  static Map? getCurrentUser() {
-    return appBox.get('userInfo');
-  }
-}
-
 class HiveSaveType {
   static const cover = 'cover';
   static const append = 'append';
+}
+
+class AppHive {
+  static final _appBox = Hive.box('app');
+
+  static Box get box => _appBox;
+
+  static String? getToken() {
+    return _appBox.get('token');
+  }
+
+  static Map? get getCurrentUser {
+    return _appBox.get('userInfo');
+  }
+
+  static Future<void> setUserInfo(Map data) async {
+    await _appBox.put('userInfo', data);
+  }
 }
 
 class UserHive extends AppHive {
@@ -23,7 +29,7 @@ class UserHive extends AppHive {
 
   // 获取对应的 Box
   static Box get box {
-    final currentUser = AppHive.getCurrentUser();
+    final currentUser = AppHive.getCurrentUser;
     if (currentUser != null && currentUser['account'] != null) {
       final account = currentUser['account'].toString();
       _box ??= Hive.box(account); // 延迟加载 Box
@@ -41,6 +47,15 @@ class UserHive extends AppHive {
 
   static List get friends => box.get('friends', defaultValue: []);
   static List get chatList => box.get('chatList', defaultValue: []);
+
+  static Future<void> setBoxData(Map data) async {
+    await box.putAll({
+      'friends': friends,
+      'chatList': chatList,
+      ...data,
+    });
+    await AppHive.setUserInfo(data);
+  }
 
   static void updateFriend(
     String findKey,

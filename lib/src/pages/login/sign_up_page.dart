@@ -1,4 +1,5 @@
 import 'package:chat_app/src/api/api.dart';
+import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/utils/toast.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
@@ -187,15 +188,13 @@ class _SignUpPageState extends State<SignUpPage> {
       errorMessage = '两次密码不一致！';
     }
     if (errorMessage != null) {
-      showToast(context: context, message: errorMessage);
+      MessageHelper.showToast(context: context, message: errorMessage);
     }
     return errorMessage == null;
   }
 
   Future<void> _onRegister() async {
-    // if (_vaildFormData()) {
-    //   return;
-    // }
+    if (_vaildFormData()) return;
 
     try {
       setState(() {
@@ -209,17 +208,17 @@ class _SignUpPageState extends State<SignUpPage> {
       };
 
       // print('注册数据：$formData');
-      Map params = {
-        'name': '小狐幽',
-        'account': 'smallfox@99111121222211',
-        'password': '123456',
-        'confirmPassword': '123456',
-      };
+      // Map params = {
+      //   'name': '小狐幽',
+      //   'account': 'smallfox@99111121222211',
+      //   'password': '123456',
+      //   'confirmPassword': '123456',
+      // };
 
-      await registerApi(params);
+      await registerApi(formData);
 
       if (mounted) {
-        showToast(message: '注册成功，请前往登陆');
+        MessageHelper.showToast(message: '注册成功，请前往登陆');
         Future.delayed(const Duration(seconds: 2), () {
           Navigator.of(context).pop();
         });
@@ -227,7 +226,7 @@ class _SignUpPageState extends State<SignUpPage> {
     } catch (error) {
       print('[error]: $error');
       if (mounted && error is Map) {
-        showToast(context: context, message: error['message']);
+        MessageHelper.showToast(context: context, message: error['message']);
       }
     } finally {
       setState(() {

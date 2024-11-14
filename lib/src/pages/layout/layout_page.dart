@@ -1,4 +1,6 @@
+import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/constants/global_key.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'message/chat_list_page.dart';
@@ -36,8 +38,23 @@ class LayoutPage extends StatefulWidget {
 
 class _LayoutPageState extends State<LayoutPage> {
   late PageController _pageViewController;
-  int currentPageIndex = 0;
+  int currentPageIndex = 1;
   bool _isPageChanging = false;
+
+  Future<void> _getUserInfo() async {
+    try {
+      final userInfo = AppHive.getCurrentUser;
+      if (userInfo != null) {
+        final res = await getUserInfoApi({'id': userInfo['id']});
+
+        if (res['data'] != null) {
+          UserHive.setBoxData(res['data']);
+        }
+      }
+    } catch (error) {
+      print('[Error layout_page]: $error');
+    }
+  }
 
   @override
   void initState() {
@@ -60,6 +77,8 @@ class _LayoutPageState extends State<LayoutPage> {
         });
       }
     });
+
+    _getUserInfo();
   }
 
   @override

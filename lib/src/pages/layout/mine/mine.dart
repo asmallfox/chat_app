@@ -2,6 +2,7 @@ import 'package:chat_app/src/pages/login/log_on_page.dart';
 import 'package:chat_app/src/providers/model/user_provider.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/share.dart';
+import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +21,8 @@ class _MineState extends State<Mine> {
 
   @override
   Widget build(BuildContext context) {
+    print(userInfo);
+
     return SafeArea(
       child: Column(
         children: [
@@ -34,10 +37,8 @@ class _MineState extends State<Mine> {
                     color: Colors.deepPurple[400],
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: Image.network(
-                    getSourceUrl(
-                      userInfo['avatar'],
-                    ),
+                  child: Avatar(
+                    url: userInfo['avatar'],
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -60,7 +61,7 @@ class _MineState extends State<Mine> {
                               color: Colors.grey.shade600,
                             ),
                           ),
-                          Text(userInfo['account'])
+                          Text(userInfo['account'].toString())
                         ],
                       )
                     ],
