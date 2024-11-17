@@ -128,4 +128,10 @@ class MessageHelper {
       },
     );
   }
+
+  static Future<void> showRequestToastError(Object error) async {
+    if (error is Map) {
+      await showToast(message: error['message']);
+    }
+  }
 }

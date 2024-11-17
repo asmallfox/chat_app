@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/share.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:path_provider/path_provider.dart';
 
 class MessageUtil {
   static void add(String account, Map msg) {

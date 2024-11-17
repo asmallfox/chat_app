@@ -1,6 +1,5 @@
 import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
-import 'package:chat_app/src/utils/toast.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/key_board_container.dart';

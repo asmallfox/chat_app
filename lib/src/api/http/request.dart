@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:chat_app/src/api/http/http_base_client.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
-import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:http/http.dart' as http;
 
 // 一、HTTP 状态码
@@ -57,13 +56,7 @@ class HttpRequest {
 
       return responseJson;
     } catch (error) {
-      print('Error in get request: $error');
-      if (error is TimeoutException) {
-        MessageHelper.showToast(message: '请求超时！');
-      }
-      if (error is http.ClientException) {
-        MessageHelper.showToast(message: '服务器错误');
-      }
+      _handleError(error, 'GET');
       rethrow;
     }
   }
@@ -88,14 +81,19 @@ class HttpRequest {
       }
       throw responseJson;
     } catch (error) {
-      if (error is TimeoutException) {
-        MessageHelper.showToast(message: '请求超时！');
-      }
-      if (error is http.ClientException) {
-        MessageHelper.showToast(message: '服务器错误');
-      }
-      print('Error in post request: ${error.runtimeType} error $error');
+      _handleError(error, 'POST');
       rethrow;
+    }
+  }
+
+  void _handleError(Object error, [String? method]) {
+    print(
+        '${method == null ? '[Request Error]' : 'Error in $method request'}: ${error.runtimeType} => $error');
+
+    if (error is TimeoutException) {
+      MessageHelper.showToast(message: '请求超时！');
+    } else if (error is http.ClientException) {
+      MessageHelper.showToast(message: '服务器错误');
     }
   }
 }

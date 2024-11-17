@@ -10,12 +10,11 @@ import 'package:chat_app/src/pages/layout/layout_page.dart';
 import 'package:chat_app/src/pages/login/widgets/custom_text_field.dart';
 import 'package:chat_app/src/pages/login/sign_up_page.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
-import 'package:chat_app/src/utils/toast.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter/services.dart' as rootBundle;
+// import 'package:flutter/services.dart' as rootBundle;
 
 import 'package:hive_flutter/adapters.dart';
 
@@ -253,7 +252,10 @@ class _LogOnPageState extends State<LogOnPage> {
       }
     } catch (error) {
       print('[error] $error');
-      MessageHelper.showToast(message: (error as Map)['message']);
+      // if (error is Exception) {
+      //   MessageHelper.showToast(message: error.toString());
+      // }
+      MessageHelper.showRequestToastError(error);
     } finally {
       setState(() {
         _loading = false;
