@@ -11,6 +11,8 @@ class SearchPerrsonPage extends StatefulWidget {
 }
 
 class _SearchPerrsonPageState extends State<SearchPerrsonPage> {
+  final TextEditingController _keywordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return KeyboardContainer(
@@ -18,21 +20,37 @@ class _SearchPerrsonPageState extends State<SearchPerrsonPage> {
         backgroundColor: const Color.fromARGB(255, 244, 246, 248),
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 244, 246, 248),
-          leading: SizedBox(width: 0),
-          leadingWidth: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          leadingWidth: 24,
           title: TextField(
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.search),
-              suffixIcon: Icon(Icons.clear),
-              hintText: '账号',
-              helperText: 'supporting text',
+            controller: _keywordController,
+            decoration: const InputDecoration(
+              hintText: '查找账号',
+              border: InputBorder.none,
+              fillColor: Colors.white,
+              filled: true,
             ),
+            onChanged: (value) {
+              setState(() {});
+            },
           ),
           actions: [
-            TextButton(
-              onPressed: () {},
-              child: const Text('取消'),
-            ),
+            _keywordController.text.isEmpty
+                ? TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('取消'),
+                  )
+                : TextButton(
+                    onPressed: () {},
+                    child: const Text('查找'),
+                  ),
           ],
         ),
         body: Column(
@@ -45,30 +63,43 @@ class _SearchPerrsonPageState extends State<SearchPerrsonPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(6)),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Row(
                 children: [
-                  Icon(
-                    Icons.search_rounded,
-                    size: 32,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(52),
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.pink,
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 10),
-                  Text(
-                    '账号',
-                    style: TextStyle(fontSize: 18),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '张三',
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          '账号：zs123456',
+                          style: TextStyle(
+                              fontSize: 14, color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: () {},
+                    child: Text('添加'),
                   ),
                 ],
               ),
-              // child: TextField(
-              //   decoration: InputDecoration(
-              //     prefixIcon: Icon(Icons.search),
-              //     suffixIcon: Icon(Icons.clear),
-              //     labelText: 'Filled',
-              //     hintText: 'hint text',
-              //     helperText: 'supporting text',
-              //     filled: true,
-              //   ),
-              // ),
             )
           ],
         ),

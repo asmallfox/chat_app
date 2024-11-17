@@ -61,7 +61,6 @@ class _SearchUserPageState extends State<SearchUserPage> {
               ),
               child: Center(
                 child: TextField(
-                  maxLines: 1,
                   controller: _keywordController,
                   decoration: const InputDecoration.collapsed(
                     hintText: 'Search User',
