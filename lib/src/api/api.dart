@@ -35,3 +35,14 @@ Future<Map<String, dynamic>> getUserInfoApi(Map data) {
   }
   return httpRequest.get('/api/user-info/${data['id']}');
 }
+
+/*
+ * 获取用户信息
+ * @param {string} id 用户id
+ */
+Future<Map<String, dynamic>> findUsersApi(Map data) {
+  if (data['account'] == null) {
+    throw ArgumentError('account is required.');
+  }
+  return httpRequest.get('/api/find-users?account=${data['account']}');
+}

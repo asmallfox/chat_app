@@ -189,11 +189,11 @@ class _SignUpPageState extends State<SignUpPage> {
     if (errorMessage != null) {
       MessageHelper.showToast(context: context, message: errorMessage);
     }
-    return errorMessage == null;
+    return true;
   }
 
   Future<void> _onRegister() async {
-    if (_vaildFormData()) return;
+    if (!_vaildFormData()) return;
 
     try {
       setState(() {
@@ -205,7 +205,6 @@ class _SignUpPageState extends State<SignUpPage> {
         'password': _passwordController.text,
         'confirmPassword': _confirmPasswordController.text,
       };
-
       // print('注册数据：$formData');
       // Map params = {
       //   'name': '小狐幽',

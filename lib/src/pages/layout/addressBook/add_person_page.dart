@@ -1,5 +1,5 @@
 import 'package:chat_app/CustomWidget/keyboard_container.dart';
-import 'package:chat_app/src/pages/layout/addressBook/search_perrson_page.dart';
+import 'package:chat_app/src/pages/layout/addressBook/search_person_page.dart';
 import 'package:flutter/material.dart';
 
 class AddPersonPage extends StatefulWidget {
@@ -28,7 +28,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
               onTap: () {
                 Navigator.of(context).push(
                   PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const SearchPerrsonPage(),
+                    pageBuilder: (_, __, ___) => const SearchPersonPage(),
                   ),
                 );
               },
