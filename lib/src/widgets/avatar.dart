@@ -3,23 +3,22 @@ import 'package:flutter/material.dart';
 
 class Avatar extends StatelessWidget {
   final String? url;
+  final double? radius;
+
   const Avatar({
     super.key,
     this.url,
+    this.radius = 20,
   });
   @override
   Widget build(BuildContext context) {
-    if (url == null) {
-      return Container(
-        color: Colors.pink,
-        child: Text('A'),
-      );
-    }
+    // String avatarUrl = getSourceUrl(url!);
 
     return CircleAvatar(
-      child: Image.network(
-        getSourceUrl(url!),
-      ),
+      radius: radius,
+      child: url == null
+          ? Image.asset('assets/images/default_avatar.png')
+          : Image.network(getSourceUrl(url!)),
     );
   }
 }

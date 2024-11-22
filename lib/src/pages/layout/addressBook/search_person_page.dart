@@ -1,7 +1,10 @@
 import 'package:chat_app/CustomWidget/keyboard_container.dart';
 import 'package:chat_app/Helpers/util.dart';
 import 'package:chat_app/src/api/api.dart';
+import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
+import 'package:chat_app/src/socket/socket_api.dart';
+import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
 
 class SearchPersonPage extends StatefulWidget {
@@ -15,9 +18,9 @@ class SearchPersonPage extends StatefulWidget {
 
 class _SearchPersonPageState extends State<SearchPersonPage> {
   final TextEditingController _keywordController =
-      TextEditingController(text: 'smallfox@99');
+      TextEditingController(text: 'lisi');
 
-  List _result = [];
+  final List _result = [];
   bool _isEmpty = false;
 
   @override
@@ -68,10 +71,7 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
                 padding: const EdgeInsets.all(20),
                 child: Text(
                   '没有找到数据~',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey.shade600
-                  ),
+                  style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
                 ),
               )
             : ListView.separated(
@@ -90,15 +90,7 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
                     ),
                     child: Row(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(52),
-                          child: SizedBox(
-                            width: 52,
-                            height: 52,
-                            child: Image.network(
-                                getNetworkSourceUrl(item['avatar'])),
-                          ),
-                        ),
+                        Avatar(url: item['avatar'], radius: 28),
                         const SizedBox(width: 20),
                         Expanded(
                           child: Column(
@@ -121,8 +113,20 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
                           ),
                         ),
                         FilledButton(
-                          onPressed: () {},
-                          child: Text('添加'),
+                          onPressed: item['status'] ==
+                                  AddFriendButtonStatus.added.value
+                              ? null
+                              : () => _onAddFriend(item),
+                          style: ButtonStyle(
+                            shape: WidgetStatePropertyAll<OutlinedBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            AddFriendButtonStatus.getText(item['status']),
+                          ),
                         ),
                       ],
                     ),
@@ -148,6 +152,118 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
         });
       }
       print(res);
+    } catch (error) {
+      print('[Error]: $error');
+    }
+  }
+
+  Future<void> _onAddFriend(Map item) async {
+    try {
+      print(item);
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('添加好友'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6.0),
+            ),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width - 40,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Avatar(
+                        radius: 24,
+                        url: item['avatar'],
+                      ),
+                      const SizedBox(width: 16),
+                      Text(item['name'])
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '填写验证信息',
+                        style: TextStyle(
+                          fontSize: 18,
+                          height: 2.2,
+                        ),
+                      ),
+                      TextField(
+                        minLines: 2,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.grey.shade200,
+                          border: InputBorder.none,
+                          hintText: '请输入验证信息',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '设置对方备注',
+                        style: TextStyle(
+                          fontSize: 18,
+                          height: 2.2,
+                        ),
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.grey.shade200,
+                          border: InputBorder.none,
+                          hintText: '请输入验证信息',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('取消'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              FilledButton(
+                onPressed: () {
+                  Map params = {
+                    'userId': item['id'],
+                    'account': item['account'],
+                    'info': '验证信息',
+                    'note': '对方备注',
+                  };
+                  SocketApi.addFriendSocketApi(params);
+                  Navigator.of(context).pop();
+                },
+                style: ButtonStyle(
+                  shape: WidgetStatePropertyAll<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                ),
+                child: const Text('发送'),
+              ),
+            ],
+          );
+        },
+      );
     } catch (error) {
       print('[Error]: $error');
     }

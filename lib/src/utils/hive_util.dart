@@ -10,6 +10,8 @@ class AppHive {
 
   static Box get box => _appBox;
 
+  static String? get token => _appBox.get('token');
+
   static String? getToken() {
     return _appBox.get('token');
   }

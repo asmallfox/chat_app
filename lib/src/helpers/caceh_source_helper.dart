@@ -1,10 +1,7 @@
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
-
 import 'package:chat_app/Helpers/util.dart';
 import 'package:path_provider/path_provider.dart';
-
 
 Future<String?> downloadAndSaveFile(String url) async {
   try {
@@ -23,7 +20,7 @@ Future<String?> downloadAndSaveFile(String url) async {
 
     return filePath;
   } catch (error) {
-    print('[Error] [downloadAndSaveFile] $error');
+    print('[Error downloadAndSaveFile] $error');
     rethrow;
   }
 }

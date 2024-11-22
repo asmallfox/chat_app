@@ -14,3 +14,21 @@ class MessageType {
   static const video = MessageType._('视频', 4);
   static const file = MessageType._('文件', 5);
 }
+
+enum AddFriendButtonStatus {
+  add(1, '添加'),
+  verifying(2, '验证中'),
+  added(3, '已添加'),
+  delete(4, '删除');
+
+  final int value;
+  final String text;
+
+  const AddFriendButtonStatus(this.value, this.text);
+
+  static String getText(int status) {
+    return AddFriendButtonStatus.values
+        .firstWhere((e) => e.value == status, orElse: () => AddFriendButtonStatus.add)
+        .text;
+  }
+}

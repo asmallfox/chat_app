@@ -2,6 +2,7 @@ import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/hive_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/router/routes.dart';
+import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,8 @@ Future<void> startService() async {
   await HiveHelper.getInstance();
   // 初始化录音插件
   await RecordingHelper.getInstance();
+  // 初始化socket
+  await SocketIOClient.getInstance();
 }
 
 class MyApp extends StatelessWidget {

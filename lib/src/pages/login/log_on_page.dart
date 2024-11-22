@@ -9,6 +9,7 @@ import 'package:chat_app/src/models/user.dart';
 import 'package:chat_app/src/pages/layout/layout_page.dart';
 import 'package:chat_app/src/pages/login/widgets/custom_text_field.dart';
 import 'package:chat_app/src/pages/login/sign_up_page.dart';
+import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
@@ -245,6 +246,8 @@ class _LogOnPageState extends State<LogOnPage> {
         await Hive.box('app').putAll({'token': token, 'userInfo': userInfo});
 
         await UserHive.setBoxData(userInfo);
+        // 初始化socket
+        await SocketIOClient.getInstance();
 
         navigator.pushReplacement(
           MaterialPageRoute(builder: (_) => const LayoutPage()),
