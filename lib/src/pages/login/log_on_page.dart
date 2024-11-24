@@ -247,7 +247,7 @@ class _LogOnPageState extends State<LogOnPage> {
 
         await UserHive.setBoxData(userInfo);
         // 初始化socket
-        await SocketIOClient.getInstance();
+        await SocketIOClient.connect();
 
         navigator.pushReplacement(
           MaterialPageRoute(builder: (_) => const LayoutPage()),

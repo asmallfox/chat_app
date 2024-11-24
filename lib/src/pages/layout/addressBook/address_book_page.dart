@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:pinyin/pinyin.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' as rootBundle;
 
 const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -26,24 +25,6 @@ class AddressBookPage extends StatefulWidget {
 }
 
 class _AddressBookPageState extends State<AddressBookPage> {
-  // List friends = List.generate(
-  //   100,
-  //   (index) {
-  //     final random = Random();
-  //     return {
-  //       'name':
-  //           letters[random.nextInt(letters.length)] + (index + 1).toString(),
-  //       'date': getDateTime(DateTime.now().microsecond),
-  //       'color': Color.fromARGB(
-  //         255,
-  //         random.nextInt(256),
-  //         random.nextInt(256),
-  //         random.nextInt(256),
-  //       )
-  //     };
-  //   },
-  // );
-
   List keywordList =
       List.generate(26, (index) => String.fromCharCode(index + 65));
 
@@ -59,7 +40,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
   final ScrollController _scrollController = ScrollController();
 
   final userInfo = Hive.box('app').get('userInfo');
-  late final userBox = Hive.box(userInfo['account']);
+  // late final userBox = Hive.box(userInfo['account']);
 
   Future<void> getFriends() async {
     try {
@@ -105,7 +86,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
   Widget build(BuildContext context) {
     final isPageChanging = Provider.of<bool>(context);
     return ValueListenableBuilder(
-      valueListenable: userBox.listenable(keys: ['friends']),
+      valueListenable: UserHive.box.listenable(keys: ['friends', 'verifyList']),
       builder: (context, box, child) {
         widgetList = _getWidgets(box.get('friends', defaultValue: []));
         return Scaffold(
@@ -288,13 +269,15 @@ class _AddressBookPageState extends State<AddressBookPage> {
         'name': '通知',
         'color': const Color.fromARGB(255, 43, 145, 46),
         'function': true,
-        'page': const NoticePage()
+        'page': const NoticePage(),
+        'badge': 0
       },
       {
         'name': '群聊',
         'color': const Color.fromARGB(255, 148, 139, 62),
         'function': true,
-        'page': const GroupPage()
+        'page': const GroupPage(),
+        'badge': 0
       }
     ]);
 
@@ -380,6 +363,22 @@ class _AddressBookPageState extends State<AddressBookPage> {
                   fontSize: 22,
                 ),
               ),
+              // trailing: Visibility(
+              //   visible: false,
+              //   child: Text('xxxxxxxxxxxxxxx'),
+              //   // child: Positioned(
+              //   //   top: 0,
+              //   //   right: 0,
+              //   //   child: Badge(
+              //   //     label: Text(
+              //   //       (item['badge'] != null && item['badge'] > 99)
+              //   //           ? '...'
+              //   //           : item['badge'].toString(),
+              //   //     ),
+              //   //     backgroundColor: const Color(0xFFf5a13c),
+              //   //   ),
+              //   // ),
+              // ),
             ),
           );
         }).toList());

@@ -18,6 +18,7 @@ List pageList = [
     'label': '通讯录',
     "icon": Icons.person_pin_rounded,
     'child': const AddressBookPage(),
+    'badge': 2,
   },
   {
     'label': '我的',
@@ -135,7 +136,7 @@ class _LayoutPageState extends State<LayoutPage> {
                       backgroundColor: const Color(0xFFf5a13c),
                     ),
                   ),
-                )
+                ),
               ],
             ),
             label: item['label'],

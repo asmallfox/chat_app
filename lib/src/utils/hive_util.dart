@@ -50,6 +50,15 @@ class UserHive extends AppHive {
   static List get friends => box.get('friends', defaultValue: []);
   static List get chatList => box.get('chatList', defaultValue: []);
 
+  /*
+   * Map {
+   *  newCount: number,
+   *  data: List<Map<String, dynamic>> []
+   * }
+  */
+  static Map<String, dynamic> get verifyList =>
+      box.get('verifyList', defaultValue: {'newCount': 0, 'data': []});
+
   static Future<void> setBoxData(Map data) async {
     await box.putAll({
       'friends': friends,

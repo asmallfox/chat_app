@@ -1,5 +1,6 @@
 import 'package:chat_app/src/pages/login/log_on_page.dart';
 import 'package:chat_app/src/providers/model/user_provider.dart';
+import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/share.dart';
 import 'package:chat_app/src/widgets/avatar.dart';
@@ -21,8 +22,6 @@ class _MineState extends State<Mine> {
 
   @override
   Widget build(BuildContext context) {
-    print(userInfo);
-
     return SafeArea(
       child: Column(
         children: [
@@ -110,6 +109,7 @@ class _MineState extends State<Mine> {
                   UserHive.box.clear();
                   appBox.put('token', null);
                   appBox.put('userInfo', null);
+                  SocketIOClient.disconnect(); // 断开socket连接
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => const LogOnPage(),
