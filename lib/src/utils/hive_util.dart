@@ -56,8 +56,8 @@ class UserHive extends AppHive {
    *  data: List<Map<String, dynamic>> []
    * }
   */
-  static Map<String, dynamic> get verifyList =>
-      box.get('verifyList', defaultValue: {'newCount': 0, 'data': []});
+  static Map<dynamic, dynamic> get verifyData =>
+      box.get('verifyData', defaultValue: {'newCount': 0, 'data': []});
 
   static Future<void> setBoxData(Map data) async {
     await box.putAll({

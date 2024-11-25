@@ -3,6 +3,8 @@ import 'package:chat_app/src/socket/socket_events.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+typedef dynamic EventHandler<T>(T data);
+
 class SocketIOClient {
   // 私有构造函数
   SocketIOClient._();
@@ -95,11 +97,8 @@ class SocketIOClient {
 
   // 设置应用需要监听的 Socket 事件
   static void _setupAppSocketEvent() {
-    // 这里可以根据需要添加 socket 事件处理逻辑
-    // 例如： chatMessageSocket(_socket!);
-    // addressBookSocket(_socket!);
     // 你可以在这里订阅不同的事件
-    socketEvents(socket);
+    socketEvents(_socket!);
   }
 
   // 断开连接并清理资源
@@ -123,22 +122,14 @@ class SocketIOClient {
     socket.emit(eventName, data);
   }
 
-  static void on(
-    String eventName,
-    Function(dynamic) event, [
-    Function(dynamic, Function)? callback,
-  ]) {
-    socket.on(eventName, (data) {
+  static void on(String event, EventHandler handler) {
+    socket.on(event, (data) {
       final ack = data is List ? data.last : data;
       if (ack is Function) {
         data.removeLast();
-        if (callback == null) {
-          ack();
-        } else {
-          callback(data, ack);
-        }
+        ack();
       }
-      event(data);
+      handler(data);
     });
   }
 

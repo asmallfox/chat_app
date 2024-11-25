@@ -86,9 +86,12 @@ class _AddressBookPageState extends State<AddressBookPage> {
   Widget build(BuildContext context) {
     final isPageChanging = Provider.of<bool>(context);
     return ValueListenableBuilder(
-      valueListenable: UserHive.box.listenable(keys: ['friends', 'verifyList']),
+      valueListenable: UserHive.box.listenable(keys: ['friends', 'verifyData']),
       builder: (context, box, child) {
-        widgetList = _getWidgets(box.get('friends', defaultValue: []));
+        widgetList = _getWidgets(
+          box.get('friends', defaultValue: []),
+          UserHive.verifyData,
+        );
         return Scaffold(
           appBar: AppBar(
             title: const Text('通讯录'),
@@ -256,7 +259,10 @@ class _AddressBookPageState extends State<AddressBookPage> {
     });
   }
 
-  List<Widget> _getWidgets(List friends) {
+  List<Widget> _getWidgets(
+    List friends,
+    Map verifyData,
+  ) {
     final Map<String, List<dynamic>> result = {};
     List<Widget> widgets = [];
     List friendList = [...friends];
@@ -270,7 +276,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
         'color': const Color.fromARGB(255, 43, 145, 46),
         'function': true,
         'page': const NoticePage(),
-        'badge': 0
+        'badge': verifyData['newCount']
       },
       {
         'name': '群聊',
@@ -363,22 +369,20 @@ class _AddressBookPageState extends State<AddressBookPage> {
                   fontSize: 22,
                 ),
               ),
-              // trailing: Visibility(
-              //   visible: false,
-              //   child: Text('xxxxxxxxxxxxxxx'),
-              //   // child: Positioned(
-              //   //   top: 0,
-              //   //   right: 0,
-              //   //   child: Badge(
-              //   //     label: Text(
-              //   //       (item['badge'] != null && item['badge'] > 99)
-              //   //           ? '...'
-              //   //           : item['badge'].toString(),
-              //   //     ),
-              //   //     backgroundColor: const Color(0xFFf5a13c),
-              //   //   ),
-              //   // ),
-              // ),
+              trailing: Visibility(
+                visible: item.containsKey('badge') && item['badge'] > 0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Badge(
+                    label: Text(
+                      (item['badge'] != null && item['badge'] > 99)
+                          ? '...'
+                          : item['badge'].toString(),
+                    ),
+                    backgroundColor: const Color(0xFFf5a13c),
+                  ),
+                ),
+              ),
             ),
           );
         }).toList());

@@ -2,31 +2,11 @@ import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'message/chat_list_page.dart';
 import 'addressBook/address_book_page.dart';
 import 'mine/mine.dart';
-
-List pageList = [
-  {
-    'label': '消息',
-    "icon": Icons.message_rounded,
-    'child': const ChatListPage(),
-    'badge': 0,
-  },
-  {
-    'label': '通讯录',
-    "icon": Icons.person_pin_rounded,
-    'child': const AddressBookPage(),
-    'badge': 2,
-  },
-  {
-    'label': '我的',
-    "icon": Icons.person_rounded,
-    'child': const Mine(),
-    'hideAppBar': true,
-  },
-];
 
 class LayoutPage extends StatefulWidget {
   const LayoutPage({
@@ -41,6 +21,27 @@ class _LayoutPageState extends State<LayoutPage> {
   late PageController _pageViewController;
   int currentPageIndex = 1;
   bool _isPageChanging = false;
+
+  List pageList = [
+    {
+      'label': '消息',
+      "icon": Icons.message_rounded,
+      'child': const ChatListPage(),
+      'badge': 0,
+    },
+    {
+      'label': '通讯录',
+      "icon": Icons.person_pin_rounded,
+      'child': const AddressBookPage(),
+      'badge': 0,
+    },
+    {
+      'label': '我的',
+      "icon": Icons.person_rounded,
+      'child': const Mine(),
+      'hideAppBar': true,
+    },
+  ];
 
   Future<void> _getUserInfo() async {
     try {
@@ -80,6 +81,12 @@ class _LayoutPageState extends State<LayoutPage> {
     });
 
     _getUserInfo();
+
+    UserHive.box.watch(key: 'verifyData').listen((boxEvent) {
+      setState(() {
+        pageList[1]['badge'] = boxEvent.value['newCount'];
+      });
+    });
   }
 
   @override

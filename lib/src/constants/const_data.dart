@@ -28,7 +28,24 @@ enum AddFriendButtonStatus {
 
   static String getText(int status) {
     return AddFriendButtonStatus.values
-        .firstWhere((e) => e.value == status, orElse: () => AddFriendButtonStatus.add)
+        .firstWhere((e) => e.value == status,
+            orElse: () => AddFriendButtonStatus.add)
+        .text;
+  }
+}
+
+enum ReadStatus {
+  no(1, '未读'),
+  yes(2, '已读');
+
+  final int value;
+  final String text;
+
+  const ReadStatus(this.value, this.text);
+
+  static String getText(int status) {
+    return ReadStatus.values
+        .firstWhere((e) => e.value == status, orElse: () => ReadStatus.no)
         .text;
   }
 }

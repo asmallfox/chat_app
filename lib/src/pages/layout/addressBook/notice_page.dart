@@ -1,3 +1,4 @@
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
 
 class NoticePage extends StatefulWidget {
@@ -10,6 +11,15 @@ class NoticePage extends StatefulWidget {
 }
 
 class _NoticePageState extends State<NoticePage> {
+
+  final verifyData = UserHive.verifyData;
+
+  @override
+  void initState() {
+    super.initState();
+    _handleRead();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,5 +30,10 @@ class _NoticePageState extends State<NoticePage> {
         child: Text('This is the Group Page'),
       ),
     );
+  }
+
+  void _handleRead() {
+    verifyData['newCount'] = 0;
+    UserHive.box.put('verifyData', verifyData);
   }
 }
