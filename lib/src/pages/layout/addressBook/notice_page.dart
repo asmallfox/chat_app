@@ -1,3 +1,5 @@
+import 'package:chat_app/src/socket/socket_api.dart';
+import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
@@ -45,9 +47,8 @@ class _NoticePageState extends State<NoticePage> {
                   url: item['receiver_avatar'],
                 ),
                 title: Text(item['name'].toString()),
-                subtitle: Text(item['message'].toString()),
+                subtitle: Text(item['info'].toString()),
                 trailing: FilledButton(
-                  child: Text('同意'),
                   style: ButtonStyle(
                     shape: WidgetStatePropertyAll<OutlinedBorder>(
                       RoundedRectangleBorder(
@@ -55,7 +56,38 @@ class _NoticePageState extends State<NoticePage> {
                       ),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: item['status'] == 1
+                      ? () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('好友验证'),
+                                content: const Text('是否同意该好友请求?'),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () => _handleRefuse(item),
+                                    child: const Text(
+                                      '拒绝',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => _handleAgree(item),
+                                    child: const Text('同意'),
+                                  )
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      : null,
+                  child: Text(_getBtnText(item['status'])),
                 ),
               );
             },
@@ -68,5 +100,35 @@ class _NoticePageState extends State<NoticePage> {
   void _handleRead() {
     verifyData['newCount'] = 0;
     UserHive.box.put('verifyData', verifyData);
+  }
+
+  String _getBtnText(int status) {
+    if (status == 1) {
+      return '验证';
+    } else if (status == 3) {
+      return '已拒绝';
+    }
+    return '已添加';
+  }
+
+  void _handleRefuse(Map item) {
+    Map params = {
+      'id': item['id'],
+      'status': 3,
+      'info': null,
+    };
+    try {
+      SocketApi.refuseFriendVerifySocketApi(params, (data) {
+        print('================ $data');
+      });
+    } catch (error) {
+      print(error);
+    }
+
+    Navigator.pop(context);
+  }
+
+  void _handleAgree(Map item) {
+    Navigator.pop(context);
   }
 }

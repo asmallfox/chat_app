@@ -7,4 +7,8 @@ class SocketApi {
   static void addFriendSocketApi(Map data) {
     SocketIOClient.emit('add_friend', data);
   }
+
+  static void refuseFriendVerifySocketApi(Map data, Function callback) {
+    SocketIOClient.emitWithAck('friend_verify', data, ack: callback, binary: true);
+  }
 }
