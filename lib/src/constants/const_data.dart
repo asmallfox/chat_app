@@ -17,7 +17,7 @@ class MessageType {
 
 enum AddFriendButtonStatus {
   add(1, '添加'),
-  verifying(2, '验证中'),
+  refuse(2, '已拒绝'),
   added(3, '已添加'),
   delete(4, '删除');
 

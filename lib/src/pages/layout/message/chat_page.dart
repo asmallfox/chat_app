@@ -249,7 +249,7 @@ class _ChatPageState extends State<ChatPage> {
         };
 
         // 更新本地数据
-        UserHive.updateFriend(
+        UserHive.updateFriendItem(
           'account',
           widget.item['account'],
           'messages',

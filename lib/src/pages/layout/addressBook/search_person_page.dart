@@ -4,8 +4,10 @@ import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/socket/socket_api.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SearchPersonPage extends StatefulWidget {
   const SearchPersonPage({
@@ -163,6 +165,8 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
       return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
+          final TextEditingController infoController = TextEditingController();
+          final TextEditingController noteController = TextEditingController();
           return AlertDialog(
             title: const Text('添加好友'),
             shape: RoundedRectangleBorder(
@@ -198,6 +202,7 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
                       TextField(
                         minLines: 2,
                         maxLines: 4,
+                        controller: infoController,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.grey.shade200,
@@ -220,6 +225,7 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
                         ),
                       ),
                       TextField(
+                        controller: noteController,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.grey.shade200,
@@ -243,12 +249,15 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
               FilledButton(
                 onPressed: () {
                   Map params = {
-                    'userId': item['id'],
+                    'friendId': item['id'],
                     'account': item['account'],
-                    'info': '验证信息',
-                    'note': '对方备注',
+                    'info': infoController.text,
+                    'note': noteController.text,
                   };
-                  SocketApi.addFriendSocketApi(params);
+                  SocketApi.addFriendSocketApi(
+                    params,
+                    (data) => UserHive.updateVerifyData(data, false),
+                  );
                   Navigator.of(context).pop();
                 },
                 style: ButtonStyle(

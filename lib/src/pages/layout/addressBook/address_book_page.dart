@@ -40,8 +40,6 @@ class _AddressBookPageState extends State<AddressBookPage> {
   final ScrollController _scrollController = ScrollController();
 
   final userInfo = Hive.box('app').get('userInfo');
-  // late final userBox = Hive.box(userInfo['account']);
-
   Future<void> getFriends() async {
     try {
       final jsonString = await rootBundle.rootBundle

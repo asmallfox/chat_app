@@ -68,7 +68,22 @@ class UserHive extends AppHive {
     await AppHive.setUserInfo(data);
   }
 
-  static void updateFriend(
+  static List updateFriends(List rows) {
+    final list = friends;
+    for (int i = 0; i < rows.length; i++) {
+      final row = rows[i];
+      final index =
+          list.indexWhere((item) => item['friendId'] == row['friendId']);
+      if (index != -1) {
+        list[index].addAll(row);
+      } else {
+        list.add(row);
+      }
+    }
+    return list;
+  }
+
+  static void updateFriendItem(
     String findKey,
     dynamic findValue,
     String updateKey,
@@ -97,5 +112,24 @@ class UserHive extends AppHive {
 
   static void saveFriends(List friends) {
     box.put('friends', friends);
+  }
+
+  static void updateVerifyData(res, [bool notice = true]) {
+    final localData = UserHive.verifyData;
+    List newFriendVerify = res is List ? res : [res];
+    for (int i = 0; i < newFriendVerify.length; i++) {
+      dynamic index = verifyData['data']
+          .indexWhere((element) => element['id'] == newFriendVerify[i]['id']);
+      if (index != -1) {
+        verifyData['data'].removeAt(index);
+      }
+    }
+
+    if (notice) {
+      localData['newCount'] = verifyData['newCount'] + newFriendVerify.length;
+    }
+    localData['data'].insertAll(0, newFriendVerify);
+    // verifyData['data'] = [];
+    UserHive.box.put('verifyData', localData);
   }
 }

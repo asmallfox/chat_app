@@ -12,7 +12,7 @@ dynamic getHandleAck(data) {
       data.removeLast();
       ack(null);
     }
-    return data.first;
+    return data is Map ? data : data.first;
   } catch (e) {
     rethrow;
   }
@@ -22,21 +22,18 @@ void socketEvents(IO.Socket socket) {
   socket.on('friend_verify', (res) {
     try {
       final data = getHandleAck(res);
+      UserHive.updateVerifyData(data);
+      print('[friend_verify socket]');
+    } catch (error) {
+      print(error);
+    }
+  });
 
-      final verifyData = UserHive.verifyData;
-
-      List newFriendVerify = data is List ? data : [data];
-      for (int i = 0; i < newFriendVerify.length; i++) {
-        dynamic index = verifyData['data']
-            .indexWhere((element) => element['id'] == newFriendVerify[i]['id']);
-        if (index != -1) {
-          verifyData['data'].removeAt(index);
-        }
-      }
-
-      verifyData['newCount'] = verifyData['newCount'] + newFriendVerify.length;
-      verifyData['data'].insertAll(0, newFriendVerify);
-      UserHive.box.put('verifyData', verifyData);
+  socket.on('friends', (res) {
+    try {
+      UserHive.updateFriends(res);
+      print('friends => $res');
+      print('[friends socket]');
     } catch (error) {
       print(error);
     }
