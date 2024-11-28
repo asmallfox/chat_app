@@ -2,7 +2,6 @@ import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'message/chat_list_page.dart';
 import 'addressBook/address_book_page.dart';

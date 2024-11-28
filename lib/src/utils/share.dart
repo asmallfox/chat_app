@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 bool isNetSource(String url) {
   return url.startsWith(r'http');
@@ -32,8 +33,10 @@ String formattedDuration(int second) {
   return str;
 }
 
-Future<File> pathTransformFile(String path, String suffix) async {
+Future<File> pathTransformFile(String path, [String? suffix]) async {
   try {
+    suffix ??= path.split('.').last;
+
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String filePath =
         '${appDocDir.path}/local-${DateTime.now().millisecondsSinceEpoch}.$suffix';
@@ -45,5 +48,27 @@ Future<File> pathTransformFile(String path, String suffix) async {
     return file;
   } catch (error) {
     throw Exception('路径转文件错误');
+  }
+}
+
+Future<String?> downloadAndSaveFile(String url) async {
+  try {
+    String remoteUrl = getSourceUrl(url);
+
+    http.Response res = await http.get(Uri.parse(remoteUrl));
+
+    Directory appDucDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDucDir.path;
+
+    String fileName = url.split("/").last;
+    String filePath = "$appDocPath/$fileName";
+
+    File file = File(filePath);
+    await file.writeAsBytes(res.bodyBytes, flush: true);
+
+    return filePath;
+  } catch (error) {
+    print('[Error downloadAndSaveFile] $error');
+    rethrow;
   }
 }

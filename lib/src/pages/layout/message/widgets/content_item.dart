@@ -9,6 +9,7 @@ import 'package:chat_app/src/theme/colors.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
 import 'package:chat_app/src/utils/share.dart';
+import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:just_audio/just_audio.dart';
@@ -151,22 +152,11 @@ class _ContentItemState extends State<ContentItem> {
         crossAxisAlignment: CrossAxisAlignment.start,
         textDirection: widget.isSelf ? TextDirection.rtl : TextDirection.ltr,
         children: [
-          CircleAvatar(
-            backgroundColor: Colors.blue,
+          Avatar(
+            url: widget.isSelf
+                ? UserHive.userInfo['avatar']
+                : widget.friend['avatar'],
             radius: 30,
-            child: widget.friend['avatar'] == null
-                ? Text(
-                    widget.friend['name'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                    ),
-                  )
-                : Image.network(
-                    widget.isSelf
-                        ? UserHive.userInfo['avatar']
-                        : widget.friend['avatar'],
-                  ),
           ),
           const SizedBox(
             width: 15,

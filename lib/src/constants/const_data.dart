@@ -49,3 +49,20 @@ enum ReadStatus {
         .text;
   }
 }
+
+enum MsgStatus {
+  sending(1, '发送中'),
+  sent(2, '已发送'),
+  failed(3, '发送失败');
+
+  final int value;
+  final String text;
+
+  const MsgStatus(this.value, this.text);
+
+  static String getText(int status) {
+    return MsgStatus.values
+        .firstWhere((e) => e.value == status, orElse: () => MsgStatus.sending)
+        .text;
+  }
+}

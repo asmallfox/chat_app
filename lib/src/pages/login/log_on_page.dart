@@ -11,6 +11,7 @@ import 'package:chat_app/src/pages/login/widgets/custom_text_field.dart';
 import 'package:chat_app/src/pages/login/sign_up_page.dart';
 import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
+import 'package:chat_app/src/utils/share.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:chat_app/src/widgets/linear_gradient_button.dart';
 import 'package:flutter/material.dart';
@@ -232,20 +233,16 @@ class _LogOnPageState extends State<LogOnPage> {
         final userInfo = res['data'];
         String token = userInfo['token'];
 
-        // UserHiveModel userModel = UserHiveModel(
-        //   id: userInfo['id'],
-        //   account: userInfo['account'],
-        //   name: userInfo['name'],
-        //   avatar: userInfo['avatar'],
-        // );
-        // AppHiveModel appModel = AppHiveModel(token: token, userInfo: userModel);
 
-        // appModel.save();
-        // userModel.save();
-
-        await Hive.box('app').putAll({'token': token, 'userInfo': userInfo});
+        await Hive.box('app').putAll({
+          'token': token,
+          'userInfo': userInfo,
+        });
 
         await UserHive.setBoxData(userInfo);
+        // 换成头像
+        UserHive.getNetworkUrl(userInfo['avatar']);
+
         // 初始化socket
         await SocketIOClient.connect();
 
@@ -255,9 +252,6 @@ class _LogOnPageState extends State<LogOnPage> {
       }
     } catch (error) {
       print('[error] $error');
-      // if (error is Exception) {
-      //   MessageHelper.showToast(message: error.toString());
-      // }
       MessageHelper.showRequestToastError(error);
     } finally {
       setState(() {

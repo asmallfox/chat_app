@@ -1,3 +1,4 @@
+import 'package:chat_app/src/utils/share.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class HiveSaveType {
@@ -25,6 +26,14 @@ class AppHive {
   }
 }
 
+/*
+ * UserHive
+ *  - userInfo => Map
+ *  - token => String 
+ *  - friends => List<Map>
+ *  - chatList => List<Map>
+ *  - urlMap => Map<String, String>
+*/
 class UserHive extends AppHive {
   // 使用 Account 字段作为 Box 的名称
   static Box? _box;
@@ -46,6 +55,7 @@ class UserHive extends AppHive {
   }
 
   static Map get userInfo => _getUserInfo();
+  static Map get urlMap => box.get('urlMap', defaultValue: {});
 
   static List get friends => box.get('friends', defaultValue: []);
   static List get chatList => box.get('chatList', defaultValue: []);
@@ -68,12 +78,15 @@ class UserHive extends AppHive {
     await AppHive.setUserInfo(data);
   }
 
-  static List updateFriends(List rows) {
+  static Future<List> updateFriends(List rows) async {
     final list = friends;
     for (int i = 0; i < rows.length; i++) {
       final row = rows[i];
       final index =
           list.indexWhere((item) => item['friendId'] == row['friendId']);
+
+      await UserHive.getNetworkUrl(row['avatar']);
+
       if (index != -1) {
         list[index].addAll(row);
       } else {
@@ -89,11 +102,13 @@ class UserHive extends AppHive {
     String updateKey,
     dynamic value, [
     String? type = HiveSaveType.cover,
-  ]) {
+  ]) async {
     final list = friends;
     final friend = list.firstWhere((element) => element[findKey] == findValue);
 
     if (friend != null) {
+      await UserHive.getNetworkUrl(friend['avatar']);
+
       if (type == HiveSaveType.cover) {
         friend[updateKey] = value;
       } else if (type == HiveSaveType.append) {
@@ -131,5 +146,18 @@ class UserHive extends AppHive {
     localData['data'].insertAll(0, newFriendVerify);
     // verifyData['data'] = [];
     UserHive.box.put('verifyData', localData);
+  }
+
+  static Future<String> getNetworkUrl(String path) async {
+    final urlMap = box.get('urlMap', defaultValue: {});
+
+    String? url = urlMap[path];
+    if (url == null) {
+      url = await downloadAndSaveFile(path);
+      urlMap[path] = url;
+    }
+
+    UserHive.box.put('urlMap', urlMap);
+    return url!;
   }
 }

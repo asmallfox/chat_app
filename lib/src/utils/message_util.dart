@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_app/src/constants/const_data.dart';
+import 'package:chat_app/src/socket/socket_api.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/share.dart';
+import 'package:flutter/material.dart';
 // import 'package:path_provider/path_provider.dart';
 
 class MessageUtil {
@@ -33,7 +35,16 @@ class MessageUtil {
     }
   }
 
-  static void update(Map msg) {}
+  static void update(Map msg, Map oldMsg) {
+    final messages = MessageUtil.getMessages(oldMsg['from']);
+
+    int index = messages.indexWhere((item) =>
+        item['sendTime'] == oldMsg['sendTime'] &&
+        item['status'] == oldMsg['status']);
+
+    print(index);
+  }
+
   static void delete({
     required String account,
     String? id,
@@ -71,7 +82,8 @@ class MessageUtil {
       'content': content,
       'from': from,
       'to': to,
-      'sendTime': DateTime.now().millisecondsSinceEpoch
+      'sendTime': DateTime.now().millisecondsSinceEpoch,
+      'status': MsgStatus.sending.value,
     };
 
     if (type == MessageType.text.value) {
@@ -95,6 +107,10 @@ class MessageUtil {
     MessageUtil.add(to, msgData);
 
     // send
+    SocketApi.sendMsgSocketApi(msgData, (res) {
+      res['status'] = MsgStatus.sent.value;
+      MessageUtil.update(res, msgData);
+    });
   }
 
   static List getMessages(String account) {

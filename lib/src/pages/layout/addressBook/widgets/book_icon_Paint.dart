@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 
 class BookIconPaint extends CustomPainter {
   final String? label;
+  final Color color;
   BookIconPaint({
     this.label,
+    this.color = Colors.blue,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.blue
+      ..color = color
       ..style = PaintingStyle.fill;
 
     const offsetRation = 0.625;

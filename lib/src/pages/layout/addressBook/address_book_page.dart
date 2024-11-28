@@ -7,6 +7,7 @@ import 'package:chat_app/src/pages/layout/addressBook/notice_page.dart';
 import 'package:chat_app/src/pages/layout/addressBook/widgets/book_icon_Paint.dart';
 import 'package:chat_app/src/pages/layout/message/chat_page.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
+import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:pinyin/pinyin.dart';
@@ -40,39 +41,39 @@ class _AddressBookPageState extends State<AddressBookPage> {
   final ScrollController _scrollController = ScrollController();
 
   final userInfo = Hive.box('app').get('userInfo');
-  Future<void> getFriends() async {
-    try {
-      final jsonString = await rootBundle.rootBundle
-          .loadString('assets/services/friends.json');
-      final friends = json.decode(jsonString);
-      final localFriends = UserHive.friends;
-      if (friends.isNotEmpty) {
-        for (int i = 0; i < friends.length; i++) {
-          int index = localFriends
-              .indexWhere((e) => e['account'] == friends[i]['account']);
-          if (index != -1) {
-            // 更新信息
-            localFriends[index] = {
-              ...localFriends[index],
-              ...(friends[i] as Map)
-            };
-          } else {
-            localFriends.add(friends[i]);
-          }
-        }
-        UserHive.saveFriends(localFriends);
-      }
-    } catch (error) {
-      print('获取好友列表错误 $error');
-    }
-  }
+  // Future<void> _getFriends() async {
+  //   try {
+  //     final jsonString = await rootBundle.rootBundle
+  //         .loadString('assets/services/friends.json');
+  //     final friends = json.decode(jsonString);
+  //     final localFriends = UserHive.friends;
+  //     if (friends.isNotEmpty) {
+  //       for (int i = 0; i < friends.length; i++) {
+  //         int index = localFriends
+  //             .indexWhere((e) => e['account'] == friends[i]['account']);
+  //         if (index != -1) {
+  //           // 更新信息
+  //           localFriends[index] = {
+  //             ...localFriends[index],
+  //             ...(friends[i] as Map)
+  //           };
+  //         } else {
+  //           localFriends.add(friends[i]);
+  //         }
+  //       }
+  //       UserHive.saveFriends(localFriends);
+  //     }
+  //   } catch (error) {
+  //     print('获取好友列表错误 $error');
+  //   }
+  // }
 
   @override
   void initState() {
     super.initState();
     keywordList.insert(0, '~');
     keywordList.add('#');
-    getFriends();
+    // _getFriends();
   }
 
   @override
@@ -136,11 +137,11 @@ class _AddressBookPageState extends State<AddressBookPage> {
                       itemBuilder: (context, index) {
                         return GestureDetector(
                           onPanUpdate: (details) =>
-                              getActiveData(context, details),
+                              _getActiveData(context, details),
                           onTapDown: (details) =>
-                              getActiveData(context, details),
-                          onPanEnd: (_) => resetHighlightedIndex(),
-                          onTapUp: (_) => resetHighlightedIndex(),
+                              _getActiveData(context, details),
+                          onPanEnd: (_) => _resetHighlightedIndex(),
+                          onTapUp: (_) => _resetHighlightedIndex(),
                           child: Container(
                             height: 20,
                             width: 20,
@@ -179,6 +180,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
                     size: iconSize,
                     painter: BookIconPaint(
                       label: keywordList[_highlightedIndex ?? 0],
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
@@ -190,7 +192,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
     );
   }
 
-  void getActiveData(BuildContext context, dynamic details) {
+  void _getActiveData(BuildContext context, dynamic details) {
     if (!(details is DragUpdateDetails || details is TapDownDetails)) return;
 
     if (_topPosition == null) {
@@ -251,7 +253,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
     });
   }
 
-  void resetHighlightedIndex() {
+  void _resetHighlightedIndex() {
     setState(() {
       _highlightedIndex = null;
     });
@@ -359,7 +361,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
                           fontSize: 22,
                         ),
                       )
-                    : Image.network(item['avatar']),
+                    : Avatar(url: item['avatar']),
               ),
               title: Text(
                 item['name'],
