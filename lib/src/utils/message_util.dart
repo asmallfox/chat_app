@@ -5,7 +5,6 @@ import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/socket/socket_api.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/share.dart';
-import 'package:flutter/material.dart';
 // import 'package:path_provider/path_provider.dart';
 
 class MessageUtil {
@@ -36,13 +35,21 @@ class MessageUtil {
   }
 
   static void update(Map msg, Map oldMsg) {
-    final messages = MessageUtil.getMessages(oldMsg['from']);
+    final List friends = UserHive.userInfo['friends'];
+    final friend =
+        friends.firstWhere((item) => item['account'] == oldMsg['to']);
+    if (friend != null) {
+      final messages = friend['messages'];
 
-    int index = messages.indexWhere((item) =>
-        item['sendTime'] == oldMsg['sendTime'] &&
-        item['status'] == oldMsg['status']);
+      int index = messages.indexWhere((item) =>
+          item['sendTime'] == oldMsg['sendTime'] &&
+          item['status'] == oldMsg['status']);
 
-    print(index);
+      if (index != -1) {
+        messages[index] = msg;
+        UserHive.box.put('friends', friends);
+      }
+    }
   }
 
   static void delete({
@@ -76,6 +83,7 @@ class MessageUtil {
     required String content,
     required String from,
     required String to,
+    double? duration
   }) async {
     Map msgData = {
       'type': type,
@@ -84,6 +92,7 @@ class MessageUtil {
       'to': to,
       'sendTime': DateTime.now().millisecondsSinceEpoch,
       'status': MsgStatus.sending.value,
+      'duration': duration
     };
 
     if (type == MessageType.text.value) {
@@ -115,8 +124,7 @@ class MessageUtil {
 
   static List getMessages(String account) {
     final List friends = UserHive.userInfo['friends'];
-    final Map? friend = friends.firstWhere((item) => item['account'] == account,
-        orElse: () => null);
+    final friend = friends.firstWhere((item) => item['account'] == account);
     if (friend != null) {
       return friend['messages'] ?? [];
     }

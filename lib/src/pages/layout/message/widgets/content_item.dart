@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/src/constants/const_data.dart';
+import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/pages/layout/message/widgets/audio_play_icon.dart';
 import 'package:chat_app/src/pages/layout/message/widgets/bubble__benu_item.dart';
@@ -165,7 +166,43 @@ class _ContentItemState extends State<ContentItem> {
             child: Align(
               alignment:
                   widget.isSelf ? Alignment.centerRight : Alignment.centerLeft,
-              child: _getContentItemWidget(context),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                textDirection:
+                    widget.isSelf ? TextDirection.rtl : TextDirection.ltr,
+                children: [
+                  _getContentItemWidget(context),
+                  Visibility(
+                    visible: widget.msgItem['status'] != MsgStatus.sent.value,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: widget.msgItem['status'] == MsgStatus.sending.value
+                          ? const SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: CircularProgressIndicator(),
+                            )
+                          : IconButton(
+                              onPressed: () {
+                                MessageHelper.showDialogModel(
+                                  title: '是否重新发送',
+                                  child:  const SizedBox(),
+                                  confirm: () {
+                                    
+                                    Navigator.of(context).pop();
+                                  }
+                                );
+                              },
+                              icon: const Icon(
+                                Icons.error,
+                                size: 36,
+                              ),
+                              color: Colors.red,
+                            ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
           const SizedBox(

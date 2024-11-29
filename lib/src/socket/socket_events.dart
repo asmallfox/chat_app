@@ -32,7 +32,6 @@ void socketEvents(IO.Socket socket) {
   socket.on('friends', (res) {
     try {
       UserHive.updateFriends(res);
-      print('friends => $res');
       print('[friends socket]');
     } catch (error) {
       print(error);

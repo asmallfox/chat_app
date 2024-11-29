@@ -11,6 +11,7 @@ import 'package:chat_app/src/pages/layout/message/widgets/chat_panel.dart';
 import 'package:chat_app/src/pages/layout/message/chat_video.page.dart';
 import 'package:chat_app/src/pages/layout/message/widgets/recording_panel.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
+import 'package:chat_app/src/utils/message_util.dart';
 import 'package:chat_app/src/widgets/key_board_container.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -98,6 +99,7 @@ class _ChatPageState extends State<ChatPage> {
                   ChatContent(item: widget.item),
                   ChatPanel(
                     item: widget.item,
+                    onSend: _onSendMessage,
                     onLongPressDown: (detail) {
                       _showRecordingPanel(detail);
                       _startRecording();
@@ -209,11 +211,13 @@ class _ChatPageState extends State<ChatPage> {
     if (!_isRecording) return;
     try {
       String? path = await RecordingHelper.stopRecording();
-      if (path != null) {
+
+      if (path == null) {
+        print('结束语音录制，未能获取到语音路径');
+      } else {
         _recordingDuration =
             (DateTime.now().millisecondsSinceEpoch - _recordingStartTime) ~/
                 1000; // 计算录音时长（秒）
-
         if (_recordingDuration < 1) {
           const snackBar = SnackBar(
             content: Text('录音时长太短'),
@@ -223,48 +227,36 @@ class _ChatPageState extends State<ChatPage> {
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
           throw Exception('录音时长太短~');
         }
-
         Directory appDocDir = await getApplicationDocumentsDirectory();
         String appDocPath = appDocDir.path;
         // 生成一个唯一的文件名
         String filePath =
             '$appDocPath/local-${DateTime.now().millisecondsSinceEpoch}.aac';
-
         File file = File(filePath);
-
         File audioFile = File(path);
-
         await file.writeAsBytes(audioFile.readAsBytesSync());
-
         final duration = await player.setUrl(path);
-
-        Map msgData = {
+        _onSendMessage({
           'type': MessageType.voice.value,
           'content': filePath,
-          'from': UserHive.userInfo['account'],
-          'to': widget.item['account'],
-          // 'file': audioFile.readAsBytesSync(),
           'duration': (duration!.inMilliseconds / 1000).ceil(),
-          'sendTime': DateTime.now().millisecondsSinceEpoch,
-        };
-
-        // 更新本地数据
-        UserHive.updateFriendItem(
-          'account',
-          widget.item['account'],
-          'messages',
-          msgData,
-          HiveSaveType.append,
-        );
-
+        });
         setState(() {
           _isRecording = false;
         });
-      } else {
-        print('结束语音录制，未能获取到语音路径');
       }
     } catch (error) {
-      print('录音失败');
+      print('录音失败 $error');
     }
+  }
+
+  void _onSendMessage(Map data) {
+    MessageUtil.sendMessage(
+      type: data['type'],
+      content: data['content'],
+      from: UserHive.userInfo['account'],
+      to: widget.item['account'],
+      duration: data['duration'],
+    );
   }
 }

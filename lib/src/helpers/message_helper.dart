@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 enum ModelType { success, error, info, warning }
 
@@ -133,5 +134,59 @@ class MessageHelper {
     if (error is Map) {
       await showToast(message: error['message']);
     }
+  }
+
+  static Future<void> showDialogModel({
+    required Widget child,
+    String? title,
+    List<Widget>? actions,
+    String? confirmBtnText,
+    String? cancelBtnText,
+    Function? confirm,
+    Function? cancel,
+  }) {
+    return showDialog(
+      context: appNavigatorKey.currentContext!,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: title == null ? null : Text(title),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.0),
+          ),
+          content: child,
+          actions: actions ??
+              <Widget>[
+                TextButton(
+                  child: Text(cancelBtnText ?? '取消'),
+                  onPressed: () {
+                    if (cancel == null) {
+                      Navigator.of(context).pop();
+                    } else {
+                      cancel();
+                    }
+                  },
+                ),
+                FilledButton(
+                  onPressed: () {
+                    if (confirm == null) {
+                      Navigator.of(context).pop();
+                    } else {
+                      confirm();
+                    }
+                  },
+                  style: ButtonStyle(
+                    shape: WidgetStatePropertyAll<OutlinedBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ),
+                  child: Text(confirmBtnText ?? '确定'),
+                ),
+              ],
+        );
+      },
+    );
   }
 }

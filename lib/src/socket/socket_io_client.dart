@@ -93,6 +93,9 @@ class SocketIOClient {
     socket.onConnectError((data) {
       print("[socket] 连接错误: $data");
     });
+    // socket.onError((error) {
+    //   print('[socket Error] $error');
+    // });
   }
 
   // 设置应用需要监听的 Socket 事件

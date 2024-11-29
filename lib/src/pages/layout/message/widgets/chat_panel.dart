@@ -29,6 +29,7 @@ class ChatPanel extends StatefulWidget {
   final void Function(DragStartDetails)? onPanStart;
   final void Function(DragEndDetails)? onPanEnd;
   final void Function(DragUpdateDetails)? onPanUpdate;
+  final void Function(Map)? onSend;
   const ChatPanel({
     super.key,
     required this.item,
@@ -45,6 +46,7 @@ class ChatPanel extends StatefulWidget {
     this.onPanStart,
     this.onPanEnd,
     this.onPanUpdate,
+    this.onSend,
   });
 
   @override
@@ -251,13 +253,16 @@ class _ChatPanelState extends State<ChatPanel> {
   }
 
   Future<void> _sendMessage() async {
-    MessageUtil.sendMessage(
-      type: MessageType.text.value,
-      content: _messageController.text,
-      from: UserHive.userInfo['account'],
-      to: widget.item['account'],
-    );
-
+    // MessageUtil.sendMessage(
+    //   type: MessageType.text.value,
+    //   content: _messageController.text,
+    //   from: UserHive.userInfo['account'],
+    //   to: widget.item['account'],
+    // );
+    widget.onSend?.call({
+      'content': _messageController.text,
+      'type': MessageType.text.value,
+    });
     setState(() {
       _messageController.clear();
       _showSendButton = false;
@@ -268,13 +273,16 @@ class _ChatPanelState extends State<ChatPanel> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      print('文件路径：${pickedFile.path}');
-      MessageUtil.sendMessage(
-        type: MessageType.image.value,
-        content: pickedFile.path,
-        from: UserHive.userInfo['account'],
-        to: widget.item['account'],
-      );
+      // MessageUtil.sendMessage(
+      //   type: MessageType.image.value,
+      //   content: pickedFile.path,
+      //   from: UserHive.userInfo['account'],
+      //   to: widget.item['account'],
+      // );
+      widget.onSend?.call({
+        'content': pickedFile.path,
+        'type': MessageType.image.value,
+      });
     }
   }
 }

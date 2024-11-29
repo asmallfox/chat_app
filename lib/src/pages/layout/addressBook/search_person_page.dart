@@ -161,7 +161,6 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
 
   Future<void> _onAddFriend(Map item) async {
     try {
-      print(item);
       return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
