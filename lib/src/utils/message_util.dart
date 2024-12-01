@@ -92,13 +92,12 @@ class MessageUtil {
     }
   }
 
-  static Future<void> sendMessage({
-    required int type,
-    required String content,
-    required String from,
-    required String to,
-    double? duration
-  }) async {
+  static Future<void> sendMessage(
+      {required int type,
+      required String content,
+      required String from,
+      required String to,
+      double? duration}) async {
     Map msgData = {
       'type': type,
       'content': content,
@@ -125,15 +124,15 @@ class MessageUtil {
       msgData.putIfAbsent('file', () => file.readAsBytesSync());
     } else if (type == MessageType.video.value) {
     } else if (type == MessageType.file.value) {}
-    print('========= $msgData');
-    // save
-    MessageUtil.add(to, msgData);
 
     // send
     SocketApi.sendMsgSocketApi(msgData, (res) {
       res['status'] = MsgStatus.sent.value;
       MessageUtil.update(res, msgData);
     });
+
+    // save
+    MessageUtil.add(to, msgData);
   }
 
   static List getMessages(String account) {
