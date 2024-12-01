@@ -2,6 +2,7 @@ import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/utils/get_date_time.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
+import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -20,25 +21,6 @@ class _ChatListPageState extends State<ChatListPage> {
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   Offset menuAnchorPosition = const Offset(0, 0);
 
-  // List chatList = List.generate(
-  //   20,
-  //   (index) {
-  //     final random = Random();
-  //     return {
-  //       'name': (index + 1).toString(),
-  //       'date': getDateTime(DateTime.now().microsecond),
-  //       'color': Color.fromARGB(
-  //         255,
-  //         random.nextInt(256),
-  //         random.nextInt(256),
-  //         random.nextInt(256),
-  //       )
-  //     };
-  //   },
-  // );
-
-  // List chatList =[];
-
   @override
   void initState() {
     super.initState();
@@ -53,7 +35,7 @@ class _ChatListPageState extends State<ChatListPage> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: UserHive.box.listenable(keys: ['friends']),
+      valueListenable: UserHive.box.listenable(keys: ['chatList']),
       builder: (context, box, child) {
         List chatList = box.get('chatList', defaultValue: []);
         return Scaffold(
@@ -103,10 +85,12 @@ class _ChatListPageState extends State<ChatListPage> {
                     ],
                     builder: (_, MenuController controller, Widget? child) {
                       Map chatItem = chatList[index];
-                      List chatItemMsgs =
-                          MessageUtil.getMessages(chatItem['account']);
 
-                      Map msgData = _getMessageData(chatItemMsgs);
+                      Map friend = UserHive.friends.firstWhere((element) =>
+                          element['account'] == chatItem['account']);
+
+                      Map msgData =
+                          _getMessageData(friend['messages'], chatItem);
 
                       return GestureDetector(
                         onLongPressDown: (details) {
@@ -125,8 +109,7 @@ class _ChatListPageState extends State<ChatListPage> {
                             } else {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      ChatPage(item: chatItem),
+                                  builder: (context) => ChatPage(item: friend),
                                 ),
                               );
                             }
@@ -138,23 +121,25 @@ class _ChatListPageState extends State<ChatListPage> {
                               controller.open();
                             }
                           },
-                          leading: Container(
-                            alignment: Alignment.center,
-                            width: 52,
-                            height: 52,
-                            // color: Colors.pink,
-                            child: Image.network(chatItem['avatar']),
+                          leading: Avatar(
+                            url: friend['avatar'],
+                            radius: 30,
                           ),
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
                             children: [
-                              Text(
-                                chatList[index]['name'],
-                                style: const TextStyle(
-                                  fontSize: 22,
+                              Flexible(
+                                child: Text(
+                                  friend['name'],
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1, // 确保文字不会换行
                                 ),
                               ),
-                              Text(msgData['sendTime'])
+                              Text(msgData['time'])
                             ],
                           ),
                           subtitle: Row(
@@ -183,22 +168,30 @@ class _ChatListPageState extends State<ChatListPage> {
     );
   }
 
-  Map _getMessageData(List messages) {
-    Map m = {'newCount': 0, 'sendTime': '', 'content': ''};
+  Map _getMessageData(List messages, Map chatItem) {
+    Map m = {
+      'content': '',
+      'time': '',
+      'newCount': 0,
+    };
 
     if (messages.isNotEmpty) {
-      m['content'] = _getFormatMsgContent(messages.last);
-      m['sendTime'] = getDateTime(messages.last['sendTime']);
-      m['newCount'] = (<dynamic>[0] + messages)
-          .reduce((value, element) => value + (element['read'] == 1 ? 1 : 0));
+      final lastMsg = messages.last;
+      m['content'] = _getFormatMsgContent(chatItem['account'], lastMsg);
+      m['time'] = getDateTime(lastMsg['updatedAt'] ?? lastMsg['sendTime']);
+      m['newCount'] = chatItem['newCount'];
     }
 
     return m;
   }
 
-  String _getFormatMsgContent(Map msg) {
+  String _getFormatMsgContent(String friendAccount, Map msg) {
     int type = msg['type'];
     String ctx = '';
+
+    bool isNewMsg =
+        friendAccount == msg['from'] && msg['read'] == ReadStatus.no.value;
+
     if (type == MessageType.text.value) {
       ctx += msg['content'];
     } else if (type == MessageType.image.value) {
@@ -207,7 +200,7 @@ class _ChatListPageState extends State<ChatListPage> {
       ctx += '语音';
     }
 
-    return "${msg['read'] == 1 ? '[新消息]' : ''} $ctx";
+    return "${isNewMsg ? '[新消息]' : ''} $ctx";
   }
 }
 

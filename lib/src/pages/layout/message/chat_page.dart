@@ -40,6 +40,19 @@ class _ChatPageState extends State<ChatPage> {
   final player = AudioPlayer();
 
   @override
+  void initState() {
+    super.initState();
+    List chatList = UserHive.chatList;
+    Map? chatItem = chatList
+        .firstWhere((element) => element['account'] == widget.item['account']);
+
+    if (chatItem != null) {
+      chatItem['newCount'] = 0;
+      UserHive.box.put('chatList', chatList);
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
     RecordingHelper.audioPlayer.stopPlayer();

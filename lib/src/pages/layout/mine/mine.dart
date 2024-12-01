@@ -105,16 +105,20 @@ class _MineState extends State<Mine> {
               ),
               FilledButton(
                 onPressed: () async {
-                  final appBox = Hive.box('app');
-                  UserHive.box.clear();
-                  appBox.put('token', null);
-                  appBox.put('userInfo', null);
-                  SocketIOClient.disconnect(); // 断开socket连接
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => const LogOnPage(),
-                    ),
-                  );
+                  try {
+                    final appBox = Hive.box('app');
+                    UserHive.box.clear();
+                    appBox.put('token', null);
+                    appBox.put('userInfo', null);
+                    SocketIOClient.disconnect();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (_) => const LogOnPage(),
+                      ),
+                    );
+                  } catch (e) {
+                    print('退出登陆错误： $e');
+                  }
                 },
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all<Color>(Colors.grey),

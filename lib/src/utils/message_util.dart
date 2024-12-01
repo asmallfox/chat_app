@@ -5,13 +5,15 @@ import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/socket/socket_api.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/share.dart';
-// import 'package:path_provider/path_provider.dart';
 
 class MessageUtil {
-  static void add(String account, Map msg) {
-    final List friends = UserHive.userInfo['friends'];
+  static void add(String friendAccount, Map msg) {
+    final isSelf = friendAccount == msg['to'];
 
-    final friend = friends.firstWhere((item) => item['account'] == account);
+    final List friends = UserHive.userInfo['friends'];
+    final friend = friends.firstWhere(
+        (item) => item['account'] == friendAccount,
+        orElse: () => null);
 
     msg.remove('file');
 
@@ -26,12 +28,24 @@ class MessageUtil {
     UserHive.box.put('friends', friends);
 
     final List chatList = UserHive.chatList;
-    final Map? chatItem = chatList
-        .firstWhere((item) => item['account'] == account, orElse: () => null);
-    if (chatItem == null) {
-      chatList.add(friend);
-      UserHive.box.put('chatList', chatList);
+
+    int chatIndex =
+        chatList.indexWhere((item) => item['account'] == friendAccount);
+
+    if (chatIndex == -1) {
+      chatList.insert(0, {
+        'account': friendAccount,
+        'id': friend['id'],
+        'newCount': isSelf ? 0 : 1,
+      });
+    } else {
+      final chatItem = chatList[chatIndex];
+      chatItem['newCount'] += isSelf ? 0 : 1;
+      chatList.removeAt(chatIndex);
+      chatList.insert(0, chatItem);
     }
+    UserHive.box.put('chatList', chatList);
+    // UserHive.box.put('chatList', []);
   }
 
   static void update(Map msg, Map oldMsg) {

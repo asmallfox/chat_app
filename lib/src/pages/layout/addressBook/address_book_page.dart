@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:chat_app/src/pages/layout/addressBook/add_person_page.dart';
@@ -12,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:pinyin/pinyin.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart' as rootBundle;
 
 const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -40,44 +38,16 @@ class _AddressBookPageState extends State<AddressBookPage> {
   final List<Map<String, dynamic>> names = [];
   final ScrollController _scrollController = ScrollController();
 
-  final userInfo = Hive.box('app').get('userInfo');
-  // Future<void> _getFriends() async {
-  //   try {
-  //     final jsonString = await rootBundle.rootBundle
-  //         .loadString('assets/services/friends.json');
-  //     final friends = json.decode(jsonString);
-  //     final localFriends = UserHive.friends;
-  //     if (friends.isNotEmpty) {
-  //       for (int i = 0; i < friends.length; i++) {
-  //         int index = localFriends
-  //             .indexWhere((e) => e['account'] == friends[i]['account']);
-  //         if (index != -1) {
-  //           // 更新信息
-  //           localFriends[index] = {
-  //             ...localFriends[index],
-  //             ...(friends[i] as Map)
-  //           };
-  //         } else {
-  //           localFriends.add(friends[i]);
-  //         }
-  //       }
-  //       UserHive.saveFriends(localFriends);
-  //     }
-  //   } catch (error) {
-  //     print('获取好友列表错误 $error');
-  //   }
-  // }
-
   @override
   void initState() {
     super.initState();
     keywordList.insert(0, '~');
     keywordList.add('#');
-    // _getFriends();
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
 

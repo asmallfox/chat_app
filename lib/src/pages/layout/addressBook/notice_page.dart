@@ -1,12 +1,9 @@
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/socket/socket_api.dart';
-import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:provider/provider.dart';
 
 class NoticePage extends StatefulWidget {
   const NoticePage({
@@ -18,8 +15,6 @@ class NoticePage extends StatefulWidget {
 }
 
 class _NoticePageState extends State<NoticePage> {
-  final verifyData = UserHive.verifyData;
-
   @override
   void initState() {
     super.initState();
@@ -111,6 +106,7 @@ class _NoticePageState extends State<NoticePage> {
   }
 
   void _handleRead() {
+    final verifyData = UserHive.verifyData;
     verifyData['newCount'] = 0;
     UserHive.box.put('verifyData', verifyData);
   }

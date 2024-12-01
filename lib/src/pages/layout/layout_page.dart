@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
@@ -20,6 +22,8 @@ class _LayoutPageState extends State<LayoutPage> {
   late PageController _pageViewController;
   int currentPageIndex = 1;
   bool _isPageChanging = false;
+
+  StreamSubscription? _subscription;
 
   List pageList = [
     {
@@ -81,9 +85,9 @@ class _LayoutPageState extends State<LayoutPage> {
 
     _getUserInfo();
 
-    UserHive.box.watch(key: 'verifyData').listen((boxEvent) {
+    _subscription = UserHive.box.watch(key: 'verifyData').listen((boxEvent) {
       setState(() {
-        pageList[1]['badge'] = boxEvent.value['newCount'];
+        pageList[1]['badge'] = boxEvent.value?['newCount'] ?? 0;
       });
     });
   }
@@ -91,6 +95,7 @@ class _LayoutPageState extends State<LayoutPage> {
   @override
   void dispose() {
     _pageViewController.dispose();
+    _subscription?.cancel();
     super.dispose();
   }
 

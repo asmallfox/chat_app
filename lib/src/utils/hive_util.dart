@@ -93,6 +93,8 @@ class UserHive extends AppHive {
         list.add(row);
       }
     }
+
+    box.put('friends', list);
     return list;
   }
 
