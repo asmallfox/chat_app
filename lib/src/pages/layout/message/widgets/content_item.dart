@@ -171,7 +171,9 @@ class _ContentItemState extends State<ContentItem> {
                 textDirection:
                     widget.isSelf ? TextDirection.rtl : TextDirection.ltr,
                 children: [
-                  _getContentItemWidget(context),
+                  Flexible(
+                    child: _getContentItemWidget(context),
+                  ),
                   Visibility(
                     visible: widget.msgItem['status'] != MsgStatus.sent.value,
                     child: Padding(
@@ -185,13 +187,11 @@ class _ContentItemState extends State<ContentItem> {
                           : IconButton(
                               onPressed: () {
                                 MessageHelper.showDialogModel(
-                                  title: '是否重新发送',
-                                  child:  const SizedBox(),
-                                  confirm: () {
-                                    
-                                    Navigator.of(context).pop();
-                                  }
-                                );
+                                    title: '是否重新发送',
+                                    child: const SizedBox(),
+                                    confirm: () {
+                                      Navigator.of(context).pop();
+                                    });
                               },
                               icon: const Icon(
                                 Icons.error,

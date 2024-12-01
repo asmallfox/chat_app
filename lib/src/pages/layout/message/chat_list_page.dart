@@ -145,7 +145,13 @@ class _ChatListPageState extends State<ChatListPage> {
                           subtitle: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(msgData['content']),
+                              Flexible(
+                                child: Text(
+                                  msgData['content'],
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
                               Badge.count(
                                 count: msgData['newCount'],
                                 backgroundColor: const Color(

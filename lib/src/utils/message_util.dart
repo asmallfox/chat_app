@@ -125,7 +125,7 @@ class MessageUtil {
       msgData.putIfAbsent('file', () => file.readAsBytesSync());
     } else if (type == MessageType.video.value) {
     } else if (type == MessageType.file.value) {}
-
+    print('========= $msgData');
     // save
     MessageUtil.add(to, msgData);
 

@@ -253,12 +253,6 @@ class _ChatPanelState extends State<ChatPanel> {
   }
 
   Future<void> _sendMessage() async {
-    // MessageUtil.sendMessage(
-    //   type: MessageType.text.value,
-    //   content: _messageController.text,
-    //   from: UserHive.userInfo['account'],
-    //   to: widget.item['account'],
-    // );
     widget.onSend?.call({
       'content': _messageController.text,
       'type': MessageType.text.value,
@@ -273,12 +267,6 @@ class _ChatPanelState extends State<ChatPanel> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      // MessageUtil.sendMessage(
-      //   type: MessageType.image.value,
-      //   content: pickedFile.path,
-      //   from: UserHive.userInfo['account'],
-      //   to: widget.item['account'],
-      // );
       widget.onSend?.call({
         'content': pickedFile.path,
         'type': MessageType.image.value,
