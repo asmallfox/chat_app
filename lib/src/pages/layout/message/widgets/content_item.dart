@@ -175,7 +175,8 @@ class _ContentItemState extends State<ContentItem> {
                     child: _getContentItemWidget(context),
                   ),
                   Visibility(
-                    visible: widget.msgItem['status'] != MsgStatus.sent.value,
+                    visible: widget.msgItem['status'] != null &&
+                        widget.msgItem['status'] != MsgStatus.sent.value,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: widget.msgItem['status'] == MsgStatus.sending.value
@@ -285,6 +286,7 @@ class _ContentItemState extends State<ContentItem> {
                   MessageUtil.delete(
                     account: widget.friend['account'],
                     sendTime: widget.msgItem['sendTime'],
+                    id: widget.msgItem['id'],
                   );
                 });
                 Navigator.of(context).pop();

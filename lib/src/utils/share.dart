@@ -5,7 +5,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 
 bool isNetSource(String url) {
-  return url.startsWith(r'http');
+  // 正则表达式匹配 http 或 https 或 uploads
+  RegExp regExp = RegExp(r'^(https?|uploads)');
+  return regExp.hasMatch(url);
 }
 
 String getSourceUrl(String url) {

@@ -45,7 +45,6 @@ class MessageUtil {
       chatList.insert(0, chatItem);
     }
     UserHive.box.put('chatList', chatList);
-    // UserHive.box.put('chatList', []);
   }
 
   static void update(Map msg, Map oldMsg) {
@@ -68,27 +67,32 @@ class MessageUtil {
 
   static void delete({
     required String account,
-    String? id,
+    int? id,
     int? sendTime,
   }) {
-    final List friends = UserHive.userInfo['friends'] ?? [];
+    try {
+      final friends = UserHive.friends;
 
-    final Map? friend = friends.firstWhere((item) => item['account'] == account,
-        orElse: () => null);
+      final Map? friend = friends
+          .firstWhere((item) => item['account'] == account, orElse: () => null);
 
-    if (friend != null) {
-      final List list = friend['messages'];
-      int index = list.indexWhere((element) =>
-          (element['id'] != null && element['id'] == id) ||
-          element['sendTime'] == sendTime);
-      if (index != -1) {
-        list.removeAt(index);
+      if (friend != null) {
+        final List list = friend['messages'];
+        int index = list.indexWhere((element) =>
+            (element['id'] != null && element['id'] == id) ||
+            element['sendTime'] == sendTime);
+
+        if (index != -1) {
+          list.removeAt(index);
+        } else {
+          throw Exception('删除记录失败~');
+        }
+        UserHive.box.put('friends', friends);
       } else {
-        throw Exception('删除记录失败~');
+        print('找不到好友 $account');
       }
-      UserHive.box.put('friends', friends);
-    } else {
-      print('找不到好友 $account');
+    } catch (error) {
+      print(error);
     }
   }
 
@@ -97,7 +101,7 @@ class MessageUtil {
       required String content,
       required String from,
       required String to,
-      double? duration}) async {
+      int? duration}) async {
     Map msgData = {
       'type': type,
       'content': content,

@@ -41,9 +41,7 @@ void socketEvents(IO.Socket socket) {
   });
 
   socket.on('chat_message', (res) {
-    print('[chat_message]: $res');
     final data = handleAck(res);
-
 
     final dataList = data is List ? data : [data];
 
