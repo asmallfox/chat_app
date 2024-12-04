@@ -87,6 +87,7 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
     if (isPlaying) {
       RecordingHelper.audioPlayer.pausePlayer();
     } else {
+      print(widget.msgItem['content']);
       await RecordingHelper.audioPlayer.startPlayer(
         fromURI: widget.msgItem['content'],
         whenFinished: () {

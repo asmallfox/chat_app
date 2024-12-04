@@ -60,6 +60,10 @@ class MessageUtil {
 
       if (index != -1) {
         messages[index] = msg;
+        if (msg['type'] == MessageType.voice.value ||
+            msg['type'] == MessageType.image.value) {
+          messages[index]['content'] = oldMsg['content'];
+        }
         UserHive.box.put('friends', friends);
       }
     }
@@ -96,12 +100,13 @@ class MessageUtil {
     }
   }
 
-  static Future<void> sendMessage(
-      {required int type,
-      required String content,
-      required String from,
-      required String to,
-      int? duration}) async {
+  static Future<void> sendMessage({
+    required int type,
+    required String content,
+    required String from,
+    required String to,
+    int? duration,
+  }) async {
     Map msgData = {
       'type': type,
       'content': content,
@@ -111,7 +116,7 @@ class MessageUtil {
       'status': MsgStatus.sending.value,
       'duration': duration
     };
-
+    print(msgData);
     if (type == MessageType.text.value) {
     } else if (type == MessageType.image.value) {
       File imageFile = File(content);
