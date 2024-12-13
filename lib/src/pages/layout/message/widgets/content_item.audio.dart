@@ -62,6 +62,7 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
               scaleX: widget.isSelf ? -1 : 1,
               child: AudioPlayIcon(
                 isPlay: isPlaying,
+                isSelf: widget.isSelf,
               ),
             ),
             const SizedBox(width: 6),
@@ -87,7 +88,6 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
     if (isPlaying) {
       RecordingHelper.audioPlayer.pausePlayer();
     } else {
-      print(widget.msgItem['content']);
       await RecordingHelper.audioPlayer.startPlayer(
         fromURI: widget.msgItem['content'],
         whenFinished: () {

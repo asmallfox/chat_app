@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 enum ModelType { success, error, info, warning }
 
@@ -142,8 +141,8 @@ class MessageHelper {
     List<Widget>? actions,
     String? confirmBtnText,
     String? cancelBtnText,
-    Function? confirm,
-    Function? cancel,
+    void Function()? confirm,
+    void Function()? cancel,
   }) {
     return showDialog(
       context: appNavigatorKey.currentContext!,

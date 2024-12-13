@@ -1,3 +1,4 @@
+import 'package:chat_app/Helpers/caceh_network_source.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
@@ -40,12 +41,18 @@ void socketEvents(IO.Socket socket) {
     }
   });
 
-  socket.on('chat_message', (res) {
+  socket.on('chat_message', (res) async {
     final data = handleAck(res);
 
     final dataList = data is List ? data : [data];
 
     for (int i = 0; i < dataList.length; i++) {
+      if (dataList[i]['type'] == MessageType.image.value ||
+          dataList[i]['type'] == MessageType.voice.value) {
+        dataList[i]['content'] =
+            await downloadAndSaveFile(dataList[i]['content']);
+      }
+
       MessageUtil.add(dataList[i]['from'], dataList[i]);
     }
   });

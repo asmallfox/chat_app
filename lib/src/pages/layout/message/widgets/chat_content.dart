@@ -62,7 +62,6 @@ class _ChatContentState extends State<ChatContent>
         }
 
         messageList = messages.reversed.toList();
-
         return Expanded(
           child: Align(
             alignment: Alignment.topCenter,

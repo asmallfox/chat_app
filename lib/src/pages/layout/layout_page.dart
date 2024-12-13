@@ -24,6 +24,7 @@ class _LayoutPageState extends State<LayoutPage> {
   bool _isPageChanging = false;
 
   StreamSubscription? _subscription;
+  StreamSubscription? _subscription2;
 
   List pageList = [
     {
@@ -89,6 +90,17 @@ class _LayoutPageState extends State<LayoutPage> {
       setState(() {
         pageList[1]['badge'] = boxEvent.value?['newCount'] ?? 0;
       });
+    });
+    _subscription2 = UserHive.box.watch(key: 'chatList').listen((boxEvent) {
+      if (boxEvent.value is List && boxEvent.value.isNotEmpty) {
+        int count = 0;
+        for (int i = 0; i < boxEvent.value.length; i++) {
+          count += (boxEvent.value[i]['newCount'] ?? 0) as int;
+        }
+        setState(() {
+          pageList[0]['badge'] = count;
+        });
+      }
     });
   }
 

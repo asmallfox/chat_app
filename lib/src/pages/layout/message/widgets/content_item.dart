@@ -6,6 +6,7 @@ import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/pages/layout/message/widgets/audio_play_icon.dart';
 import 'package:chat_app/src/pages/layout/message/widgets/bubble__benu_item.dart';
 import 'package:chat_app/src/pages/layout/message/widgets/content_item.audio.dart';
+import 'package:chat_app/src/pages/layout/message/widgets/content_item_media.dart';
 import 'package:chat_app/src/theme/colors.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
@@ -188,11 +189,12 @@ class _ContentItemState extends State<ContentItem> {
                           : IconButton(
                               onPressed: () {
                                 MessageHelper.showDialogModel(
-                                    title: '是否重新发送',
-                                    child: const SizedBox(),
-                                    confirm: () {
-                                      Navigator.of(context).pop();
-                                    });
+                                  title: '是否重新发送',
+                                  child: const SizedBox(),
+                                  confirm: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                );
                               },
                               icon: const Icon(
                                 Icons.error,
@@ -217,14 +219,16 @@ class _ContentItemState extends State<ContentItem> {
   Widget _getContentItemWidget(BuildContext context) {
     switch (widget.msgItem['type']) {
       case 2:
-        return getContentItemImage();
+        return ContentItemMedia(
+          msgItem: widget.msgItem,
+          isSelf: widget.isSelf,
+        );
       case 3:
+      case 4:
         return ContentItemAudio(
           msgItem: widget.msgItem,
           isSelf: widget.isSelf,
         );
-      case 4:
-        return Text('视频占位');
       case 5:
         return Text('文件占位');
       default:
@@ -252,17 +256,6 @@ class _ContentItemState extends State<ContentItem> {
           color: widget.isSelf ? Colors.white : Colors.black,
         ),
       ),
-    );
-  }
-
-  Widget getContentItemImage() {
-    return Container(
-      child: isNetSource(widget.msgItem['content'])
-          ? Image.network(
-              getSourceUrl(widget.msgItem['content']),
-              fit: BoxFit.cover,
-            )
-          : Image.file(File(widget.msgItem['content'])),
     );
   }
 

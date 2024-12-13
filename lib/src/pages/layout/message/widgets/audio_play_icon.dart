@@ -74,9 +74,11 @@ class AudioPlayIconPaint extends CustomPainter {
 
 class AudioPlayIcon extends StatefulWidget {
   final bool isPlay;
+  final bool isSelf;
   const AudioPlayIcon({
     super.key,
     this.isPlay = false,
+    this.isSelf = true,
   });
 
   @override
@@ -136,6 +138,7 @@ class _AudioPlayIconState extends State<AudioPlayIcon>
             painter: AudioPlayIconPaint(
               actionColor: Colors.red,
               actionIndex: index,
+              inactiveColor: widget.isSelf ? Colors.white : Colors.black,
             ),
           );
         },

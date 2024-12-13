@@ -44,7 +44,7 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     List chatList = UserHive.chatList;
     Map? chatItem = chatList
-        .firstWhere((element) => element['account'] == widget.item['account']);
+        .firstWhere((element) => element['account'] == widget.item['account'], orElse: () => null);
 
     if (chatItem != null) {
       chatItem['newCount'] = 0;
