@@ -1,9 +1,9 @@
+import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:chat_app/src/widgets/communicate_icon_button.dart';
+import 'package:chat_app/src/widgets/picture.dart';
 import 'package:chat_app/src/widgets/rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-
-import 'package:flutter/widgets.dart';
 
 class ChatAudioPage extends StatefulWidget {
   final Map friend;
@@ -30,9 +30,9 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
     return Stack(
       children: [
         Positioned.fill(
-          child: Image.network(
-            widget.friend['avatar'],
-            fit: BoxFit.cover,
+          child: Picture(
+            url: widget.friend['avatar'],
+            fit: BoxFit.fill,
           ),
         ),
         // 模糊效果
@@ -62,22 +62,19 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Container(
-                  width: 130,
-                  height: 130,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 2,
-                      color: Colors.grey.shade500,
+                    width: 130,
+                    height: 130,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 2,
+                        color: Colors.grey.shade500,
+                      ),
+                      borderRadius: BorderRadius.circular(100),
                     ),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: ClipOval(
-                    child: Image.network(
-                      widget.friend['avatar'],
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                    child: Avatar(
+                      url: widget.friend['avatar'],
+                      isCircle: true,
+                    )),
                 const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -120,7 +117,9 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
                       visible: isOnCall,
                       child: CommunicateIconButton(
                         color: Colors.grey.shade300,
-                        icon: isMuted ? Icons.mic_external_off_rounded : Icons.mic_none_rounded,
+                        icon: isMuted
+                            ? Icons.mic_external_off_rounded
+                            : Icons.mic_none_rounded,
                         onTap: () {},
                       ),
                     ),
@@ -134,4 +133,3 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
     );
   }
 }
-
