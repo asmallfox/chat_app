@@ -1,3 +1,4 @@
+import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:chat_app/src/widgets/communicate_icon_button.dart';
 import 'package:chat_app/src/widgets/picture.dart';
@@ -24,6 +25,22 @@ class _ChatAudioPageState extends State<ChatAudioPage> {
   bool isExpanded = false;
   // 静音
   bool isMuted = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    RecordingHelper.play(
+      'assets/mp3/call.mp3',
+      assets: true,
+      loop: true,
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

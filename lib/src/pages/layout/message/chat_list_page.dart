@@ -201,9 +201,9 @@ class _ChatListPageState extends State<ChatListPage> {
     if (type == MessageType.text.value) {
       ctx += msg['content'];
     } else if (type == MessageType.image.value) {
-      ctx += '图片';
+      ctx += '[图片]';
     } else if (type == MessageType.voice.value) {
-      ctx += '语音';
+      ctx += '[语音]';
     }
 
     return "${isNewMsg ? '[新消息]' : ''} $ctx";
