@@ -39,7 +39,6 @@ class _MessageAudioState extends State<MessageAudio> {
 
       await _audioPlayer.setSourceUrl(widget.item['message']);
 
-
       audioDuration = await _audioPlayer.getDuration();
       if (audioDuration != null) {
         setState(() {
@@ -65,27 +64,21 @@ class _MessageAudioState extends State<MessageAudio> {
         String? url = widget.item['message'];
 
         if (url != null) {
-          print('设置播放地址 http://192.168.31.22:3000/uploads/message/audios/1722580491751-123157522.webm');
-          // AudioPlayer _audioPlayer = AudioPlayer();
+          AudioPlayer _audioPlayer = AudioPlayer();
 
+          _audioPlayer.onPlayerComplete.listen((event) {
+            print('播放结束');
+            setState(() {
+              isPlaying = false;
+            });
+          });
 
-          // _audioPlayer.play(UrlSource(url));
-
-          RecordingManager.audioPlayer?.startPlayer(
-            fromURI: url,
-            codec: Codec.mp3,
-            whenFinished: () {
-              print('播放结束');
-              setState(() {
-                isPlaying = false;
-              });
-            },
-          );
+          _audioPlayer.play(UrlSource(url));
         }
 
-        // setState(() {
-        //   isPlaying = true;
-        // });
+        setState(() {
+          isPlaying = true;
+        });
       },
       child: Container(
         height: 40,
