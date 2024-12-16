@@ -1,4 +1,5 @@
 import 'package:chat_app/src/pages/login/log_on_page.dart';
+import 'package:chat_app/src/pages/test/test_page.dart';
 import 'package:chat_app/src/providers/model/user_provider.dart';
 import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
@@ -99,9 +100,15 @@ class _MineState extends State<Mine> {
               ),
               ListTile(
                 leading: const Icon(Icons.settings),
-                title: const Text('设置'),
+                title: const Text('测试'),
                 trailing: const Icon(Icons.keyboard_arrow_right_rounded),
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const TestPage(),
+                    ),
+                  );
+                },
               ),
               FilledButton(
                 onPressed: () async {
