@@ -19,8 +19,6 @@ class _TestPageState extends State<TestPage> {
   List<double> list = List.generate(20, (index) => 4);
 
   bool _isRecord = false;
-  bool _recordSendBtn = false;
-  bool _recordCancelBtn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -115,27 +113,24 @@ class _TestPageState extends State<TestPage> {
 
     final recordCancelBtn =
         _widgetCoincide(recordingCancelBtnKey, details.globalPosition, 2);
-
+    print(recordSendBtn);
     setState(() {
-      _recordSendBtn = recordSendBtn;
-      _recordCancelBtn = recordCancelBtn;
       _isRecord = true;
     });
 
     context.read<ChatProviderModel>().setIsRecord(true);
     context.read<ChatProviderModel>().setRecordCancelBtn(recordCancelBtn);
-    context.read<ChatProviderModel>().setIsRecord(recordSendBtn);
+    context.read<ChatProviderModel>().setRecordSendBtn(recordSendBtn);
   }
 
   void _handleStopRecording(BuildContext context) {
     setState(() {
-      _recordSendBtn = false;
-      _recordCancelBtn = false;
       _isRecord = false;
     });
- context.read<ChatProviderModel>().setIsRecord(false);
+    context.read<ChatProviderModel>().setIsRecord(false);
     context.read<ChatProviderModel>().setRecordCancelBtn(false);
     context.read<ChatProviderModel>().setIsRecord(false);
+    Navigator.pop(context);
   }
 
   bool _widgetCoincide(GlobalKey widgetKey, Offset position, int type) {
@@ -164,45 +159,60 @@ void showRecordingPanel({
   required double decibels,
 }) {
   showDialog(
-    barrierColor: Colors.black.withOpacity(0.75),
+    barrierColor: Colors.black.withOpacity(0.68),
     context: context,
     builder: (_) {
       return Consumer<ChatProviderModel>(
         builder: (context, chatProvider, child) {
           double width = MediaQuery.of(context).size.width;
-
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text('${chatProvider.isRecord}'), // chatProvider.isRecord会自动更新
               Expanded(
-                child: Align(
-                  child: CustomPaint(
-                    size: const Size(200, 100),
-                    painter: AudioCablePainter(
-                      list: list,
-                      decibels: decibels,
-                      offset: 10,
+                key: recordingCancelBtnKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        child: CustomPaint(
+                          size: const Size(200, 100),
+                          painter: AudioCablePainter(
+                            list: list,
+                            decibels: decibels,
+                            offset: 10,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          margin: const EdgeInsets.only(bottom: 40),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: chatProvider.recordCancelBtn
+                                ? Colors.black26
+                                : Colors.black38,
+                            borderRadius: BorderRadius.circular(60),
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: chatProvider.recordCancelBtn
+                                ? Colors.grey[100]
+                                : Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ClipRRect(
-                    key: recordingCancelBtnKey,
-                    borderRadius: BorderRadius.circular(40),
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      color: true ? Colors.black26 : Colors.black38,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
               SizedBox(
+                key: recordingSendBtnKey,
                 width: width,
                 height: 140,
                 child: Stack(
@@ -212,20 +222,23 @@ void showRecordingPanel({
                       child: Text(
                         '松开 发送',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.72),
+                          color: Colors.white.withOpacity(
+                              chatProvider.recordSendBtn ? 0.72 : 0),
                           fontSize: 16,
+                          decoration: TextDecoration.none,
                         ),
                       ),
                     ),
                     Positioned(
-                      key: recordingSendBtnKey,
                       top: 40,
                       left: -(width * 0.5 / 2),
                       child: ClipOval(
                         child: Container(
                           width: width * 1.5,
                           height: 400,
-                          color: true ? Colors.black26 : Colors.black38,
+                          color: chatProvider.recordSendBtn
+                              ? Colors.black26
+                              : Colors.black38,
                         ),
                       ),
                     ),

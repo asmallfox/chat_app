@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_app/src/api/api.dart';
 import 'package:chat_app/src/constants/global_key.dart';
+import 'package:chat_app/src/pages/layout/chats/chats_page.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,17 +21,17 @@ class LayoutPage extends StatefulWidget {
 
 class _LayoutPageState extends State<LayoutPage> {
   late PageController _pageViewController;
-  int currentPageIndex = 1;
+  int currentPageIndex = 0;
   bool _isPageChanging = false;
 
   StreamSubscription? _subscription;
   StreamSubscription? _subscription2;
 
-  List pageList = [
+  final List pageList = [
     {
       'label': '消息',
       "icon": Icons.message_rounded,
-      'child': const ChatListPage(),
+      'child': const ChatsPage(),
       'badge': 0,
     },
     {
