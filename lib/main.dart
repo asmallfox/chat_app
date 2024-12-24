@@ -1,12 +1,14 @@
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/hive_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
+import 'package:chat_app/src/providers/model/chat_provider_model.dart';
 import 'package:chat_app/src/router/routes.dart';
 import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chat_app/src/router/route_handle.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   // 返回实现 WidgetsBinding 的绑定的实例。
@@ -14,8 +16,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await startService();
-
-  runApp(const MyApp());
+  // Provider.debugCheckInvalidValueType = null;
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(
+        create: (_) => ChatProviderModel(),
+      ),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 Future<void> startService() async {
@@ -34,11 +43,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: appNavigatorKey,
-      routes: namesRoutes,
       // onGenerateRoute: (settings) {
       //    return HandleRoute.handleRoute(settings.name);
       // },
+      navigatorKey: appNavigatorKey,
+      routes: namesRoutes,
       themeMode: ThemeMode.light,
       theme: AppTheme.lightTheme(context: context),
       darkTheme: AppTheme.darkTheme(context: context),

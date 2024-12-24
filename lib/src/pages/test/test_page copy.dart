@@ -1,9 +1,6 @@
-import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
-import 'package:chat_app/src/providers/model/chat_provider_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:provider/provider.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({
@@ -15,18 +12,26 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
+  void initState() {
+    super.initState();
+  }
+
   double decibels = 10;
   List<double> list = List.generate(20, (index) => 4);
 
   bool _isRecord = false;
+  bool _isOverlap = false;
   bool _recordSendBtn = false;
   bool _recordCancelBtn = false;
+
+  GlobalKey _recordingCancelBtnKey = GlobalKey();
+  GlobalKey _recordingSendBtnKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test Page'),
+        title: Text('Test Page'),
       ),
       body: Column(
         children: [
@@ -37,6 +42,7 @@ class _TestPageState extends State<TestPage> {
                 RecordingHelper.audioRecorder
                     .setSubscriptionDuration(const Duration(milliseconds: 100));
                 RecordingHelper.audioRecorder.onProgress?.listen((e) {
+                  print(e.decibels);
                   double decibels = (e.decibels ?? 4) < 4 ? 4 : e.decibels!;
                   setState(() {
                     list.removeAt(0);
@@ -57,7 +63,7 @@ class _TestPageState extends State<TestPage> {
             onPressed: () async {
               String? filePath =
                   await RecordingHelper.audioRecorder.stopRecorder();
-              list.fillRange(0, list.length, 4);
+              list.fillRange(0, list.length - 1, 4);
               print(filePath);
             },
             child: Text('stop'),
@@ -71,17 +77,14 @@ class _TestPageState extends State<TestPage> {
             ),
           ),
           GestureDetector(
-            onPanDown: (details) => _handleStartRecording(context, details),
-            onLongPressMoveUpdate: (details) =>
-                _handleStartRecording(context, details),
-            onVerticalDragUpdate: (details) =>
-                _handleStartRecording(context, details),
-            onHorizontalDragUpdate: (details) =>
-                _handleStartRecording(context, details),
-            onLongPressUp: () => _handleStopRecording(context),
-            onTapUp: (_) => _handleStopRecording(context),
-            onVerticalDragEnd: (_) => _handleStopRecording(context),
-            onHorizontalDragEnd: (_) => _handleStopRecording(context),
+            onPanDown: _handleStartRecording,
+            onLongPressMoveUpdate: _handleStartRecording,
+            onVerticalDragUpdate: _handleStartRecording,
+            onHorizontalDragUpdate: _handleStartRecording,
+            onLongPressUp: _handleStopRecording,
+            onTapUp: (details) => _handleStopRecording(),
+            onVerticalDragEnd: (details) => _handleStopRecording(),
+            onHorizontalDragEnd: (details) => _handleStopRecording(),
             child: Container(
               color: Colors.pink,
               child: const Text('按住 说话'),
@@ -101,104 +104,37 @@ class _TestPageState extends State<TestPage> {
     );
   }
 
-  void _handleStartRecording(BuildContext context, details) {
+  void _handleStartRecording(details) {
     if (!_isRecord) {
-      showRecordingPanel(
+      showDialog(
+        barrierColor: Colors.black.withOpacity(0.75),
         context: context,
-        list: list,
-        decibels: decibels,
-      );
-    }
-
-    final recordSendBtn =
-        _widgetCoincide(recordingSendBtnKey, details.globalPosition, 1);
-
-    final recordCancelBtn =
-        _widgetCoincide(recordingCancelBtnKey, details.globalPosition, 2);
-
-    setState(() {
-      _recordSendBtn = recordSendBtn;
-      _recordCancelBtn = recordCancelBtn;
-      _isRecord = true;
-    });
-
-    context.read<ChatProviderModel>().setIsRecord(true);
-    context.read<ChatProviderModel>().setRecordCancelBtn(recordCancelBtn);
-    context.read<ChatProviderModel>().setIsRecord(recordSendBtn);
-  }
-
-  void _handleStopRecording(BuildContext context) {
-    setState(() {
-      _recordSendBtn = false;
-      _recordCancelBtn = false;
-      _isRecord = false;
-    });
- context.read<ChatProviderModel>().setIsRecord(false);
-    context.read<ChatProviderModel>().setRecordCancelBtn(false);
-    context.read<ChatProviderModel>().setIsRecord(false);
-  }
-
-  bool _widgetCoincide(GlobalKey widgetKey, Offset position, int type) {
-    if (widgetKey.currentContext == null) return type == 1;
-
-    RenderBox renderBox =
-        widgetKey.currentContext?.findRenderObject() as RenderBox;
-
-    Offset offset = renderBox.localToGlobal(Offset.zero);
-    double boxX = offset.dx;
-    double boxY = offset.dy;
-    double x = position.dx;
-    double y = position.dy;
-    double sizeW = renderBox.size.width;
-    double sizeH = renderBox.size.height;
-
-    bool coincide =
-        (x > boxX && x < boxX + sizeW) && (y > boxY && y < boxY + sizeH);
-    return coincide;
-  }
-}
-
-void showRecordingPanel({
-  required BuildContext context,
-  required List<double> list,
-  required double decibels,
-}) {
-  showDialog(
-    barrierColor: Colors.black.withOpacity(0.75),
-    context: context,
-    builder: (_) {
-      return Consumer<ChatProviderModel>(
-        builder: (context, chatProvider, child) {
+        builder: (context) {
           double width = MediaQuery.of(context).size.width;
-
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text('${chatProvider.isRecord}'), // chatProvider.isRecord会自动更新
-              Expanded(
-                child: Align(
-                  child: CustomPaint(
-                    size: const Size(200, 100),
-                    painter: AudioCablePainter(
-                      list: list,
-                      decibels: decibels,
-                      offset: 10,
-                    ),
-                  ),
-                ),
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   ClipRRect(
-                    key: recordingCancelBtnKey,
+                    key: _recordingCancelBtnKey,
                     borderRadius: BorderRadius.circular(40),
                     child: Container(
                       width: 60,
                       height: 60,
-                      color: true ? Colors.black26 : Colors.black38,
+                      color: _recordCancelBtn ? Colors.black26 : Colors.black38,
                     ),
                   ),
+                  Text('$_recordCancelBtn')
+                  // ClipRRect(
+                  //   borderRadius: BorderRadius.circular(60),
+                  //   child: Container(
+                  //     width: 60,
+                  //     height: 60,
+                  //     color: Colors.grey,
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 40),
@@ -218,26 +154,70 @@ void showRecordingPanel({
                       ),
                     ),
                     Positioned(
-                      key: recordingSendBtnKey,
+                      key: _recordingSendBtnKey,
                       top: 40,
                       left: -(width * 0.5 / 2),
                       child: ClipOval(
                         child: Container(
                           width: width * 1.5,
                           height: 400,
-                          color: true ? Colors.black26 : Colors.black38,
+                          color:
+                              _recordSendBtn ? Colors.black26 : Colors.black38,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
+              )
             ],
           );
         },
       );
-    },
-  );
+    }
+
+    final recordSendBtn =
+        _widgetCoincide(_recordingSendBtnKey, details.globalPosition, 1);
+
+    final recordCancelBtn =
+        _widgetCoincide(_recordingCancelBtnKey, details.globalPosition, 2);
+
+    setState(() {
+      _recordSendBtn = recordSendBtn;
+      _recordCancelBtn = recordCancelBtn;
+      _isRecord = true;
+    });
+  }
+
+  void _handleStopRecording() {
+    setState(() {
+      _recordSendBtn = false;
+      _recordCancelBtn = false;
+      _isRecord = false;
+    });
+  }
+
+  bool _widgetCoincide(GlobalKey widgetKey, Offset position, int type) {
+    if (widgetKey.currentContext == null) return type == 1;
+
+    RenderBox renderBox =
+        widgetKey.currentContext?.findRenderObject() as RenderBox;
+
+    Offset offset = renderBox.localToGlobal(Offset.zero);
+    double boxX = offset.dx;
+    double boxY = offset.dy;
+    double x = position.dx;
+    double y = position.dy;
+    double sizeW = renderBox.size.width;
+    double sizeH = renderBox.size.height;
+
+    bool coincide =
+        (x > boxX && x < boxX + sizeW) && (y > boxY && y < boxY + sizeH);
+    // if (type == 2) {
+    //   print('===== x = $x, y = $y, sizeW = $sizeW');
+    //   print('===== boxX = $boxX, boxY = $boxY, sizeH = $sizeH');
+    // }
+    return coincide;
+  }
 }
 
 class AudioCablePainter extends CustomPainter {

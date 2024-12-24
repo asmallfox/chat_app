@@ -7,3 +7,6 @@ final GlobalKey bottomNavBarKey = GlobalKey();
 final voiceCancelKey = GlobalKey();
 // 录音页面发送按钮
 final voiceSendKey = GlobalKey();
+
+final GlobalKey recordingCancelBtnKey = GlobalKey();
+final GlobalKey recordingSendBtnKey = GlobalKey();
