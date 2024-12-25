@@ -162,7 +162,8 @@ class _PanelAudioState extends State<PanelAudio> {
                           child: CustomPaint(
                             size: const Size(200, 100),
                             painter: AudioCablePainter(
-                                list: chatProvider.decibelsList),
+                              list: chatProvider.decibelsList,
+                            ),
                           ),
                         ),
                       ),

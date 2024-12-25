@@ -1,3 +1,5 @@
+import 'package:chat_app/src/pages/layout/chats/chats_audio.page.dart';
+import 'package:chat_app/src/pages/layout/chats/chats_video_page.dart';
 import 'package:chat_app/src/pages/layout/chats/widgets/conversation_content.dart';
 import 'package:chat_app/src/pages/layout/chats/widgets/conversation_panel.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
@@ -29,24 +31,24 @@ class _ChatsConversationPage extends State<ChatsConversationPage> {
           actions: [
             IconButton(
               onPressed: () async {
-                // Navigator.of(context).push(
-                //   PageRouteBuilder(
-                //     pageBuilder: (_, __, ___) =>
-                //         ChatAudioPage(friend: widget.item),
-                //   ),
-                // );
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) =>
+                        ChatsAudioPage(friend: widget.item),
+                  ),
+                );
               },
               icon: const Icon(Icons.phone),
               color: Theme.of(context).colorScheme.primary,
             ),
             IconButton(
               onPressed: () {
-                // Navigator.of(context).push(
-                //   PageRouteBuilder(
-                //     pageBuilder: (_, __, ___) =>
-                //         ChatVideoPage(friend: widget.item),
-                //   ),
-                // );
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) =>
+                        ChatsVideoPage(friend: widget.item),
+                  ),
+                );
               },
               icon: const Icon(Icons.videocam_sharp),
               color: Theme.of(context).colorScheme.primary,

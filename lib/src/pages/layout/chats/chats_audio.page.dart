@@ -1,4 +1,3 @@
-import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:chat_app/src/widgets/communicate_icon_button.dart';
 import 'package:chat_app/src/widgets/picture.dart';
@@ -6,41 +5,25 @@ import 'package:chat_app/src/widgets/rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
-class ChatAudioPage extends StatefulWidget {
+class ChatsAudioPage extends StatefulWidget {
   final Map friend;
 
-  const ChatAudioPage({
+  const ChatsAudioPage({
     super.key,
     required this.friend,
   });
 
   @override
-  State<ChatAudioPage> createState() => _ChatAudioPageState();
+  State<ChatsAudioPage> createState() => _ChatsAudioPageState();
 }
 
-class _ChatAudioPageState extends State<ChatAudioPage> {
+class _ChatsAudioPageState extends State<ChatsAudioPage> {
   // 正在通话
   bool isOnCall = false;
   // 扩音
   bool isExpanded = false;
   // 静音
   bool isMuted = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    RecordingHelper.play(
-      'assets/mp3/call.mp3',
-      assets: true,
-      loop: true,
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

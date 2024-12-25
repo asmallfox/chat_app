@@ -1,9 +1,9 @@
 import 'package:chat_app/src/helpers/recording_helper.dart';
+import 'package:chat_app/src/pages/layout/chats/widgets/audio_play_icon.dart';
 import 'package:chat_app/src/theme/colors.dart';
 import 'package:chat_app/src/utils/share.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:chat_app/src/pages/layout/message/widgets/audio_play_icon.dart';
 
 class ContentItemAudio extends StatefulWidget {
   final Map msgItem;
@@ -84,11 +84,9 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
     if (RecordingHelper.audioPlayer.isPlaying && !isPlaying) {
       RecordingHelper.audioPlayer.audioPlayerFinished(2);
     }
-
     if (isPlaying) {
       RecordingHelper.audioPlayer.pausePlayer();
     } else {
-      print('播放');
       await RecordingHelper.audioPlayer.startPlayer(
         fromURI: widget.msgItem['content'],
         whenFinished: () {
@@ -98,7 +96,6 @@ class _ContentItemAudioState extends State<ContentItemAudio> {
         },
       );
     }
-
     setState(() {
       isPlaying = !isPlaying;
     });
