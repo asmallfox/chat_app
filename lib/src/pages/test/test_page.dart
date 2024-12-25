@@ -1,19 +1,9 @@
-<<<<<<< HEAD
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/providers/model/chat_provider_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
-=======
-import 'dart:io';
-
-import 'package:chat_app/src/helpers/recording_helper.dart';
-import 'package:chat_app/src/utils/share.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_sound/flutter_sound.dart';
->>>>>>> 50da8ced605261a9cac95b68bfe5761205ca70af
 
 class TestPage extends StatefulWidget {
   const TestPage({
@@ -36,7 +26,6 @@ class _TestPageState extends State<TestPage> {
       appBar: AppBar(
         title: const Text('Test Page'),
       ),
-<<<<<<< HEAD
       body: Column(
         children: [
           FilledButton(
@@ -106,20 +95,10 @@ class _TestPageState extends State<TestPage> {
             ),
           ),
         ],
-=======
-      body: Center(
-        child: FilledButton(
-          onPressed: () {
-            getFileUrl();
-          },
-          child: Text('播放'),
-        ),
->>>>>>> 50da8ced605261a9cac95b68bfe5761205ca70af
       ),
     );
   }
 
-<<<<<<< HEAD
   void _handleStartRecording(BuildContext context, details) {
     if (!_isRecord) {
       showRecordingPanel(
@@ -313,18 +292,4 @@ class AudioCablePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
-=======
-  Future<void> getFileUrl() async {
-    final byteData = await rootBundle.load('assets/mp3/chat_notice.mp3');
-    final buffer = byteData.buffer.asUint8List();
-    print('开始播放');
-    RecordingHelper.audioPlayer.startPlayer(
-      fromDataBuffer: buffer,
-      codec: Codec.mp3,
-      whenFinished: () {
-        print('播放完毕');
-      },
-    );
-  }
->>>>>>> 50da8ced605261a9cac95b68bfe5761205ca70af
 }
