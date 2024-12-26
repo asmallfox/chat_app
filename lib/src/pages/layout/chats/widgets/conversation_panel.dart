@@ -21,7 +21,7 @@ class ConversationPanel extends StatefulWidget {
 class _ConversationPanelState extends State<ConversationPanel> {
   final FocusNode focusNode = FocusNode();
   final TextEditingController _messageController = TextEditingController();
-  bool _inputBtn = false;
+  bool _inputBtn = true;
   bool _showSendBtn = false;
   bool _showFnPanel = false;
 

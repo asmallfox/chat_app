@@ -1,4 +1,5 @@
 import 'package:chat_app/src/constants/global_key.dart';
+import 'package:chat_app/src/helpers/global_notification.dart';
 import 'package:chat_app/src/helpers/hive_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/providers/model/chat_provider_model.dart';
@@ -34,6 +35,8 @@ Future<void> startService() async {
   await RecordingHelper.getInstance();
   // 初始化socket
   await SocketIOClient.getInstance();
+  // 初始化全局通知
+  await GlobalNotification.getInstance();
 }
 
 class MyApp extends StatelessWidget {

@@ -78,4 +78,13 @@ void socketEvents(IO.Socket socket) {
       MessageUtil.add(dataList[i]['from'], dataList[i]);
     }
   });
+
+  socket.on('call', (res) {
+    try {
+      final data = handleAck(res);
+      print('$data');
+    } catch (error) {
+      print(error);
+    }
+  });
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chat_app/src/pages/layout/chats/widgets/content_item.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class ConversationContent extends StatefulWidget {
@@ -18,16 +19,15 @@ class ConversationContent extends StatefulWidget {
 
 class _ConversationContentState extends State<ConversationContent>
     with SingleTickerProviderStateMixin {
-  bool _isSelf(Map msg) {
-    return msg['from'] == UserHive.userInfo['account'];
-  }
-
   StreamSubscription? _subscription;
+  final ScrollController _scrollController =
+      ScrollController(keepScrollOffset: false);
 
   List messageList = [];
 
+  bool _isSelf(Map msg) => msg['from'] == UserHive.userInfo['account'];
+
   void _init() {
-    print('更新了');
     final friends = UserHive.friends;
     final friend = friends.firstWhere(
       (element) => element['account'] == widget.item['account'],
@@ -45,13 +45,25 @@ class _ConversationContentState extends State<ConversationContent>
   @override
   void initState() {
     super.initState();
-    _init();
     _subscription = UserHive.box.watch(key: 'friends').listen((_) => _init());
+    _init();
+  }
+
+  @override
+  void didUpdateWidget(covariant ConversationContent oldWidget) {
+    if (messageList.isNotEmpty) {
+      bool isSelf = _isSelf(messageList.last);
+      if (isSelf || _scrollController.position.pixels < 120) {
+        _scrollController.jumpTo(0);
+      }
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -63,6 +75,7 @@ class _ConversationContentState extends State<ConversationContent>
         child: ListView.separated(
           reverse: true,
           shrinkWrap: true,
+          controller: _scrollController,
           itemCount: messageList.length,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           separatorBuilder: (context, index) => const SizedBox(height: 20),

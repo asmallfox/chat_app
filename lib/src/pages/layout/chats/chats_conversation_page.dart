@@ -21,6 +21,20 @@ class ChatsConversationPage extends StatefulWidget {
 
 class _ChatsConversationPage extends State<ChatsConversationPage> {
   @override
+  void initState() {
+    super.initState();
+    List chatList = UserHive.chatList;
+    Map? chatItem = chatList.firstWhere(
+        (element) => element['account'] == widget.item['account'],
+        orElse: () => null);
+
+    if (chatItem != null) {
+      chatItem['newCount'] = 0;
+      UserHive.box.put('chatList', chatList);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return KeyboardContainer(
       child: Scaffold(
@@ -68,11 +82,12 @@ class _ChatsConversationPage extends State<ChatsConversationPage> {
             )
           ],
         ),
+        resizeToAvoidBottomInset: false, // 页面是否被软键盘顶起
       ),
     );
   }
 
-   void _onSendMessage(Map data) {
+  void _onSendMessage(Map data) {
     MessageUtil.sendMessage(
       type: data['type'],
       content: data['content'],

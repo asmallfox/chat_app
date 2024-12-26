@@ -18,4 +18,9 @@ class SocketApi {
   static void sendMsgSocketApi(Map data, [Function? callback]) {
     SocketIOClient.emitWithAck('chat_message', data, ack: callback);
   }
+
+  // 语音拨打
+  static void callSocketApi(Map data, [Function? callback]) {
+    SocketIOClient.emitWithAck('call', data, ack: callback);
+  }
 }
