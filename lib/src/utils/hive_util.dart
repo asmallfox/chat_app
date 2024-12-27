@@ -78,6 +78,27 @@ class UserHive extends AppHive {
     await AppHive.setUserInfo(data);
   }
 
+  static Map? getFriend({int? id, String? account}) {
+    if (id == null && account == null) return null;
+    if (id != null) {
+      print(friends);
+      return friends.firstWhere(
+        (item) {
+          print(item['friendId'].runtimeType);
+          print(id);
+          return item['friendId'] == id;
+        },
+        orElse: () => null,
+      );
+    } else if (account != null) {
+      return friends.firstWhere(
+        (item) => item['account'] == account,
+        orElse: () => null,
+      );
+    }
+    return null;
+  }
+
   static Future<List> updateFriends(List rows) async {
     final list = friends;
     for (int i = 0; i < rows.length; i++) {

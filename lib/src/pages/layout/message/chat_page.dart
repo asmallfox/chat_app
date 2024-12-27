@@ -250,7 +250,7 @@ class _ChatPageState extends State<ChatPage> {
         await file.writeAsBytes(audioFile.readAsBytesSync());
         final duration = await player.setUrl(path);
         _onSendMessage({
-          'type': MessageType.voice.value,
+          'type': MessageType.audio.value,
           'content': filePath,
           'duration': (duration!.inMilliseconds / 1000).ceil(),
         });

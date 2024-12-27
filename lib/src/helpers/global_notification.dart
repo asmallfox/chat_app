@@ -1,14 +1,12 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:chat_app/Helpers/find_data.dart';
-import 'package:chat_app/Screens/Message/chat.dart';
 import 'package:chat_app/constants/config.dart';
-import 'package:chat_app/provider/model/chat_model.dart';
+import 'package:chat_app/src/constants/global_key.dart';
+import 'package:chat_app/src/pages/layout/chats/chats_audio.page.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -54,15 +52,26 @@ class GlobalNotification {
           if (payload != null) {
             final payloadArr = payload.split(',');
 
-            final type = payloadArr[0];
+            final type = int.parse(payloadArr[0]);
             final friendId = int.parse(payloadArr[1]);
 
-            final friend = findChatItem(friendId) ?? findFriend(friendId);
-            final context = navigatorKey.currentContext!;
+            final context = appNavigatorKey.currentContext!;
+            final friend = UserHive.getFriend(id: friendId);
+
+            if (friend == null) return;
+
             switch (type) {
               // 私信
-              case '1':
+              case 1:
+              case 2:
                 print('推送被点击了');
+                break;
+              case 3:
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => ChatsAudioPage(friend: friend),
+                  ),
+                );
                 break;
               default:
                 print('没有匹配到推送的类型操作~');
@@ -202,20 +211,13 @@ class GlobalNotification {
       ticker: 'ticker',
       playSound: true,
       timeoutAfter: 3000,
-      // showWhen: false,
-      // usesChronometer: false,
-      // chronometerCountDown: false,
-      // ongoing: true,
-      // visibility: NotificationVisibility.public,
-      // enableVibration: false,
-      // // enableLights: true,
-      // largeIcon: const DrawableResourceAndroidBitmap('default_avatar'),
-      // color: Colors.pink,
-      // // ledColor: Colors.pink
-      // colorized: true,
-      // number: 1111
-      tag: 'tag',
-      
+      showWhen: false,
+      usesChronometer: false,
+      chronometerCountDown: false,
+      ongoing: true,
+      visibility: NotificationVisibility.public,
+      enableVibration: false,
+      largeIcon: const DrawableResourceAndroidBitmap('default_avatar'),
     );
 
     NotificationDetails notificationDetails = NotificationDetails(
@@ -229,5 +231,37 @@ class GlobalNotification {
       notificationDetails,
       payload: 'xxxxxxxxxxxxx',
     );
+  }
+
+  static Future<void> show(
+    Map data, {
+    String? title,
+    String? body,
+  }) async {
+    AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+      'channel id',
+      'channel name',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+      playSound: true,
+      timeoutAfter: 3000,
+      showWhen: false,
+      usesChronometer: false,
+      chronometerCountDown: false,
+      ongoing: true,
+      visibility: NotificationVisibility.public,
+      enableVibration: false,
+      largeIcon: const DrawableResourceAndroidBitmap('default_avatar'),
+    );
+
+    NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+    );
+
+    await _flutterLocalNotificationsPlugin?.show(
+        _id++, title ?? '', body ?? '', notificationDetails,
+        payload: '${data['type']},${data['user']['id']}');
   }
 }

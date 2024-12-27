@@ -1,3 +1,4 @@
+import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/global_notification.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
@@ -27,6 +28,12 @@ class _TestPageState extends State<TestPage> {
         children: [
           FilledButton(
             onPressed: () {
+              RecordingHelper.play('assets/mp3/chat_notice.mp3', assets: true);
+            },
+            child: Text('play'),
+          ),
+          FilledButton(
+            onPressed: () {
               _call();
             },
             child: Text('audio'),
@@ -37,17 +44,15 @@ class _TestPageState extends State<TestPage> {
   }
 
   void _call() {
-    GlobalNotification.send({
-      'payload': 'audio'
-    });
-    // SocketApi.callSocketApi(
-    //   {
-    //     'id': 2,
-    //     'account': 'lisi',
-    //   },
-    //   (data) {
-    //     print('结果： ￥data');
-    //   },
-    // );
+    SocketApi.callSocketApi(
+      {
+        'id': 3,
+        'account': 'lisi',
+        'type': MessageType.audio.value,
+      },
+      (data) {
+        print('结果： ￥data');
+      },
+    );
   }
 }

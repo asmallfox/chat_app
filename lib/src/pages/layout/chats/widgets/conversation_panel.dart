@@ -193,7 +193,7 @@ class _ConversationPanelState extends State<ConversationPanel> {
       });
     } else if (data?['filePath'] != null) {
       widget.onSend?.call({
-        'type': MessageType.voice.value,
+        'type': MessageType.audio.value,
         'content': data?['filePath'],
         'duration': data?['duration'],
       });

@@ -60,7 +60,7 @@ class MessageUtil {
 
       if (index != -1) {
         messages[index] = msg;
-        if (msg['type'] == MessageType.voice.value ||
+        if (msg['type'] == MessageType.audio.value ||
             msg['type'] == MessageType.image.value) {
           messages[index]['content'] = oldMsg['content'];
         }
@@ -127,7 +127,7 @@ class MessageUtil {
       File file = await pathTransformFile(content, extension);
       msgData['content'] = file.path;
       msgData.putIfAbsent('file', () => base64Encode(imageBytes));
-    } else if (type == MessageType.voice.value) {
+    } else if (type == MessageType.audio.value) {
       File file = await pathTransformFile(content, 'acc');
       msgData['content'] = file.path;
       msgData.putIfAbsent('file', () => file.readAsBytesSync());

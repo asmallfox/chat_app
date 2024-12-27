@@ -1,3 +1,4 @@
+import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/widgets/avatar.dart';
 import 'package:chat_app/src/widgets/communicate_icon_button.dart';
 import 'package:chat_app/src/widgets/picture.dart';
@@ -25,6 +26,16 @@ class _ChatsAudioPageState extends State<ChatsAudioPage> {
   // 静音
   bool isMuted = false;
 
+  void _init() {
+    RecordingHelper.play('assets/mp3/chat_notice.mp3', assets: true);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -35,7 +46,6 @@ class _ChatsAudioPageState extends State<ChatsAudioPage> {
             fit: BoxFit.fill,
           ),
         ),
-        // 模糊效果
         Positioned.fill(
           child: Container(
             color: Colors.black.withOpacity(0.68),
@@ -51,6 +61,13 @@ class _ChatsAudioPageState extends State<ChatsAudioPage> {
           backgroundColor: Colors.transparent,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
+            leading: IconButton(
+              color: Colors.white,
+              icon: const Icon(Icons.close_fullscreen_rounded),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
             title: Text(
               widget.friend['name'],
               style: const TextStyle(color: Colors.white),

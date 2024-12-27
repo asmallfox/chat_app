@@ -202,7 +202,7 @@ class _ChatListPageState extends State<ChatListPage> {
       ctx += msg['content'];
     } else if (type == MessageType.image.value) {
       ctx += '[图片]';
-    } else if (type == MessageType.voice.value) {
+    } else if (type == MessageType.audio.value) {
       ctx += '[语音]';
     }
 

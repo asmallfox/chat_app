@@ -2,18 +2,25 @@
 // const String baseUrl = 'http://192.168.31.22:3000';
 const String serverBaseUrl = 'http://10.0.2.2:3001';
 
-class MessageType {
-  final String label;
+enum MessageType {
+  text(1, '文本'),
+  image(2, '图片'),
+  audio(3, '语音'),
+  video(4, '视频'),
+  file(5, '文件');
+
   final int value;
+  final String label;
 
-  const MessageType._(this.label, this.value);
+  const MessageType(this.value, this.label);
 
-  static const text = MessageType._('文本', 1);
-  static const image = MessageType._('图片', 2);
-  static const voice = MessageType._('语音', 3);
-  static const video = MessageType._('视频', 4);
-  static const file = MessageType._('文件', 5);
+  static String getText(int type) {
+    return MessageType.values
+        .firstWhere((e) => e.value == type, orElse: () => MessageType.text)
+        .label;
+  }
 }
+
 
 enum AddFriendButtonStatus {
   add(1, '添加'),
@@ -22,15 +29,15 @@ enum AddFriendButtonStatus {
   delete(4, '删除');
 
   final int value;
-  final String text;
+  final String label;
 
-  const AddFriendButtonStatus(this.value, this.text);
+  const AddFriendButtonStatus(this.value, this.label);
 
   static String getText(int status) {
     return AddFriendButtonStatus.values
         .firstWhere((e) => e.value == status,
             orElse: () => AddFriendButtonStatus.add)
-        .text;
+        .label;
   }
 }
 
@@ -39,14 +46,14 @@ enum ReadStatus {
   yes(2, '已读');
 
   final int value;
-  final String text;
+  final String label;
 
-  const ReadStatus(this.value, this.text);
+  const ReadStatus(this.value, this.label);
 
   static String getText(int status) {
     return ReadStatus.values
         .firstWhere((e) => e.value == status, orElse: () => ReadStatus.no)
-        .text;
+        .label;
   }
 }
 
@@ -56,13 +63,13 @@ enum MsgStatus {
   failed(3, '发送失败');
 
   final int value;
-  final String text;
+  final String label;
 
-  const MsgStatus(this.value, this.text);
+  const MsgStatus(this.value, this.label);
 
   static String getText(int status) {
     return MsgStatus.values
         .firstWhere((e) => e.value == status, orElse: () => MsgStatus.sending)
-        .text;
+        .label;
   }
 }
