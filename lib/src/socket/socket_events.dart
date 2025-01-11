@@ -2,14 +2,17 @@ import 'dart:io';
 
 import 'package:chat_app/Helpers/caceh_network_source.dart';
 import 'package:chat_app/src/constants/const_data.dart';
+import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/global_notification.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
+import 'package:chat_app/src/providers/model/chat_provider_model.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 Future<String> _copyAssetToTempDir() async {
@@ -90,11 +93,30 @@ void socketEvents(IO.Socket socket) {
       } else if (type == MessageType.video.value) {
         title = '视频通话';
       }
-      GlobalNotification.show(
-        data,
-        title: title,
-        body: data['user']['name'],
-      );
+      GlobalNotification.show(data,
+          title: title, body: data['user']['name'], timeoutAfter: 1000 * 60);
+      appNavigatorKey.currentContext!
+          .read<ChatProviderModel>()
+          .setCallData(data['user']);
+    } catch (error) {
+      print(error);
+    }
+  });
+
+  socket.on('call-handle', (res) {
+    try {
+      final data = handleAck(res);
+      print('call-handle: $data');
+      bool isAgree = data['status'] == SessionStatus.agree.value;
+      if (!isAgree) {
+        appNavigatorKey.currentContext!
+            .read<ChatProviderModel>()
+            .setCallData(null);
+      }
+
+      appNavigatorKey.currentContext!
+          .read<ChatProviderModel>()
+          .setIsCalling(isAgree);
     } catch (error) {
       print(error);
     }

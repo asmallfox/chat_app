@@ -21,7 +21,6 @@ enum MessageType {
   }
 }
 
-
 enum AddFriendButtonStatus {
   add(1, '添加'),
   refuse(2, '已拒绝'),
@@ -70,6 +69,22 @@ enum MsgStatus {
   static String getText(int status) {
     return MsgStatus.values
         .firstWhere((e) => e.value == status, orElse: () => MsgStatus.sending)
+        .label;
+  }
+}
+
+enum SessionStatus {
+  agree(1, '已接通'),
+  reject(2, '拒绝');
+
+  final int value;
+  final String label;
+
+  const SessionStatus(this.value, this.label);
+
+  static String getText(int status) {
+    return SessionStatus.values
+        .firstWhere((e) => e.value == status, orElse: () => SessionStatus.agree)
         .label;
   }
 }

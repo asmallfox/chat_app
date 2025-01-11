@@ -6,6 +6,8 @@ class ChatProviderModel with ChangeNotifier {
   bool _recordSendBtn = false;
   bool _recordCancelBtn = false;
   List<double> _decibelsList = List<double>.generate(20, (index) => 4);
+  Map? _callData;
+  bool _isCalling = false;
 
   bool get isRecord => _isRecord;
   void setIsRecord(bool value) {
@@ -34,6 +36,18 @@ class ChatProviderModel with ChangeNotifier {
       _decibelsList.removeAt(0);
       _decibelsList.add(val);
     }
+    notifyListeners();
+  }
+
+  Map? get callData => _callData;
+  void setCallData(Map? value) {
+    _callData = value;
+    notifyListeners();
+  }
+
+  bool get isCalling => _isCalling;
+  void setIsCalling(bool value) {
+    _isCalling = value;
     notifyListeners();
   }
 }

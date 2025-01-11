@@ -237,31 +237,41 @@ class GlobalNotification {
     Map data, {
     String? title,
     String? body,
+    int timeoutAfter = 3000,
   }) async {
     AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-      'channel id',
-      'channel name',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'ticker',
-      playSound: true,
-      timeoutAfter: 3000,
-      showWhen: false,
-      usesChronometer: false,
-      chronometerCountDown: false,
-      ongoing: true,
-      visibility: NotificationVisibility.public,
-      enableVibration: false,
-      largeIcon: const DrawableResourceAndroidBitmap('default_avatar'),
-    );
+        AndroidNotificationDetails('channel id', 'channel name',
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: 'ticker',
+            playSound: true,
+            timeoutAfter: timeoutAfter,
+            ongoing: false,
+            showWhen: false,
+            usesChronometer: false,
+            chronometerCountDown: false,
+            visibility: NotificationVisibility.public,
+            enableVibration: false,
+            largeIcon: const DrawableResourceAndroidBitmap('default_avatar'));
 
     NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
     );
 
     await _flutterLocalNotificationsPlugin?.show(
-        _id++, title ?? '', body ?? '', notificationDetails,
-        payload: '${data['type']},${data['user']['id']}');
+      _id++,
+      title ?? '',
+      body ?? '',
+      notificationDetails,
+      payload: '${data['type']},${data['user']['id']}',
+    );
+  }
+
+  static Future<void> cancelAll() async {
+    await _flutterLocalNotificationsPlugin?.cancelAll();
+  }
+
+  static Future<void> hidden(int id) async {
+    await _flutterLocalNotificationsPlugin?.cancelAll();
   }
 }

@@ -23,4 +23,9 @@ class SocketApi {
   static void callSocketApi(Map data, [Function? callback]) {
     SocketIOClient.emitWithAck('call', data, ack: callback);
   }
+
+  // 语音处理
+  static void callHandleSocketApi(Map data, [Function? callback]) {
+    SocketIOClient.emitWithAck('call-handle', data, ack: callback);
+  }
 }
