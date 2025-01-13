@@ -2,7 +2,7 @@
 // const String baseUrl = 'http://192.168.31.22:3000';
 const String serverBaseUrl = 'http://10.0.2.2:3001';
 
-enum MessageType {
+enum ChatMessageType {
   text(1, '文本'),
   image(2, '图片'),
   audio(3, '语音'),
@@ -12,11 +12,11 @@ enum MessageType {
   final int value;
   final String label;
 
-  const MessageType(this.value, this.label);
+  const ChatMessageType(this.value, this.label);
 
   static String getText(int type) {
-    return MessageType.values
-        .firstWhere((e) => e.value == type, orElse: () => MessageType.text)
+    return ChatMessageType.values
+        .firstWhere((e) => e.value == type, orElse: () => ChatMessageType.text)
         .label;
   }
 }

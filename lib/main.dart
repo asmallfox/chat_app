@@ -6,6 +6,7 @@ import 'package:chat_app/src/providers/model/chat_provider_model.dart';
 import 'package:chat_app/src/router/routes.dart';
 import 'package:chat_app/src/socket/socket_io_client.dart';
 import 'package:chat_app/src/theme/app_theme.dart';
+import 'package:chat_app/src/webRtc/web_rtc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chat_app/src/router/route_handle.dart';
@@ -35,6 +36,8 @@ Future<void> startService() async {
   await RecordingHelper.getInstance();
   // 初始化socket
   await SocketIOClient.getInstance();
+  // 初始化WebRTC
+  await WebRtc.getInstance();
   // 初始化全局通知
   await GlobalNotification.getInstance();
 }

@@ -93,7 +93,7 @@ class _ChatTabPanelState extends State<ChatTabPanel>
     widget.onSend!({
       'content': cacheFile.path,
       'file': cacheFile.readAsBytesSync(),
-      'type': messageType['image']?['value']
+      'type': ChatMessageType['image']?['value']
     });
   }
 
@@ -288,7 +288,7 @@ class _ChatTabPanelState extends State<ChatTabPanel>
                       if (widget.onSend != null) {
                         widget.onSend!({
                           'content': _controller.text,
-                          'type': messageType['text']?['value'],
+                          'type': ChatMessageType['text']?['value'],
                         });
                         _controller.text = '';
                       }

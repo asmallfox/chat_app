@@ -113,7 +113,7 @@ class HiveHelper {
 //         friendId,
 //         lastMessage,
 //         lastMessageTime,
-//         lastMessageType,
+//         lastChatMessageType,
 //         unreadCount,
 //        ...
 //       }

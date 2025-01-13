@@ -197,11 +197,11 @@ class _ChatPageState extends State<ChatsPage> {
     bool isNewMsg =
         friendAccount == msg['from'] && msg['read'] == ReadStatus.no.value;
 
-    if (type == MessageType.text.value) {
+    if (type == ChatMessageType.text.value) {
       ctx += msg['content'];
-    } else if (type == MessageType.image.value) {
+    } else if (type == ChatMessageType.image.value) {
       ctx += '图片';
-    } else if (type == MessageType.audio.value) {
+    } else if (type == ChatMessageType.audio.value) {
       ctx += '语音';
     }
 

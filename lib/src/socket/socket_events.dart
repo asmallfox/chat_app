@@ -9,6 +9,7 @@ import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/providers/model/chat_provider_model.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
+import 'package:chat_app/src/webRtc/web_rtc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
@@ -73,8 +74,8 @@ void socketEvents(IO.Socket socket) {
     final dataList = data is List ? data : [data];
 
     for (int i = 0; i < dataList.length; i++) {
-      if (dataList[i]['type'] == MessageType.image.value ||
-          dataList[i]['type'] == MessageType.audio.value) {
+      if (dataList[i]['type'] == ChatMessageType.image.value ||
+          dataList[i]['type'] == ChatMessageType.audio.value) {
         dataList[i]['content'] =
             await downloadAndSaveFile(dataList[i]['content']);
       }
@@ -88,9 +89,9 @@ void socketEvents(IO.Socket socket) {
       final data = handleAck(res);
       String title = '消息';
       int type = data['type'];
-      if (type == MessageType.audio.value) {
+      if (type == ChatMessageType.audio.value) {
         title = '语音通话';
-      } else if (type == MessageType.video.value) {
+      } else if (type == ChatMessageType.video.value) {
         title = '视频通话';
       }
       GlobalNotification.show(data,
@@ -103,17 +104,19 @@ void socketEvents(IO.Socket socket) {
     }
   });
 
-  socket.on('call-handle', (res) {
+  socket.on('call-handle', (res) async {
     try {
       final data = handleAck(res);
       print('call-handle: $data');
       bool isAgree = data['status'] == SessionStatus.agree.value;
-      if (!isAgree) {
+      if (isAgree) {
+        await WebRtc.setAnswer(data['answer']);
+      } else {
         appNavigatorKey.currentContext!
             .read<ChatProviderModel>()
             .setCallData(null);
+        await WebRtc.closeConnection();
       }
-
       appNavigatorKey.currentContext!
           .read<ChatProviderModel>()
           .setIsCalling(isAgree);

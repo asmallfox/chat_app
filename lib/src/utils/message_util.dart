@@ -60,8 +60,8 @@ class MessageUtil {
 
       if (index != -1) {
         messages[index] = msg;
-        if (msg['type'] == MessageType.audio.value ||
-            msg['type'] == MessageType.image.value) {
+        if (msg['type'] == ChatMessageType.audio.value ||
+            msg['type'] == ChatMessageType.image.value) {
           messages[index]['content'] = oldMsg['content'];
         }
         UserHive.box.put('friends', friends);
@@ -117,8 +117,8 @@ class MessageUtil {
       'duration': duration
     };
     print(msgData);
-    if (type == MessageType.text.value) {
-    } else if (type == MessageType.image.value) {
+    if (type == ChatMessageType.text.value) {
+    } else if (type == ChatMessageType.image.value) {
       File imageFile = File(content);
       List<int> imageBytes = imageFile.readAsBytesSync();
 
@@ -127,12 +127,12 @@ class MessageUtil {
       File file = await pathTransformFile(content, extension);
       msgData['content'] = file.path;
       msgData.putIfAbsent('file', () => base64Encode(imageBytes));
-    } else if (type == MessageType.audio.value) {
+    } else if (type == ChatMessageType.audio.value) {
       File file = await pathTransformFile(content, 'acc');
       msgData['content'] = file.path;
       msgData.putIfAbsent('file', () => file.readAsBytesSync());
-    } else if (type == MessageType.video.value) {
-    } else if (type == MessageType.file.value) {}
+    } else if (type == ChatMessageType.video.value) {
+    } else if (type == ChatMessageType.file.value) {}
 
     // send
     SocketApi.sendMsgSocketApi(msgData, (res) {

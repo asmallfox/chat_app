@@ -255,7 +255,7 @@ class _ChatPanelState extends State<ChatPanel> {
   Future<void> _sendMessage() async {
     widget.onSend?.call({
       'content': _messageController.text,
-      'type': MessageType.text.value,
+      'type': ChatMessageType.text.value,
     });
     setState(() {
       _messageController.clear();
@@ -269,7 +269,7 @@ class _ChatPanelState extends State<ChatPanel> {
     if (pickedFile != null) {
       widget.onSend?.call({
         'content': pickedFile.path,
-        'type': MessageType.image.value,
+        'type': ChatMessageType.image.value,
       });
     }
   }

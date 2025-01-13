@@ -185,7 +185,7 @@ class _ConversationPanelState extends State<ConversationPanel> {
     if (_inputBtn) {
       widget.onSend?.call({
         'content': _messageController.text,
-        'type': MessageType.text.value,
+        'type': ChatMessageType.text.value,
       });
       setState(() {
         _messageController.clear();
@@ -193,7 +193,7 @@ class _ConversationPanelState extends State<ConversationPanel> {
       });
     } else if (data?['filePath'] != null) {
       widget.onSend?.call({
-        'type': MessageType.audio.value,
+        'type': ChatMessageType.audio.value,
         'content': data?['filePath'],
         'duration': data?['duration'],
       });
@@ -206,7 +206,7 @@ class _ConversationPanelState extends State<ConversationPanel> {
     if (pickedFile != null) {
       widget.onSend?.call({
         'content': pickedFile.path,
-        'type': MessageType.image.value,
+        'type': ChatMessageType.image.value,
       });
     }
   }

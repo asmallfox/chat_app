@@ -39,7 +39,7 @@ class MessageStatus {
   static int fail = 3;
 }
 
-const messageType = {
+const ChatMessageType = {
   'text': {
     'label': '文本',
     'value': 1,
