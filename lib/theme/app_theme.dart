@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class AppTheme {
   static ThemeData lightTheme({required BuildContext context}) {

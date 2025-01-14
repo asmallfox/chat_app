@@ -1,9 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_app/CustomWidget/audio_icon.dart';
-import 'package:chat_app/Helpers/audio_service.dart';
 import 'package:chat_app/Helpers/local_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 
 class MessageAudio extends StatefulWidget {
   final Map item;
@@ -121,7 +119,6 @@ class _MessageAudioState extends State<MessageAudio> {
         ),
       ),
     );
-    ;
   }
 }
 

@@ -9,7 +9,6 @@ import 'package:chat_app/src/theme/app_theme.dart';
 import 'package:chat_app/src/webRtc/web_rtc.dart';
 import 'package:flutter/material.dart';
 
-import 'package:chat_app/src/router/route_handle.dart';
 import 'package:provider/provider.dart';
 
 void main() async {

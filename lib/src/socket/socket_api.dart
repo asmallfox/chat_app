@@ -28,4 +28,9 @@ class SocketApi {
   static void callHandleSocketApi(Map data, [Function? callback]) {
     SocketIOClient.emitWithAck('call-handle', data, ack: callback);
   }
+
+  // ICE
+  static void sendICESocketApi(Map data, [Function? callback]) {
+    SocketIOClient.emitWithAck('icecandidate', data, ack: callback);
+  }
 }

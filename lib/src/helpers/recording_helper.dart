@@ -4,8 +4,6 @@ import 'package:flutter_sound/flutter_sound.dart';
 class RecordingHelper {
   static final RecordingHelper _instance = RecordingHelper._internal();
 
-  RecordingHelper._();
-
   factory RecordingHelper() => _instance;
 
   RecordingHelper._internal();

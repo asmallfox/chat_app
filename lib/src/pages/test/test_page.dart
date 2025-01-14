@@ -1,4 +1,3 @@
-import 'package:camera/camera.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/helpers/global_notification.dart';
 import 'package:chat_app/src/helpers/message_helper.dart';
@@ -9,10 +8,7 @@ import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/webRtc/web_rtc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({
@@ -24,13 +20,14 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  List<CameraDescription>? _cameras;
-  CameraController? _controller;
-  Future<void>? _initializeControllerFuture;
-
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -69,45 +66,42 @@ class _TestPageState extends State<TestPage> {
           ),
           FilledButton(
             onPressed: () {
+              setState(() {});
+            },
+            child: Text('刷新'),
+          ),
+          FilledButton(
+            onPressed: () {
               _call();
             },
             child: Text('audio'),
           ),
-          FilledButton(
-            onPressed: () async {
-              await Permission.camera.request();
-              _cameras = await availableCameras();
-              final cameraDescription = _cameras![0];
-              // print(CameraDescription.);
-              _controller =
-                  CameraController(cameraDescription, ResolutionPreset.high);
-
-              _initializeControllerFuture = _controller?.initialize();
-              print('获取摄像头');
-              setState(() {});
-            },
-            child: Text('获取摄像头'),
+          Text('远端'),
+          Container(
+            width: 100,
+            height: 100,
+            child: WebRtc.remoteRenderer.srcObject != null
+                ? RTCVideoView(
+                    WebRtc.remoteRenderer,
+                    // mirror: true,
+                  )
+                : Text('未开启'),
           ),
-          FilledButton(
-            onPressed: () {},
-            child: Text('关闭摄像头'),
-          ),
-          Visibility(
-            visible: _controller != null,
-            child: CameraPreview(_controller!),
+          Text('本地'),
+          Container(
+            width: 100,
+            height: 100,
+            child: WebRtc.localRenderer.srcObject != null
+                ? RTCVideoView(
+                    WebRtc.localRenderer,
+                    // mirror: true,
+                  )
+                : Text('未开启'),
           ),
           Visibility(
             visible: context.watch<ChatProviderModel>().isCalling,
             child: Row(
               children: [
-                Container(
-                  width: 150,
-                  height: 150,
-                  child: RTCVideoView(
-                    WebRtc.localRenderer!,
-                    mirror: true,
-                  ),
-                ),
                 FilledButton(
                   onPressed: () {
                     _callEnd();

@@ -1,8 +1,4 @@
-import 'dart:convert';
-
 import 'package:chat_app/src/api/http/request.dart';
-import 'package:chat_app/src/constants/const_data.dart';
-import 'package:http/http.dart' as http;
 
 /*
  * 用户注册

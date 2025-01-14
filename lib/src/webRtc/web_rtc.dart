@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:chat_app/src/socket/socket_api.dart';
+import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class WebRtc {
@@ -7,72 +11,68 @@ class WebRtc {
 
   static bool _isInitialized = false;
   // 本地
-  static RTCVideoRenderer? _localRenderer;
+  static final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
+  static final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
   static RTCPeerConnection? _peerConnection;
   static MediaStream? _localStream;
   static MediaStream? _remoteStream;
 
+  static final _configuration = {
+    'iceServers': [
+      {'urls': 'stun:stun.l.google.com:19302'}
+    ]
+  };
+
   static Future<WebRtc> getInstance() async {
     if (!_isInitialized) {
-      _initialize();
+      await _initialize();
     }
     return _instance;
   }
 
-  static _initialize() {
-    // _localRenderer = RTCVideoRenderer();
+  static Future<void> _initialize() async {
+    await _localRenderer.initialize();
+    await _remoteRenderer.initialize();
     _isInitialized = true;
   }
 
-  static RTCVideoRenderer? get localRenderer => _localRenderer;
+  static RTCVideoRenderer get localRenderer => _localRenderer;
+  static RTCVideoRenderer get remoteRenderer => _remoteRenderer;
   static RTCPeerConnection? get peerConnection => _peerConnection;
   static MediaStream? get localStream => _localStream;
   static MediaStream? get remoteStream => _remoteStream;
 
   static Future<MediaStream> _getMediaStream(bool isAudio, bool isVideo) async {
-    late MediaStream mediaStream;
-
-    if (isAudio) {
-      mediaStream = await navigator.mediaDevices.getUserMedia({
-        'audio': true,
-        'video': false,
-      });
-    } else {
-      mediaStream = await navigator.mediaDevices.getUserMedia({
-        'audio': false,
-        'video': {'width': 100, 'height': 100},
-      });
-    }
-    // await navigator.mediaDevices.getUserMedia({
-    //   'audio': true,
-    //   'video': {'width': 100, 'height': 100}
-    // });
+    MediaStream mediaStream = await navigator.mediaDevices.getUserMedia({
+      'audio': true,
+      'video': true,
+    });
 
     return mediaStream;
   }
 
   // 创建提议（offer）
   static Future<RTCSessionDescription> createOffer() async {
-    _peerConnection = await createPeerConnection({});
+    _peerConnection = await createPeerConnection(_configuration);
     _localStream = await _getMediaStream(false, true);
+
+    // 设置本地音视频流
+    _localRenderer.srcObject = _localStream!;
+
     _localStream?.getTracks().forEach((track) {
       _peerConnection?.addTrack(track, _localStream!);
     });
 
     _peerConnection?.onTrack = (event) {
-      print('远程数据流offer ${event.track.kind}');
-
-      if (event.track.kind == 'audio') {
-        _remoteStream = event.streams[0];
-      }
+      _remoteStream = event.streams[0];
+      _remoteRenderer.srcObject = _remoteStream;
     };
 
     RTCSessionDescription offer = await _peerConnection!.createOffer();
     await _peerConnection!.setLocalDescription(offer);
 
     _peerConnection?.onIceCandidate = (candidate) {
-      print('交换IEC候补');
-      _peerConnection?.addCandidate(candidate);
+      _sendIceCandidate(candidate, 2);
     };
 
     return offer;
@@ -80,19 +80,18 @@ class WebRtc {
 
   // 创建应答（answer）
   static Future<RTCSessionDescription> createAnswer(Map offer) async {
-    _peerConnection = await createPeerConnection({});
-
+    _peerConnection = await createPeerConnection(_configuration);
     _localStream = await _getMediaStream(true, false);
     _localStream?.getTracks().forEach((track) {
       _peerConnection?.addTrack(track, _localStream!);
     });
 
-    _peerConnection?.onTrack = (event) {
-      print('远程数据流answer ${event.track.kind}');
+    // 设置本地音视频流
+    _localRenderer.srcObject = _localStream!;
 
-      if (event.track.kind == 'audio') {
-        _remoteStream = event.streams[0];
-      }
+    _peerConnection?.onTrack = (event) {
+      _remoteStream = event.streams[0];
+      _remoteRenderer.srcObject = _remoteStream;
     };
 
     RTCSessionDescription description =
@@ -103,12 +102,38 @@ class WebRtc {
     await _peerConnection!.setLocalDescription(answer);
 
     _peerConnection?.onIceCandidate = (candidate) {
-      _peerConnection?.addCandidate(candidate);
+      // _peerConnection?.addCandidate(candidate);
+      _sendIceCandidate(candidate, 3);
     };
 
     return answer;
   }
 
+// 发送 ICE Candidate
+  static void _sendIceCandidate(RTCIceCandidate candidate, int to) {
+    SocketApi.sendICESocketApi({
+      'from': UserHive.userInfo['id'],
+      'to': to,
+      'candidateData': {
+        'type': 'candidate',
+        'candidate': candidate.candidate,
+        'sdpMid': candidate.sdpMid,
+        'sdpMLineIndex': candidate.sdpMLineIndex
+      },
+    });
+  }
+
+  // 设置ICE
+  static Future<void> setCandidate(Map candidate) async {
+    print('交换ICE');
+    _peerConnection?.addCandidate(RTCIceCandidate(
+      candidate['candidate'],
+      candidate['sdpMid'],
+      candidate['sdpMLineIndex'],
+    ));
+  }
+
+  // 设置应答
   static Future<void> setAnswer(Map answer) async {
     RTCSessionDescription description =
         RTCSessionDescription(answer['sdp'], answer['type']);
@@ -132,5 +157,8 @@ class WebRtc {
     _peerConnection = null;
     _localStream = null;
     _remoteStream = null;
+
+    _localRenderer.srcObject?.dispose();
+    _remoteRenderer.srcObject?.dispose();
   }
 }

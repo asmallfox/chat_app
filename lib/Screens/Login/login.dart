@@ -7,12 +7,7 @@ import 'package:chat_app/Helpers/show_tip_message.dart';
 import 'package:chat_app/Screens/Home/home.dart';
 import 'package:chat_app/Screens/Login/register.dart';
 import 'package:chat_app/socket/socket_io.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:logging/logging.dart';
 

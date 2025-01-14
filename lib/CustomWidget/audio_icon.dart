@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class AudioIconPaint extends CustomPainter {
   final Color actionColor;

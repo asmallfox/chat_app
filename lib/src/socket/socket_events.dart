@@ -4,14 +4,12 @@ import 'package:chat_app/Helpers/caceh_network_source.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/global_key.dart';
 import 'package:chat_app/src/helpers/global_notification.dart';
-import 'package:chat_app/src/helpers/message_helper.dart';
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:chat_app/src/providers/model/chat_provider_model.dart';
 import 'package:chat_app/src/utils/hive_util.dart';
 import 'package:chat_app/src/utils/message_util.dart';
 import 'package:chat_app/src/webRtc/web_rtc.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -120,6 +118,18 @@ void socketEvents(IO.Socket socket) {
       appNavigatorKey.currentContext!
           .read<ChatProviderModel>()
           .setIsCalling(isAgree);
+    } catch (error) {
+      print(error);
+    }
+  });
+
+  socket.on('icecandidate', (res) async {
+    try {
+      final data = handleAck(res);
+
+      if (data['candidate']) {
+        WebRtc.setCandidate(data['candidateData']);
+      }
     } catch (error) {
       print(error);
     }

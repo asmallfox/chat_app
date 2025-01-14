@@ -6,8 +6,6 @@ import 'package:chat_app/CustomWidget/custom_icon_button.dart';
 import 'package:chat_app/src/constants/const_data.dart';
 import 'package:chat_app/src/constants/const_keys.dart';
 import 'package:chat_app/src/helpers/keyboard_observer.dart';
-import 'package:chat_app/src/utils/hive_util.dart';
-import 'package:chat_app/src/utils/message_util.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

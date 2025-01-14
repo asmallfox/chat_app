@@ -1,6 +1,5 @@
 import 'package:chat_app/src/helpers/recording_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({
@@ -20,7 +19,6 @@ class _TestPageState extends State<TestPage> {
   List<double> list = List.generate(20, (index) => 4);
 
   bool _isRecord = false;
-  bool _isOverlap = false;
   bool _recordSendBtn = false;
   bool _recordCancelBtn = false;
 

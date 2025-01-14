@@ -42,6 +42,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        // // camera插件配置
+        minSdkVersion = 21
     }
 
     buildTypes {
