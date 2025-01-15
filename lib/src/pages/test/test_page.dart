@@ -78,22 +78,22 @@ class _TestPageState extends State<TestPage> {
           ),
           Text('远端'),
           Container(
-            width: 100,
+            width: 200,
             height: 100,
-            child: WebRtc.remoteRenderer.srcObject != null
+            child: WebRtc.remoteRenderer?.srcObject != null
                 ? RTCVideoView(
-                    WebRtc.remoteRenderer,
+                    WebRtc.remoteRenderer!,
                     // mirror: true,
                   )
                 : Text('未开启'),
           ),
           Text('本地'),
           Container(
-            width: 100,
+            width: 200,
             height: 100,
-            child: WebRtc.localRenderer.srcObject != null
+            child: WebRtc.localRenderer?.srcObject != null
                 ? RTCVideoView(
-                    WebRtc.localRenderer,
+                    WebRtc.localRenderer!,
                     // mirror: true,
                   )
                 : Text('未开启'),

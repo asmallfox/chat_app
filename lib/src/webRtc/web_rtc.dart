@@ -11,15 +11,21 @@ class WebRtc {
 
   static bool _isInitialized = false;
   // 本地
-  static final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  static final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
+  static RTCVideoRenderer? _localRenderer;
+  static RTCVideoRenderer? _remoteRenderer;
   static RTCPeerConnection? _peerConnection;
   static MediaStream? _localStream;
   static MediaStream? _remoteStream;
 
   static final _configuration = {
     'iceServers': [
-      {'urls': 'stun:stun.l.google.com:19302'}
+      // {'urls': 'stun:stun.aliyun.com:3478'},
+      {'urls': 'stun:172.27.213.63:3478'},
+      {
+        'urls': "turn:172.27.213.63:3478",
+        'username': "smallfox",
+        'credential': "123456"
+      }
     ]
   };
 
@@ -31,13 +37,11 @@ class WebRtc {
   }
 
   static Future<void> _initialize() async {
-    await _localRenderer.initialize();
-    await _remoteRenderer.initialize();
     _isInitialized = true;
   }
 
-  static RTCVideoRenderer get localRenderer => _localRenderer;
-  static RTCVideoRenderer get remoteRenderer => _remoteRenderer;
+  static RTCVideoRenderer? get localRenderer => _localRenderer;
+  static RTCVideoRenderer? get remoteRenderer => _remoteRenderer;
   static RTCPeerConnection? get peerConnection => _peerConnection;
   static MediaStream? get localStream => _localStream;
   static MediaStream? get remoteStream => _remoteStream;
@@ -51,13 +55,21 @@ class WebRtc {
     return mediaStream;
   }
 
+  static Future<void> _initRenderer() async {
+    _localRenderer = RTCVideoRenderer();
+    _remoteRenderer = RTCVideoRenderer();
+    await _localRenderer?.initialize();
+    await _remoteRenderer?.initialize();
+  }
+
   // 创建提议（offer）
   static Future<RTCSessionDescription> createOffer() async {
+    await _initRenderer();
     _peerConnection = await createPeerConnection(_configuration);
     _localStream = await _getMediaStream(false, true);
 
     // 设置本地音视频流
-    _localRenderer.srcObject = _localStream!;
+    _localRenderer?.srcObject = _localStream!;
 
     _localStream?.getTracks().forEach((track) {
       _peerConnection?.addTrack(track, _localStream!);
@@ -65,7 +77,8 @@ class WebRtc {
 
     _peerConnection?.onTrack = (event) {
       _remoteStream = event.streams[0];
-      _remoteRenderer.srcObject = _remoteStream;
+      _remoteRenderer?.srcObject = _remoteStream;
+      print('设置远端数据流');
     };
 
     RTCSessionDescription offer = await _peerConnection!.createOffer();
@@ -75,11 +88,19 @@ class WebRtc {
       _sendIceCandidate(candidate, 2);
     };
 
+    _peerConnection?.onIceConnectionState = (state) {
+      print('ICE连接状态onIceConnectionState：${state}');
+    };
+    _peerConnection?.onIceGatheringState = (state) {
+      print('ICE连接状态onIceGatheringState：${state}');
+    };
+
     return offer;
   }
 
   // 创建应答（answer）
   static Future<RTCSessionDescription> createAnswer(Map offer) async {
+    await _initRenderer();
     _peerConnection = await createPeerConnection(_configuration);
     _localStream = await _getMediaStream(true, false);
     _localStream?.getTracks().forEach((track) {
@@ -87,11 +108,11 @@ class WebRtc {
     });
 
     // 设置本地音视频流
-    _localRenderer.srcObject = _localStream!;
+    _localRenderer?.srcObject = _localStream!;
 
     _peerConnection?.onTrack = (event) {
       _remoteStream = event.streams[0];
-      _remoteRenderer.srcObject = _remoteStream;
+      _remoteRenderer?.srcObject = _remoteStream;
     };
 
     RTCSessionDescription description =
@@ -125,12 +146,13 @@ class WebRtc {
 
   // 设置ICE
   static Future<void> setCandidate(Map candidate) async {
-    print('交换ICE');
     _peerConnection?.addCandidate(RTCIceCandidate(
       candidate['candidate'],
       candidate['sdpMid'],
       candidate['sdpMLineIndex'],
     ));
+    // print('=== connectionState ${_peerConnection?.connectionState}');
+    // print('=== iceConnectionState ${_peerConnection?.iceConnectionState}');
   }
 
   // 设置应答
@@ -158,7 +180,9 @@ class WebRtc {
     _localStream = null;
     _remoteStream = null;
 
-    _localRenderer.srcObject?.dispose();
-    _remoteRenderer.srcObject?.dispose();
+    _localRenderer?.srcObject?.dispose();
+    _remoteRenderer?.srcObject?.dispose();
+    _localRenderer?.dispose();
+    _remoteRenderer?.dispose();
   }
 }

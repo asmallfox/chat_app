@@ -105,7 +105,6 @@ void socketEvents(IO.Socket socket) {
   socket.on('call-handle', (res) async {
     try {
       final data = handleAck(res);
-      print('call-handle: $data');
       bool isAgree = data['status'] == SessionStatus.agree.value;
       if (isAgree) {
         await WebRtc.setAnswer(data['answer']);
@@ -126,10 +125,7 @@ void socketEvents(IO.Socket socket) {
   socket.on('icecandidate', (res) async {
     try {
       final data = handleAck(res);
-
-      if (data['candidate']) {
-        WebRtc.setCandidate(data['candidateData']);
-      }
+      WebRtc.setCandidate(data['candidateData']);
     } catch (error) {
       print(error);
     }
